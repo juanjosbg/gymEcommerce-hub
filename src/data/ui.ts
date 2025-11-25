@@ -8,3 +8,9 @@ export const headerSection = {
 export const promotionTag = {
   title: "¡Descubre Descuentos Irresistibles!",
 };
+
+export const productsSection = {
+  heading: "Haz tu compra ahora, tu progreso empieza hoy.",
+  description:
+    "¡Tenemos una gran variedad de colecciones para ti! Explora y encuentra los zapatos de tus sueños, ¡hazlo realidad!",
+};
