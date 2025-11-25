@@ -1,7 +1,4 @@
-# HotKicks Template for React +, Tailwind CSS, TypeScript and Supebase
-
-🚀 HotKicks Template for Next JS 13+ with App Router support, Tailwind CSS and TypeScript ⚡️ Made with developer
-experience first: Next.js, TypeScript, ESLint, Prettier, Husky, Lint-Staged, Commitlint, Netlify, PostCSS, Tailwind CSS)
+# 🚀  HotKicks Template for React +, Tailwind CSS, TypeScript and Supebase
 
 ### Features
 
