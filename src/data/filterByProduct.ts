@@ -1,57 +1,49 @@
 export const productCategories = [
-  {
-    name: "Aminoácidos",
-    includes: ["Aminoácidos", "BCAA", "EAA", "AMINOx"],
-  },
-  {
-    name: "Creatina",
-    includes: ["Creatina", "Creatine micronized", "Creatina monohidratada"],
-  },
-  {
-    name: "Glutamina",
-    includes: ["Glutamina", "L-Glutamina"],
-  },
-  {
-    name: "Omega 3",
-    includes: ["Omega 3"],
-  },
-  {
-    name: "Pre-entreno",
-    includes: [
-      "Pre-entreno",
-      "Pre Workout",
-      "PSYCHOTIC",
-      "Venom",
-      "Pre-entrenamiento",
-    ],
-  },
-  {
-    name: "Proteína",
-    includes: [
-      "Proteína",
-      "ISO 100",
-      "Whey Protein",
-      "CBUM Itholate Protein",
-    ],
-  },
+  "Todos",
+  "Pre-entreno",
+  "Proteína",
+  "Creatina",
+  "Glutamina",
+  "Aminoácidos",
+  "Omega 3",
+  "Suplemento",
 ];
 
-export const filterProducts = (products, { type, price, discount }) => {
+// Función principal de filtrado
+export const filterProducts = (products, selected) => {
+  const [type, discount, priceRange] = selected;
+
   return products.filter((p) => {
+    // --------------------
+    // FILTRO POR TIPO
+    // --------------------
     const matchType =
       type === "Todos" ||
-      productCategories
-        .find((c) => c.name === type)
-        ?.includes.includes(p.category);
+      p.category.toLowerCase().includes(type.toLowerCase());
 
-    const matchPrice =
-      price[0] <= p.price && p.price <= price[1];
+    // --------------------
+    // FILTRO POR DESCUENTO
+    // --------------------
+    const hasDiscount =
+      typeof p.previousPrice === "number" && p.previousPrice > p.price;
 
     const matchDiscount =
       discount === "Todos" ||
-      (discount === "Con descuento" && p.previousPrice > p.price) ||
-      (discount === "Sin descuento" && p.previousPrice === p.price);
+      (discount === "Con descuento" && hasDiscount) ||
+      (discount === "Sin descuento" && !hasDiscount);
 
-    return matchType && matchPrice && matchDiscount;
+    // --------------------
+    // FILTRO POR RANGO DE PRECIO
+    // --------------------
+    let matchPrice = true;
+
+    if (priceRange === "Menos de 100") matchPrice = p.price < 100;
+    else if (priceRange === "100 - 500")
+      matchPrice = p.price >= 100 && p.price <= 500;
+    else if (priceRange === "500 - 1000")
+      matchPrice = p.price > 500 && p.price <= 1000;
+    else if (priceRange === "Más de 1000") matchPrice = p.price > 1000;
+
+    return matchType && matchDiscount && matchPrice;
   });
 };

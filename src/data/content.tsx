@@ -1,9 +1,17 @@
 import { headerSection, promotionTag } from "./ui";
 import { products } from "./products";
-import { productCategories, filterProducts } from "./filterByProduct";
+import { filterProducts } from "./filterByProduct";
 import { ProductImages } from "./ImgContent";
+import { filters } from "./Filter"; 
 
-export { products, headerSection, promotionTag, ProductImages, productCategories, filterProducts };
+export {
+  products,
+  headerSection,
+  promotionTag,
+  ProductImages,
+  filterProducts,
+  filters, 
+};
 
 export const Content = {
   ui: {
@@ -12,8 +20,5 @@ export const Content = {
   },
   products,
   images: ProductImages,
-  filters: {
-    categories: productCategories,
-    filterProducts,
-  },
+  filters,
 };
