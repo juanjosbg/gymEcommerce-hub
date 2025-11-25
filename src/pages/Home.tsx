@@ -28,9 +28,9 @@ const Home = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-
   const [currentSlide, setCurrentSlide] = useState(0);
-
+  const [limit, setLimit] = useState(8);
+  
   const heroSlides = [
     {
       title: "Energía, fuerza y recuperación",
@@ -91,6 +91,13 @@ const Home = () => {
   const handleFilter = (selectedFilters: string[]) => {
     const filtered = applyFilters(products, selectedFilters);
     setFilteredProducts(filtered);
+    setLimit(8);
+  };
+
+  // =====================
+  // Función para cargar más productos
+  const handleLoadMore = () => {
+    setLimit((prev) => prev + 4); // 👈 Ahora ya funciona
   };
 
   // ------ RENDER ------
@@ -180,7 +187,7 @@ const Home = () => {
           </div>
         </div>
         <Filter onFilter={handleFilter} />
-        
+
         {loading ? (
           <div className="flex justify-center py-12">
             <p className="text-muted-foreground">Cargando productos...</p>
@@ -192,11 +199,26 @@ const Home = () => {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredProducts.slice(0, 8).map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
+          <>
+            {/* GRID DE PRODUCTOS */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {filteredProducts.slice(0, limit).map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+
+            {/* BOTÓN VER MÁS */}
+            {limit < filteredProducts.length && (
+              <div className="flex justify-center mt-8">
+                <button
+                  onClick={handleLoadMore}
+                  className="px-6 py-3 bg-primary text-white rounded-full hover:bg-primary/90 transition"
+                >
+                  Ver más
+                </button>
+              </div>
+            )}
+          </>
         )}
       </section>
 
