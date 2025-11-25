@@ -7,7 +7,7 @@ experience first: Next.js, TypeScript, ESLint, Prettier, Husky, Lint-Staged, Com
 
 Developer experience first:
 
-- ⚡ [React.js](https://react.org) with App Router support
+- ⚡ [React.js] 
 - 🔥 Type checking [TypeScript](https://www.typescriptlang.org)
 - 💎 Integrate with [Tailwind CSS](https://tailwindcss.com)
 - ✅ Strict Mode for TypeScript and React 18
