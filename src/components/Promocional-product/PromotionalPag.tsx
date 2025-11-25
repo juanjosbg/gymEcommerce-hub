@@ -1,7 +1,6 @@
 import React from "react";
 import PromoTag from "./PromoTag";
-import { headerSection } from "@/data/content";
-
+import { Content } from "@/data/content";
 import { Splide, SplideSlide } from "@splidejs/react-splide";
 import "@splidejs/react-splide/css";
 
@@ -10,6 +9,8 @@ const psychoticImages = [
   "/psychotic-2.webp",
   "/psychotic-3.webp",
 ];
+
+const { headerSection } = Content.ui;
 
 function PromotionalPag() {
   return (

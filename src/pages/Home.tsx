@@ -133,9 +133,20 @@ const Home = () => {
       </section>
 
       {/* Promocion de productos */}
-      <PromotionalPage/>
+      <PromotionalPage />
 
-      {/* Products Section */}
+      {/* Promocion en productos */}
+      <div className="container">
+        <div className="overflow-hidden rounded-2xl bg-gray p-5">
+          <div className="mb-5 items-center justify-between space-y-5 md:flex md:space-y-0">
+            <h3 className="text-3xl font-medium">Productos en Promoción!</h3>
+            <CountDownTimer />
+          </div>
+          <div className="pb-2">{/* <ProductSlider /> */}</div>
+        </div>
+      </div>
+
+      {/* Haz tu compra ahora */}
       <section className="container py-16">
         <div className="flex items-center justify-between mb-8">
           <h2 className="text-3xl font-bold">Productos en Promoción!</h2>

@@ -1,11 +1,11 @@
 "use client";
 
 import React from "react";
-import { Splide, SplideSlide } from "@splidejs/react-splide";
 import "@splidejs/react-splide/css";
+import { Content } from "@/data/content";
+import { Splide, SplideSlide } from "@splidejs/react-splide";
 
-import { promotionTag } from "@/data/content";
-
+const { promotionTag } = Content.ui;
 const promoImages = ["/OFF.webp", "/OFF2.webp", "/PreEntreno.webp"];
 
 const PromoTag = () => {

@@ -1,15 +1,20 @@
-/* Fotos */
-import { ImgContent } from "@/data/ImgContent";
+import { headerSection, promotionTag } from "./ui";
+import { products } from "./products";
+import { productCategories, filterProducts } from "./filterByProduct";
+import { ProductImages } from "./ImgContent";
 
-/* Productos en promocion */
-export const promotionTag = {
-  title: "¡Descubre Descuentos Irresistibles!",
-};
+export const Content = {
+  ui: {
+    headerSection,
+    promotionTag,
+  },
 
-export const headerSection = {
-  title: "🔥 LLEGÓ LA BESTIA 🔥",
-  heading: "PSYCHOTIC – POTENCIA AL LÍMITE",
-  description:
-    "No es un simple pre-entreno. PSYCHOTIC desata una energía brutal, foco extremo y resistencia imparable. ¡Prepárate para entrenar como nunca antes!",
+  products,
+
+  images: ProductImages,
+
+  filters: {
+    categories: productCategories,
+    filterProducts,
+  },
 };
-/* Descripcion Productos */

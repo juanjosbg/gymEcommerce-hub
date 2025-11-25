@@ -8,7 +8,7 @@ import psychotic3 from "@/images/psychotic/psychotic-1.png";
 import psychotic4 from "@/images/psychotic/psychotic.webp";
 import psychotic5 from "@/images/psychotic/psychotic-5.jpg";
 
-// --- ISO / Proteína ---
+// --- ISO 100 ---
 import iso from "@/images/iso100/Iso-100-0.avif";
 import iso1 from "@/images/iso100/iso-1.jpg";
 import iso2 from "@/images/iso100/iso-2.jpg";
@@ -63,7 +63,7 @@ import peachbum1 from "@/images/peachbum/creatine-1.jpg";
 import peachbum2 from "@/images/peachbum/creatine-2.jpg";
 import peachbum3 from "@/images/peachbum/creatine-3.jpg";
 
-// --- Preentreno Venom ---
+// --- Venom ---
 import preentreno from "@/images/preentreno/preentrenovenom.jpg";
 import Venom from "@/images/preentreno/vemon1.jpg";
 import Venom1 from "@/images/preentreno/vemon2.jpg";
@@ -118,15 +118,25 @@ import Bcaas1 from "@/images/Bcaas/Bcaas1.jpeg";
 import Bcaas2 from "@/images/Bcaas/Bcaas2.jpeg";
 import Bcaas3 from "@/images/Bcaas/Bcaas3.jpeg";
 
+// --- Otros ---
 import omega3 from "@/images/omega3/Omega3.jpg";
 import modernEaa from "@/images/modern-eaa/EAA.webp";
 import glutamina from "@/images/glutamina/GLUTAMINA.png";
 import creatinaBirdman from "@/images/birdman/creatina.webp";
 import dragonCreatine from "@/images/dragoncreatine/creatina-Dragon.webp";
 
-export const ImgContent = {
-  psychotic: [psychotic, psychotic1, psychotic2, psychotic3, psychotic4, psychotic5],
-  iso: [iso, iso1, iso2, iso3, iso4],
+// ========== EXPORT FINAL ==========
+export const ProductImages = {
+  psychotic: [
+    psychotic,
+    psychotic1,
+    psychotic2,
+    psychotic3,
+    psychotic4,
+    psychotic5,
+  ],
+  iso100: [iso, iso1, iso2, iso3, iso4],
+
   cbum: [CBUM, CBUM1, CBUM2, CBUM3, CBUM4],
   cake: [Cake, Cake1, Cake2, Cake3, Cake4],
   cream: [cream, cream1, cream2, cream3, cream4, cream5],
@@ -144,9 +154,9 @@ export const ImgContent = {
   bordan: [Bordan, Bordan1, Bordan2, Bordan3, Bordan4],
   bcaas: [Bcaas, Bcaas1, Bcaas2, Bcaas3],
 
-  omega3,
-  modernEaa,
-  glutamina,
-  creatinaBirdman,
-  dragonCreatine,
+  omega3: [omega3],
+  modernEaa: [modernEaa],
+  glutamina: [glutamina],
+  creatinaBirdman: [creatinaBirdman],
+  dragonCreatine: [dragonCreatine],
 };
