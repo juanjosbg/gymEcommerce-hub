@@ -1,7 +1,5 @@
 "use client";
-
 import React from "react";
-
 import useCountDownTime from "@/hooks/useCountDownTime";
 
 const CountDownTimer = () => {

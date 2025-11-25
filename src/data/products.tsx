@@ -726,8 +726,8 @@ export const products = [
     reviews: 154,
     pieces_sold: 3150,
     justIn: false,
-    coverImage: ProductImages.modernEaa,
-    shots: [ProductImages.modernEaa],
+    coverImage: ProductImages.modernEaa[0],
+    shots: ProductImages.modernEaa,
     overview:
       "Modern EAA+ de USP Labs combina aminoácidos esenciales (EAA) con electrolitos para optimizar la hidratación, recuperación y crecimiento muscular. Ideal para consumir antes, durante o después del entrenamiento. Su fórmula avanzada ayuda a prevenir la degradación muscular y acelerar la síntesis proteica. Libre de estimulantes y con delicioso sabor a ponche de frutas.",
     shipment_details: [
@@ -765,8 +765,8 @@ export const products = [
     reviews: 78,
     pieces_sold: 1820,
     justIn: false,
-    coverImage: ProductImages.omega3,
-    shots: [ProductImages.omega3],
+    coverImage: ProductImages.omega3[0],
+    shots: ProductImages.omega3,
     overview:
       "Omega-3 90 Softgels es un suplemento de ácidos grasos esenciales que apoya la salud cardiovascular, cerebral y articular. Cada cápsula blanda contiene una alta concentración de EPA y DHA de calidad premium. Ideal para uso diario, mejora la circulación, reduce la inflamación y favorece el bienestar general. Sin sabor a pescado ni aditivos artificiales.",
     shipment_details: [
@@ -804,8 +804,8 @@ export const products = [
     reviews: 132,
     pieces_sold: 3200,
     justIn: false,
-    coverImage: ProductImages.creatinaBirdman,
-    shots: [ProductImages.creatinaBirdman],
+    coverImage: ProductImages.creatinaBirdman[0],
+    shots: ProductImages.creatinaBirdman,
     overview:
       "La Creatina Monohidratada Birdman 450g es un suplemento vegano de alta pureza que mejora el rendimiento físico, la fuerza muscular y acelera la recuperación post-entrenamiento. Apta para atletas y deportistas exigentes, esta creatina es 100% micronizada, sin saborizantes, colorantes ni aditivos artificiales. Perfecta para consumo diario.",
     shipment_details: [
@@ -843,8 +843,8 @@ export const products = [
     reviews: 176,
     pieces_sold: 4100,
     justIn: false,
-    coverImage: ProductImages.dragonCreatine,
-    shots: [ProductImages.dragonCreatine],
+    coverImage: ProductImages.dragonCreatine[0],
+    shots: ProductImages.dragonCreatine,
     overview:
       "La Creatina Monohidratada Dragon Pharma 1 kg proporciona 200 porciones de alta pureza, ideal para aumentar la fuerza, resistencia y volumen muscular. Formulada para atletas de alto rendimiento, esta creatina no contiene saborizantes ni aditivos. Perfecta para ciclos de carga y mantenimiento.",
     shipment_details: [
@@ -882,8 +882,8 @@ export const products = [
     reviews: 98,
     pieces_sold: 2650,
     justIn: true,
-    coverImage: ProductImages.glutamina,
-    shots: [ProductImages.glutamina],
+    coverImage: ProductImages.glutamina[0],
+    shots: ProductImages.glutamina,
     overview:
       "El suplemento Glutamina + Creatina combina dos potentes ingredientes para mejorar la recuperación muscular, aumentar la energía y reducir el catabolismo tras entrenamientos intensos. Ideal para quienes buscan fortalecer masa muscular y acelerar el tiempo de recuperación. Fórmula sin sabor, fácil de mezclar.",
     shipment_details: [

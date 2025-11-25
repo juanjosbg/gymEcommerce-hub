@@ -4,6 +4,8 @@ import { ProductCard } from "@/components/ProductCard";
 import { supabase } from "@/integrations/supabase/client";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import PromotionalPage from "@/components/Promocional-product/PromotionalPag";
+import CountDownTimer from "@/components/Promocional-product/CountDownTimer";
+import ProductSlider from "@/components/Promocional-product/ProductSlider";
 
 interface Product {
   id: string;
@@ -136,13 +138,15 @@ const Home = () => {
       <PromotionalPage />
 
       {/* Promocion en productos */}
-      <div className="container">
-        <div className="overflow-hidden rounded-2xl bg-gray p-5">
-          <div className="mb-5 items-center justify-between space-y-5 md:flex md:space-y-0">
+      <div className="container ">
+        <div className="overflow-hidden rounded-2xl bg-gray p-5 bg-[#f3f3f3]">
+          <div className="mb-5 items-center justify-between space-y-5 md:flex md:space-y-0 ">
             <h3 className="text-3xl font-medium">Productos en Promoción!</h3>
             <CountDownTimer />
           </div>
-          <div className="pb-2">{/* <ProductSlider /> */}</div>
+          <div className="pb-2">
+            <ProductSlider />
+          </div>
         </div>
       </div>
 
