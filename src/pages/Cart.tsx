@@ -1,4 +1,3 @@
-import { Header } from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useCart } from '@/contexts/CartContext';
@@ -15,7 +14,6 @@ const Cart = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header />
       
       <div className="container py-8">
         <h1 className="text-3xl font-bold mb-8">Carrito de Compras</h1>

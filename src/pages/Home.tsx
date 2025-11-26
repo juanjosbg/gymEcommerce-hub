@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { Header } from "@/components/Header";
 import { ProductCard } from "@/components/ProductCard";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -99,8 +98,6 @@ const Home = () => {
   // ------ RENDER ------
   return (
     <div className="min-h-screen bg-white">
-      <Header />
-
       {/* HERO CAROUSEL */}
       <section className="relative h-[800px] overflow-hidden mb-10">
         {heroSlides.map((slide, index) => (

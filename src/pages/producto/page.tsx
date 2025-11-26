@@ -5,7 +5,6 @@ import ProductCard from "@/components/Products/ProductCard";
 import SidebarFilters from "@/components/SideBarFilter";
 import { products } from "@/data/content";
 import { branch } from "@/data/filterByProduct";
-import { Header } from "@/components/Header";
 
 const getMinMaxPrice = () => {
   const prices = products.map((item) => item.price || 0);
@@ -55,7 +54,6 @@ const Page = () => {
 
   return (
     <div>
-      <Header />
       <div className="container relative flex flex-col lg:flex-row" id="body">
         <div className="pr-4 pt-10 lg:basis-1/3 xl:basis-1/4">
           <SidebarFilters

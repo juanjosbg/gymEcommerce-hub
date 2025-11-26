@@ -2,15 +2,12 @@ import React from "react";
 import { contact as contactSection } from "@/data/content";
 import ButtonSecondary from "@/shared/Button/ButtonSecondary";
 import Heading from "@/shared/Heading/Heading";
-import { Header } from "@/components/Header";
 
 import ContactForm from "./ContactForm";
 
 const page = () => {
   return (
     <section>
-      <Header />
-
       <div className="container">
         <div className="mb-32 mt-20">
           <Heading desc={contactSection.description} isMain isCenter>
