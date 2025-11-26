@@ -1,30 +1,19 @@
+import { useParams } from "react-router-dom";
 import { pathOr } from "ramda";
 import React from "react";
-
-import { shoes } from "@/data/content";
-
+import { products } from "@/data/content";
 import SectionMoreProducts from "./SectionMoreProducts";
 import SectionNavigation from "./SectionNavigation";
 import SectionProductHeader from "./SectionProductHeader";
 import SectionProductInfo from "./SectionProductInfo";
 
-type Props = {
-  params: { productId: string };
-  searchParams: { [key: string]: string | string[] | undefined };
-};
-
-const getProductData = async (id: string) => {
-  const filteredDestination = shoes.find((item) => item.slug === id);
-  return filteredDestination;
-};
-
-const SingleProductPage = async (props: Props) => {
-  const selectedProduct = await getProductData(props.params.productId);
+const SingleProductPage = () => {
+  const { productId = "" } = useParams();
+  const selectedProduct = products.find((item) => item.slug === productId);
 
   return (
     <div className="container">
       <SectionNavigation />
-
       <div className="mb-20">
         <SectionProductHeader
           shots={pathOr([], ["shots"], selectedProduct)}
@@ -34,12 +23,11 @@ const SingleProductPage = async (props: Props) => {
           rating={pathOr(0, ["rating"], selectedProduct)}
           pieces_sold={pathOr(0, ["pieces_sold"], selectedProduct)}
           reviews={pathOr(0, ["reviews"], selectedProduct)}
-          coverImage={pathOr("", ["coverImage"], selectedProduct)} 
+          coverImage={pathOr("", ["coverImage"], selectedProduct)}
           slug={pathOr("", ["slug"], selectedProduct)}
           shoeCategory={pathOr("", ["shoeCategory"], selectedProduct)}
         />
       </div>
-
       <div className="mb-28">
         <SectionProductInfo
           overview={pathOr("", ["overview"], selectedProduct)}
@@ -48,7 +36,6 @@ const SingleProductPage = async (props: Props) => {
           reviews={pathOr(0, ["reviews"], selectedProduct)}
         />
       </div>
-
       <div className="mb-28">
         <SectionMoreProducts />
       </div>

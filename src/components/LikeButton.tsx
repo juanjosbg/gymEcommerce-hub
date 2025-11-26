@@ -1,28 +1,41 @@
+// src/components/LikeButton.tsx
 "use client";
 
 import React from "react";
+import Swal from "sweetalert2";
 import { useAuth } from "@/hooks/useAuth";
 import { useWishlist } from "@/hooks/useWishlist";
 
 export interface LikeButtonProps {
   className?: string;
   product: any;
+  onRequireLogin?: () => void; // opcional si quieres seguir usando tu modal
 }
 
-const LikeButton: React.FC<LikeButtonProps> = ({ className = "", product }) => {
+const LikeButton: React.FC<LikeButtonProps> = ({ className = "", product, onRequireLogin }) => {
   const { user } = useAuth();
   const { isInWishlist, add, remove } = useWishlist();
   const liked = user && product && product.id ? isInWishlist(product.id) : false;
 
   const handleClick = async () => {
     if (!user) {
-      alert("Debes iniciar sesión para agregar a tu lista de deseos.");
+      // Si tienes un modal externo, dispáralo; de lo contrario usa SweetAlert
+      if (onRequireLogin) {
+        onRequireLogin();
+      } else {
+        Swal.fire({
+          icon: "info",
+          title: "Upps!",
+          text: "Asegúrate de iniciar sesión para poder agregar este producto como favorito.",
+          confirmButtonText: "Entendido",
+          customClass: { popup: "rounded-2xl" },
+        });
+      }
       return;
     }
-    if (!product || !product.id) {
-      alert("Este producto no tiene un identificador válido.");
-      return;
-    }
+
+    if (!product || !product.id) return;
+
     if (liked) {
       await remove(product.id);
     } else {

@@ -1,11 +1,11 @@
 "use client";
 
 import type { FC } from "react";
-import React from "react";
-import { Link } from "react-router-dom";
-
-import type { ProductType } from "@/data/types";
+import React, { useState } from "react";
 import LikeButton from "../LikeButton";
+import { Link } from "react-router-dom";
+import type { ProductType } from "@/data/types";
+import LoginRequiredModal from "@/components/Modal/LoginRequiredModal";
 
 interface ProductCardProps {
   product: ProductType;
@@ -18,8 +18,12 @@ const ProductCard: FC<ProductCardProps> = ({
   className,
   showPrevPrice = false,
 }) => {
+  const [showLoginModal, setShowLoginModal] = useState(false);
+
   return (
-    <div className={`transitionEffect relative rounded-2xl p-3 shadow-md ${className}`}>
+    <div
+      className={`transitionEffect relative rounded-2xl p-3 shadow-md ${className}`}
+    >
       <div className="h-[250px] w-full overflow-hidden rounded-2xl">
         {product.justIn && (
           <div className="absolute left-6 top-0 rounded-b-lg bg-primary px-3 py-2 text-sm uppercase text-white shadow-md font-semibold">
@@ -30,10 +34,8 @@ const ProductCard: FC<ProductCardProps> = ({
         {/* Like button */}
         <LikeButton
           className="absolute right-2 top-2"
-          product={{
-            ...product,
-            id: product.slug,
-          }}
+          product={{ ...product, id: product.slug }}
+          onRequireLogin={() => setShowLoginModal(true)}
         />
 
         {/* Imagen */}
@@ -63,6 +65,11 @@ const ProductCard: FC<ProductCardProps> = ({
           <p className="text-lg font-medium text-primary">${product.price}</p>
         </div>
       </div>
+
+      <LoginRequiredModal
+        open={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+      />
     </div>
   );
 };

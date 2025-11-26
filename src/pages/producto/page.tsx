@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import ProductCard from "@/components/ProductCard";
+import ProductCard from "@/components/Products/ProductCard";
 import SidebarFilters from "@/components/SideBarFilter";
 import { shoes } from "@/data/content";
 import { branch } from "@/data/filterByProduct";

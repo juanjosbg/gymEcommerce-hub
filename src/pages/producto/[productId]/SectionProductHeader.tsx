@@ -10,9 +10,9 @@ import { LuInfo } from "react-icons/lu";
 import { MdStar } from "react-icons/md";
 import { PiSealCheckFill } from "react-icons/pi";
 
-import ImageShowCase from "@/components/ImageShowCase";
-import ShoeSizeButton from "@/components/ShoeSizeButton";
-import { shoeSizes } from "@/data/content";
+import ImageShowCase from "@/components/Products/ImageShowCase";
+import ShoeSizeButton from "@/components/Products/ProductSizeButton";
+import { products } from "@/data/content";
 import nike_profile from "@/images/nike_profile.png";
 import ButtonCircle3 from "@/shared/Button/ButtonCircle3";
 import ButtonPrimary from "@/shared/Button/ButtonPrimary";
@@ -119,7 +119,7 @@ const SectionProductHeader: FC<SectionProductHeaderProps> = ({
         </div>
 
         <div className="grid grid-cols-3 gap-3">
-          {shoeSizes.map((size) => (
+          {products.map((size) => (
             <ShoeSizeButton key={size} size={size} />
           ))}
         </div>

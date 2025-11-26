@@ -30,8 +30,8 @@ const Filter = ({ onFilter }: { onFilter: (filters: string[]) => void }) => {
       <div className="grid basis-3/4 gap-3 md:grid-cols-3">
         {filters.map((filter, idx) => (
           <Select
+            key={`filter-${idx}`}
             sizeClass="h-11"
-            key={filter[0]}
             value={selected[idx]}
             onChange={(e) => handleChange(e.target.value, idx)}
             className="bg-white text-black font-semibold border border-transparent px-3 shadow-sm"
