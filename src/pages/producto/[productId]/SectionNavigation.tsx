@@ -10,9 +10,10 @@ const tabs = ["Home", "Banner", "New Arrival"];
 
 const SectionNavigation = () => {
   const [activeTab, setActiveTab] = useState("New Arrival");
+
   return (
     <div className="my-10 flex items-center justify-between">
-      <Link href="/">
+      <Link to="/">
         <ButtonCircle3 size="w-10 h-10" className="border border-neutral-300">
           <MdArrowBack className="text-2xl" />
         </ButtonCircle3>
@@ -24,9 +25,7 @@ const SectionNavigation = () => {
             key={tab}
             type="button"
             onClick={() => setActiveTab(tab)}
-            className={`${
-              activeTab === tab ? "text-primary" : "text-neutral-500"
-            }`}
+            className={activeTab === tab ? "text-primary" : "text-neutral-500"}
           >
             {tab}
           </button>

@@ -1,43 +1,40 @@
-'use client';
+"use client";
 
-import type { StaticImageData } from 'next/image';
-import Image from 'next/image';
-import { pathOr } from 'ramda';
-import type { FC } from 'react';
-import React, { useState } from 'react';
+import type { FC } from "react";
+import React, { useState } from "react";
 
-import LikeButton from '../LikeButton';
+import LikeButton from "../LikeButton";
 
 interface ImageShowCaseProps {
-  shots: StaticImageData[];
+  shots: string[];
   product: any;
 }
 
 const ImageShowCase: FC<ImageShowCaseProps> = ({ shots, product }) => {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const activeSrc = shots[activeImageIndex] ?? shots[0] ?? "";
 
   return (
     <div className="space-y-3 rounded-2xl border border-neutral-300 p-2">
       <div className="relative overflow-hidden rounded-2xl md:h-[720px]">
         <LikeButton
           className="absolute right-2 top-2"
-          product={{
-            ...product,
-            id: product.id || product.slug,
-          }}
+          product={{ ...product, id: product.id || product.slug }}
         />
-        <Image
-          src={pathOr('', [activeImageIndex], shots)}
-          alt="shoe image"
-          className="size-full object-cover object-center"
-        />
+        {activeSrc && (
+          <img
+            src={activeSrc}
+            alt="product image"
+            className="size-full object-cover object-center"
+          />
+        )}
       </div>
       <div className="grid grid-cols-4 gap-3">
         {shots.map((shot, index) => (
           <div
-            key={shot.src}
+            key={shot || index}
             className={`${
-              activeImageIndex === index ? 'border-2 border-primary' : ''
+              activeImageIndex === index ? "border-2 border-primary" : ""
             } h-[100px] overflow-hidden rounded-lg`}
           >
             <button
@@ -45,9 +42,9 @@ const ImageShowCase: FC<ImageShowCaseProps> = ({ shots, product }) => {
               type="button"
               onClick={() => setActiveImageIndex(index)}
             >
-              <Image
+              <img
                 src={shot}
-                alt="shoe image"
+                alt="product thumbnail"
                 className="size-full object-cover object-center"
               />
             </button>

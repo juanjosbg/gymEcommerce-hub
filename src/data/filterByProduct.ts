@@ -28,3 +28,14 @@ export const filterProducts = (products, selected) => {
     return matchType && matchDiscount && matchPrice;
   });
 };
+
+export const branch = [
+  { name: "Mostrar todo", categorias: [] },
+  { name: "Pre-entreno", categorias: ["Pre-entreno"] },
+  { name: "Proteína", categorias: ["Proteína"] },
+  { name: "Creatina", categorias: ["Creatina"] },
+  { name: "Glutamina", categorias: ["Glutamina"] },
+  { name: "Aminoácidos", categorias: ["Aminoácidos"] },
+  { name: "Omega 3", categorias: ["Omega 3"] },
+  { name: "Suplemento", categorias: ["Suplemento", "Suplementos"] },
+];

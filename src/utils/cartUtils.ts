@@ -1,40 +1,82 @@
-import { db } from "@/firebase/config";
-import { collection, doc, setDoc, deleteDoc, onSnapshot, updateDoc, getDocs } from "firebase/firestore";
+// src/utils/cartUtils.ts
 
-export const addToCart = async (userId: string, item: any) => {
-  if (!item || !item.id) {
-    throw new Error("El producto no tiene id");
+// Helpers
+const CART_KEY = (userId: string) => `cart:${userId || "anon"}`;
+
+type CartItem = {
+  id: string;
+  nombreProducto: string;
+  precio: number;
+  cantidad: number;
+  coverImage?: string;
+  shoeCategory?: string;
+  rating?: number;
+  [k: string]: any;
+};
+
+const readCart = (userId: string): CartItem[] => {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem(CART_KEY(userId));
+    return raw ? (JSON.parse(raw) as CartItem[]) : [];
+  } catch {
+    return [];
   }
-  await setDoc(
-    doc(db, "carts", userId, "items", item.id),
-    { ...item }
-  );
+};
+
+const writeCart = (userId: string, items: CartItem[]) => {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(CART_KEY(userId), JSON.stringify(items));
+};
+
+// API
+export const addToCart = async (userId: string, item: CartItem) => {
+  if (!item || !item.id) throw new Error("El producto no tiene id");
+  const items = readCart(userId);
+  const idx = items.findIndex((i) => i.id === item.id);
+  if (idx >= 0) {
+    items[idx].cantidad += item.cantidad ?? 1;
+  } else {
+    items.push({ ...item, cantidad: item.cantidad ?? 1 });
+  }
+  writeCart(userId, items);
 };
 
 export const removeFromCart = async (userId: string, itemId: string) => {
-  await deleteDoc(doc(db, "carts", userId, "items", itemId));
+  const items = readCart(userId).filter((i) => i.id !== itemId);
+  writeCart(userId, items);
 };
 
-export const updateCartItemQuantity = async (userId: string, itemId: string, cantidad: number) => {
-  await updateDoc(doc(db, "carts", userId, "items", itemId), { cantidad });
+export const updateCartItemQuantity = async (
+  userId: string,
+  itemId: string,
+  cantidad: number
+) => {
+  const items = readCart(userId).map((i) =>
+    i.id === itemId ? { ...i, cantidad } : i
+  );
+  writeCart(userId, items);
 };
 
 export const subscribeToCart = (
   userId: string,
-  callback: (items: any[]) => void
+  callback: (items: CartItem[]) => void,
+  intervalMs = 800
 ) => {
-  return onSnapshot(
-    collection(db, "carts", userId, "items"),
-    (snapshot) => {
-      const items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      callback(items);
+  let last = "";
+  const tick = () => {
+    const raw = localStorage.getItem(CART_KEY(userId)) || "";
+    if (raw !== last) {
+      last = raw;
+      callback(raw ? (JSON.parse(raw) as CartItem[]) : []);
     }
-  );
+  };
+  const id = setInterval(tick, intervalMs);
+  tick(); 
+  return () => clearInterval(id);
 };
 
 export const clearUserCart = async (userId: string) => {
-  const itemsRef = collection(db, "carts", userId, "items");
-  const itemsSnap = await getDocs(itemsRef);
-  const deletePromises = itemsSnap.docs.map((docu) => deleteDoc(docu.ref));
-  await Promise.all(deletePromises);
+  if (typeof window === "undefined") return;
+  localStorage.removeItem(CART_KEY(userId));
 };

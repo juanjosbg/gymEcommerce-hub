@@ -1,29 +1,23 @@
 "use client";
 
-import type { StaticImageData } from "next/image";
-import Image from "next/image";
 import type { FC } from "react";
-import React from "react";
-import { BsBag } from "react-icons/bs";
+import React, { useMemo } from "react";
 import { GoDotFill } from "react-icons/go";
-import { LuInfo } from "react-icons/lu";
 import { MdStar } from "react-icons/md";
 import { PiSealCheckFill } from "react-icons/pi";
 
 import ImageShowCase from "@/components/Products/ImageShowCase";
-import ShoeSizeButton from "@/components/Products/ProductSizeButton";
 import { products } from "@/data/content";
 import nike_profile from "@/images/nike_profile.png";
 import ButtonCircle3 from "@/shared/Button/ButtonCircle3";
 import ButtonPrimary from "@/shared/Button/ButtonPrimary";
-import ButtonSecondary from "@/shared/Button/ButtonSecondary";
 import Heading from "@/shared/Heading/Heading";
 import { useCart } from "@/hooks/useCart";
 import { useAuth } from "@/hooks/useAuth";
 import AddToCartButton from "@/components/AddToCartButton";
 
 interface SectionProductHeaderProps {
-  shots: StaticImageData[];
+  shots: string[];
   shoeName: string;
   prevPrice: number;
   currentPrice: number;
@@ -33,6 +27,7 @@ interface SectionProductHeaderProps {
   coverImage: string;
   slug: string;
   shoeCategory?: string;
+  stock?: number; // opcional si tu data lo trae
 }
 
 const SectionProductHeader: FC<SectionProductHeaderProps> = ({
@@ -46,6 +41,7 @@ const SectionProductHeader: FC<SectionProductHeaderProps> = ({
   coverImage,
   slug,
   shoeCategory,
+  stock,
 }) => {
   const { user } = useAuth();
   const { addToCart } = useCart();
@@ -59,6 +55,14 @@ const SectionProductHeader: FC<SectionProductHeaderProps> = ({
     shoeCategory,
     rating,
   };
+
+  const related = useMemo(
+    () =>
+      products
+        .filter((p) => p.category === shoeCategory && p.slug !== slug)
+        .slice(0, 3),
+    [shoeCategory, slug]
+  );
 
   const handleAddToCart = () => {
     if (!user) {
@@ -85,7 +89,7 @@ const SectionProductHeader: FC<SectionProductHeaderProps> = ({
               className="overflow-hidden border border-neutral-400"
               size="w-11 h-11"
             >
-              <Image
+              <img
                 src={nike_profile}
                 alt="nike_profile"
                 className="h-full w-full object-cover"
@@ -109,19 +113,14 @@ const SectionProductHeader: FC<SectionProductHeaderProps> = ({
         <div className="mb-5 space-y-1">
           <p className="text-neutral-500 line-through">${prevPrice}</p>
           <h1 className="text-3xl font-medium">${currentPrice}</h1>
-        </div>
-
-        <div className="mb-5 flex items-end justify-between">
-          <p className="text-xl">Available sizes</p>
-          <p className="flex items-center gap-1 text-sm text-neutral-500">
-            Size guide <LuInfo />
+          <p className="text-sm text-neutral-600">
+            Disponibilidad:{" "}
+            {typeof stock === "number"
+              ? stock > 0
+                ? `En stock (${stock} uds)`
+                : "Agotado"
+              : "Consulta disponibilidad"}
           </p>
-        </div>
-
-        <div className="grid grid-cols-3 gap-3">
-          {products.map((size) => (
-            <ShoeSizeButton key={size} size={size} />
-          ))}
         </div>
 
         <div className="mt-5 flex items-center gap-5">
@@ -134,6 +133,23 @@ const SectionProductHeader: FC<SectionProductHeaderProps> = ({
             <BsBag /> Add to cart
           </ButtonSecondary> */}
         </div>
+
+        {related.length > 0 && (
+          <div className="mt-8 space-y-2">
+            <p className="text-sm font-semibold">También te puede interesar</p>
+            <ul className="space-y-1">
+              {related.map((item) => (
+                <li
+                  key={item.slug}
+                  className="flex items-center justify-between text-sm text-neutral-700"
+                >
+                  <span>{item.name}</span>
+                  <span className="text-primary">${item.price}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
     </div>
   );

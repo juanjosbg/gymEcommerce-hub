@@ -1,24 +1,24 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ProductCard from "@/components/Products/ProductCard";
 import SidebarFilters from "@/components/SideBarFilter";
-import { shoes } from "@/data/content";
+import { products } from "@/data/content";
 import { branch } from "@/data/filterByProduct";
+import { Header } from "@/components/Header";
 
 const getMinMaxPrice = () => {
-  const prices = shoes.map((item) => item.currentPrice || 0);
+  const prices = products.map((item) => item.price || 0);
   return [Math.min(...prices), Math.max(...prices)];
 };
 
 const Page = () => {
   const [priceRange, setPriceRange] = useState(getMinMaxPrice());
-  const [filteredShoes, setFilteredShoes] = useState(shoes);
+  const [filteredShoes, setFilteredShoes] = useState(products);
 
   const handleFilterChange = (brand: string, range: number[]) => {
     setPriceRange(range);
-
-    let filtered = [...shoes];
+    let filtered = [...products];
 
     if (brand !== "Mostrar todo") {
       const branchObj = branch.find((b) => b.name === brand);
@@ -26,9 +26,9 @@ const Page = () => {
         filtered = filtered.filter((item) =>
           branchObj.categorias.some(
             (cat) =>
-              item.shoeCategory &&
+              item.category &&
               cat &&
-              item.shoeCategory.trim().toLowerCase() === cat.trim().toLowerCase()
+              item.category.trim().toLowerCase() === cat.trim().toLowerCase()
           )
         );
       } else {
@@ -38,23 +38,24 @@ const Page = () => {
 
     filtered = filtered.filter(
       (item) =>
-        typeof item.currentPrice === "number" &&
+        typeof item.price === "number" &&
         range[0] !== undefined &&
         range[1] !== undefined &&
-        item.currentPrice >= range[0] &&
-        item.currentPrice <= range[1]
+        item.price >= range[0] &&
+        item.price <= range[1]
     );
 
     setFilteredShoes(filtered);
   };
 
-  React.useEffect(() => {
-    setFilteredShoes(shoes);
+  useEffect(() => {
+    setFilteredShoes(products);
     setPriceRange(getMinMaxPrice());
   }, []);
 
   return (
     <div>
+      <Header />
       <div className="container relative flex flex-col lg:flex-row" id="body">
         <div className="pr-4 pt-10 lg:basis-1/3 xl:basis-1/4">
           <SidebarFilters
@@ -71,7 +72,7 @@ const Page = () => {
           </div>
         </div>
       </div>
-      <div className="my-24"></div>
+      <div className="my-24" />
     </div>
   );
 };

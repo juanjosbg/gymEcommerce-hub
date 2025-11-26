@@ -12,7 +12,7 @@ export const products = [
   // -------- cbum5peat --------
   {
     slug: "cbum5peat",
-    name: "cbum5peat",
+    name: "CBUM Thavage 5PEAT",
     category: "Pre-entreno",
     price: 10000,
     previousPrice: 2000,
@@ -51,7 +51,7 @@ export const products = [
   // -------- peachbum --------
   {
     slug: "peachbum",
-    name: "PEACHBUM",
+    name: "Thavage Peach Bum 40 servicios",
     category: "Pre-entreno",
     price: 10000,
     previousPrice: 2000,
@@ -90,7 +90,7 @@ export const products = [
   // -------- Vemon --------
   {
     slug: "Vemon",
-    name: "VEMON",
+    name: "Venom Pre-Workout",
     category: "Pre-entreno",
     price: 199,
     previousPrice: 250,
@@ -129,7 +129,7 @@ export const products = [
   // -------- psychotic-orange --------
   {
     slug: "psychotic-orange",
-    name: "PSYCHOTIC",
+    name: "Psychotic Pre Workout Orange",
     category: "Pre-entreno",
     price: 280,
     previousPrice: 350,
@@ -170,7 +170,7 @@ export const products = [
   // -------- dymatize-iso100-vainilla --------
   {
     slug: "dymatize-iso100-vainilla",
-    name: "ISO 100",
+    name: "ISO 100 Dymatize Vainilla 2.27 kg",
     category: "Proteína",
     price: 950,
     previousPrice: 1150,
@@ -209,7 +209,7 @@ export const products = [
   // -------- cbum-itholate --------
   {
     slug: "cbum-itholate",
-    name: "CBUM Itholate Protein",
+    name: "CBUM Itholate Protein - Avena Vainilla 2 lbs",
     category: "Proteína",
     price: 1250,
     previousPrice: 1450,
@@ -248,7 +248,7 @@ export const products = [
   // -------- cbum-itholate-cake --------
   {
     slug: "cbum-itholate-cake",
-    name: "CBUM Itholate Protein Cake",
+    name: "CCBUM Itholate Protein Cake - Birthday Cake",
     category: "Proteína",
     price: 1250,
     previousPrice: 1450,
@@ -259,7 +259,7 @@ export const products = [
     coverImage: ProductImages.cake[0],
     shots: ProductImages.cake,
     overview:
-      "Proteína de suero aislada de alta calidad con 25 g por porción, sabor a avena con vainilla. Bajo en grasas, con solo 1 g de carbohidratos, y derivada 100 % de vacas alimentadas con pasto. Ideal para apoyar el desarrollo muscular magro, la recuperación post-entrenamiento y mejorar el rendimiento físico. Fácil de digerir gracias a su proceso de microfiltración, sin molestias estomacales.",
+      "Proteína de suero aislada de alta calidad con 25g por porción, sabor a avena con vainilla. Bajo en grasas, con solo 1g de carbohidratos, y derivada 100 % de vacas alimentadas con pasto. Ideal para apoyar el desarrollo muscular magro, la recuperación post-entrenamiento y mejorar el rendimiento físico. Fácil de digerir gracias a su proceso de microfiltración, sin molestias estomacales.",
     shipment_details: [
       {
         icon: <PiPercentFill className="text-xl text-secondary" />,
@@ -287,7 +287,7 @@ export const products = [
   // -------- raw-mint-chip --------
   {
     slug: "raw-mint-chip",
-    name: "RAW Itholate - Menta Chispas",
+    name: "RAW Itholate Mint Chip Ice Cream 2.2 lbs",
     category: "Proteína",
     price: 900,
     previousPrice: 1050,
@@ -326,9 +326,9 @@ export const products = [
   // -------- gold-standard-chocolate --------
   {
     slug: "gold-standard-chocolate",
-    name: "Gold Standard Chocolate",
+    name: "Gold Standard Isolate Chocolate 5 lb",
     category: "Suplementos",
-    price: 1949,
+    price: 800,
     previousPrice: 2359,
     rating: 4.1,
     reviews: 157,
@@ -365,9 +365,9 @@ export const products = [
   // -------- gold-standard-whey --------
   {
     slug: "gold-standard-whey",
-    name: "Gold Standard - Whey Protein",
+    name: "Gold Standard 100% Whey 5 lb",
     category: "Proteína",
-    price: 20000,
+    price: 800,
     previousPrice: 19000,
     rating: 4.8,
     reviews: 22500,
@@ -406,10 +406,10 @@ export const products = [
   // -------- creatine --------
   {
     slug: "creatine",
-    name: "Creatine micronized",
+    name: "Creatina Micronizada ON 57 servicios",
     category: "Suplementos",
-    price: 165,
-    previousPrice: 210,
+    price: 300,
+    previousPrice: 410,
     rating: 4.9,
     reviews: 124,
     pieces_sold: 3200,
@@ -445,7 +445,7 @@ export const products = [
   // -------- aminox --------
   {
     slug: "aminox",
-    name: "ANINOX",
+    name: "AMINOx BSN 30 servicios",
     category: "Suplementos",
     price: 145,
     previousPrice: 180,
@@ -484,7 +484,7 @@ export const products = [
   // -------- Ryse --------
   {
     slug: "Ryse",
-    name: "Ryse",
+    name: "Ryse BCAA/Amino",
     category: "Suplementos",
     price: 145,
     previousPrice: 180,
@@ -523,7 +523,7 @@ export const products = [
   // -------- Pak --------
   {
     slug: "Pak",
-    name: "Pak",
+    name: "Animal Pak - Multivitamínico",
     category: "Suplementos",
     price: 145,
     previousPrice: 180,
@@ -562,7 +562,7 @@ export const products = [
   // -------- Muscletech --------
   {
     slug: "Muscletech",
-    name: "Muscletech",
+    name: "Muscletech Amino/Suplemento",
     category: "Suplementos",
     price: 145,
     previousPrice: 180,
@@ -601,7 +601,7 @@ export const products = [
   // -------- Falcon --------
   {
     slug: "Falcon",
-    name: "Falcon",
+    name: "Falcon Suplemento",
     category: "Suplementos",
     price: 145,
     previousPrice: 180,
@@ -640,7 +640,7 @@ export const products = [
   // -------- Bordan --------
   {
     slug: "Bordan",
-    name: "Bordan",
+    name: "Bordan Suplemento",
     category: "Suplementos",
     price: 145,
     previousPrice: 180,
@@ -679,7 +679,7 @@ export const products = [
   // -------- Bcaas --------
   {
     slug: "Bcaas",
-    name: "Bcaas & Glutamina",
+    name: "BCAAs & Glutamina",
     category: "Suplementos",
     price: 145,
     previousPrice: 180,
@@ -718,7 +718,7 @@ export const products = [
   // -------- modern-eaa-plus --------
   {
     slug: "modern-eaa-plus",
-    name: "Modern EAA+",
+    name: "Modern EAA+ 450g",
     category: "Aminoácidos",
     price: 699,
     previousPrice: 799,
@@ -798,7 +798,7 @@ export const products = [
     slug: "creatina-monohidratada-birdman-450g",
     name: "Creatina Monohidratada Birdman 450g",
     category: "Creatina",
-    price: 499,
+    price: 380,
     previousPrice: 599,
     rating: 4.8,
     reviews: 132,
@@ -835,7 +835,7 @@ export const products = [
   // -------- creatina-dragon-pharma-1kg --------
   {
     slug: "creatina-dragon-pharma-1kg",
-    name: "Creatina Dragon",
+    name: "Creatina Monohidratada Dragon Pharma 1 kg",
     category: "Creatina",
     price: 749,
     previousPrice: 899,
@@ -906,6 +906,120 @@ export const products = [
         icon: <FaTruckFast className="text-xl text-secondary" />,
         title: "Entrega estimada",
         description: "24 - 27 de junio 2025",
+      },
+    ],
+  },
+  // -------- Mutant-whey-chocolate --------
+  {
+    slug: "mutant-whey-chocolate-5lb",
+    name: "Mutant Whey Chocolate 5 lb",
+    category: "Proteína",
+    price: 500,
+    previousPrice: 550,
+    rating: 4.5,
+    reviews: 120,
+    pieces_sold: 900,
+    justIn: false,
+    coverImage: ProductImages.glutamina[0], // Cambiar por imagen correcta
+    shots: ProductImages.glutamina, // Cambiar por imagen correcta
+    overview:
+      "Mutant Whey Chocolate 5 lb es una mezcla de proteína diseñada para apoyar el crecimiento muscular y la recuperación con un sabor intenso a chocolate.",
+    shipment_details: [
+      {
+        icon: <PiPercentFill className="text-xl text-secondary" />,
+        title: "Descuento",
+        description: "Descuento disponible según campaña",
+      },
+      {
+        icon: <FaCalendarAlt className="text-xl text-secondary" />,
+        title: "Tiempo de entrega",
+        description: "4 - 8 días hábiles",
+      },
+      {
+        icon: <BsBoxFill className="text-xl text-secondary" />,
+        title: "Empaque",
+        description: "Envase de 5 lb",
+      },
+      {
+        icon: <FaTruckFast className="text-xl text-secondary" />,
+        title: "Entrega estimada",
+        description: "Según transportadora",
+      },
+    ],
+  },
+  // -------- Mass-tech-extreme --------
+  {
+    slug: "mass-tech-extreme-2000",
+    name: "Mass-Tech Extreme 2000 6 lb Triple Chocolate",
+    category: "Ganador de masa",
+    price: 878,
+    previousPrice: 1072,
+    rating: 4.7,
+    reviews: 210,
+    pieces_sold: 1500,
+    justIn: false,
+    coverImage: ProductImages.glutamina[0], // Cambiar por imagen correcta
+    shots: ProductImages.glutamina, // Cambiar por imagen correcta
+    overview:
+      "Ganador de masa de alto contenido calórico para quienes buscan subir de peso y volumen muscular de forma rápida y controlada.",
+    shipment_details: [
+      {
+        icon: <PiPercentFill className="text-xl text-secondary" />,
+        title: "Descuento",
+        description: "Aplicable según promociones vigentes",
+      },
+      {
+        icon: <FaCalendarAlt className="text-xl text-secondary" />,
+        title: "Tiempo de entrega",
+        description: "4 - 8 días hábiles",
+      },
+      {
+        icon: <BsBoxFill className="text-xl text-secondary" />,
+        title: "Empaque",
+        description: "Saco/Bolsa 6 lb",
+      },
+      {
+        icon: <FaTruckFast className="text-xl text-secondary" />,
+        title: "Entrega estimada",
+        description: "Según región del país",
+      },
+    ],
+  },
+  // -------- Birdman-bcaa-glutamina --------
+  {
+    slug: "birdman-bcaa-glutamina-405g",
+    name: "Birdman BCAA + Glutamina 405 g",
+    category: "Aminoácidos",
+    price: 320, // TODO: en el PDF aparece Retail: $320
+    previousPrice: 350,
+    rating: 4.6,
+    reviews: 95,
+    pieces_sold: 700,
+    justIn: false,
+    coverImage: ProductImages.glutamina[0], // Cambiar por imagen correcta
+    shots: ProductImages.glutamina, // Cambiar por imagen correcta
+    overview:
+      "BCAA + Glutamina Birdman 405 g para apoyar la recuperación muscular, reducir la fatiga y mejorar el rendimiento deportivo.",
+    shipment_details: [
+      {
+        icon: <PiPercentFill className="text-xl text-secondary" />,
+        title: "Descuento",
+        description: "Descuento según campañas de mayoreo",
+      },
+      {
+        icon: <FaCalendarAlt className="text-xl text-secondary" />,
+        title: "Tiempo de entrega",
+        description: "3 - 6 días hábiles",
+      },
+      {
+        icon: <BsBoxFill className="text-xl text-secondary" />,
+        title: "Empaque",
+        description: "Bote ecológico Birdman® 405 g",
+      },
+      {
+        icon: <FaTruckFast className="text-xl text-secondary" />,
+        title: "Entrega estimada",
+        description: "Dependiendo de la ciudad",
       },
     ],
   },
