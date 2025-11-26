@@ -13,7 +13,9 @@ import Filter from "@/components/Filters/Filter";
 import { productsSection } from "@/data/ui";
 import { filterProducts as applyFilters } from "@/data/filterByProduct";
 import { products as localCatalog } from "@/data/products";
-import { ProductImages } from "@/data/ImgContent";
+
+import Hero1 from "../../public/Hero/hero_bg_1_1.png"
+import Hero2 from "../../public/Hero/hero_bg_1_2.png"
 
 interface Product {
   id: string;
@@ -36,18 +38,13 @@ const Home = () => {
   const heroSlides = [
     {
       title: "Energía, fuerza y recuperación",
-      subtitle: "Todo lo que necesitas para alcanzar tus metas.",
-      image: ProductImages.cbum5peat[0],
+      subtitle: "Todo lo que necesitas para alcanzar tus metas fitness.",
+      image: Hero1,
     },
     {
-      title: "Proteína de elite",
-      subtitle: "ISO 100 y CBUM Itholate para tu mejor versión.",
-      image: ProductImages.iso100[0],
-    },
-    {
-      title: "Pre-entreno extremo",
-      subtitle: "Psychotic y Venom para romper tus límites.",
-      image: ProductImages.psychotic[0],
+      title: "Encunetra el suplemento perfecto",
+      subtitle: "Portencia tu rendimiento con nuestra fórmulas avanzadas.",
+      image: Hero2,
     },
   ];
 
@@ -96,7 +93,7 @@ const Home = () => {
   // =====================
   // Función para cargar más productos
   const handleLoadMore = () => {
-    setLimit((prev) => prev + 4); // 👈 Ahora ya funciona
+    setLimit((prev) => prev + 4);
   };
 
   // ------ RENDER ------
@@ -105,7 +102,7 @@ const Home = () => {
       <Header />
 
       {/* HERO CAROUSEL */}
-      <section className="relative h-[600px] overflow-hidden">
+      <section className="relative h-[800px] overflow-hidden mb-10">
         {heroSlides.map((slide, index) => (
           <div
             key={index}
@@ -117,7 +114,7 @@ const Home = () => {
               className="absolute inset-0 bg-cover bg-center"
               style={{ backgroundImage: `url(${slide.image})` }}
             >
-              <div className="absolute inset-0 bg-black/50" />
+              <div className="absolute inset-0 " />
             </div>
             <div className="relative h-full container flex items-center">
               <div className="max-w-2xl text-white">
@@ -147,7 +144,7 @@ const Home = () => {
         </button>
 
         {/* INDICADORES */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+        <div className="absolute bottom-24 left-1/2 -translate-x-1/2 flex gap-2 z-10 -ml-12">
           {heroSlides.map((_, index) => (
             <button
               key={index}
@@ -179,9 +176,9 @@ const Home = () => {
 
       {/* HAZ TU COMPRA AHORA */}
       <section className="container py-16">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h2 className="text-3xl font-bold">{productsSection.heading}</h2>
+        <div className="mb-10 space-y-5 flex">
+          <div className="flex flex-col items-center text-center">
+            <h2 className="md:text-5xl font-semibold uppercase py-5 px-10 lineHeight text-3xl">{productsSection.heading}</h2>
             <p className="text-neutral-500">{productsSection.description}</p>
           </div>
         </div>

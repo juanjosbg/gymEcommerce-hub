@@ -5,9 +5,10 @@ import { Splide, SplideSlide } from "@splidejs/react-splide";
 import "@splidejs/react-splide/css";
 
 const psychoticImages = [
-  "/psychotic.webp",
-  "/psychotic-2.webp",
-  "/psychotic-3.webp",
+  "../../public/PSYCCHOTIC1.png",
+  "../../public/PSYCCHOTIC2.png",
+  "../../public/PSYCCHOTIC3.png",
+  "../../public/PSYCCHOTIC4.png",
 ];
 
 const { headerSection } = Content.ui;

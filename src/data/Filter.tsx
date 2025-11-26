@@ -1,42 +1,19 @@
 import type { ProductType } from "./types";
 
 export const filters: string[][] = [
-  [
-    "Tipo",
-    "Todos",
-    "Pre-entreno",
-    "Proteína",
-    "Creatina",
-    "Glutamina",
-    "Aminoácidos",
-    "Omega 3",
-    "Suplemento",
-  ],
-  ["Descuento", "Todos", "Con descuento", "Sin descuento"],
-  [
-    "Precios",
-    "Todos",
-    "Menos de 100",
-    "100 - 500",
-    "500 - 1000",
-    "Más de 1000",
-  ],
+  ["Todos", "Pre-entreno", "Proteína", "Creatina", "Glutamina", "Aminoácidos", "Omega 3", "Suplemento"],
+  ["Todos", "Con descuento", "Sin descuento"],
+  ["Todos", "Menos de 100", "100 - 500", "500 - 1000", "Más de 1000"],
 ];
 
 export const productCategories = filters[0].slice(1);
 
-export function filterProducts(
-  products: ProductType[],
-  selected: string[]
-): ProductType[] {
+export function filterProducts(products: ProductType[], selected: string[]): ProductType[] {
   const [typeFilter, discountFilter, priceFilter] = selected;
 
-  return products.filter((product) => {
-    const { category, price, previousPrice } = product;
-
-    // ---------- FILTRO POR TIPO ----------
+  return products.filter(({ category, price, previousPrice }) => {
+    // tipo
     let passType = true;
-
     switch (typeFilter) {
       case "Pre-entreno":
         passType = /pre-?entreno/i.test(category);
@@ -51,47 +28,28 @@ export function filterProducts(
       case "Suplemento":
         passType = category.toLowerCase().includes("suplement");
         break;
-
       default:
         passType = true;
     }
-
     if (!passType) return false;
 
-    // ---------- FILTRO POR DESCUENTO ----------
-    const hasDiscount =
-      typeof previousPrice === "number" && previousPrice > price;
+    // descuento
+    const hasDiscount = typeof previousPrice === "number" && previousPrice > price;
+    if (discountFilter === "Con descuento" && !hasDiscount) return false;
+    if (discountFilter === "Sin descuento" && hasDiscount) return false;
 
-    let passDiscount = true;
-
-    if (discountFilter === "Con descuento") passDiscount = hasDiscount;
-    else if (discountFilter === "Sin descuento") passDiscount = !hasDiscount;
-
-    if (!passDiscount) return false;
-
-    // ---------- FILTRO POR PRECIO ----------
-    let passPrice = true;
-
+    // precio
     switch (priceFilter) {
       case "Menos de 100":
-        passPrice = price < 100;
-        break;
+        return price < 100;
       case "100 - 500":
-        passPrice = price >= 100 && price <= 500;
-        break;
+        return price >= 100 && price <= 500;
       case "500 - 1000":
-        passPrice = price > 500 && price <= 1000;
-        break;
+        return price > 500 && price <= 1000;
       case "Más de 1000":
-        passPrice = price > 1000;
-        break;
-
+        return price > 1000;
       default:
-        passPrice = true;
+        return true;
     }
-
-    if (!passPrice) return false;
-
-    return true;
   });
 }

@@ -3,6 +3,8 @@ import { products } from "./products";
 import { filterProducts } from "./filterByProduct";
 import { ProductImages } from "./ImgContent";
 import { filters } from "./Filter"; 
+import { faqsData } from "./faqsData";
+import { contact } from "./contact";
 
 export {
   products,
@@ -11,6 +13,8 @@ export {
   ProductImages,
   filterProducts,
   filters, 
+  faqsData,
+  contact,
 };
 
 export const Content = {
@@ -19,6 +23,8 @@ export const Content = {
     promotionTag,
   },
   products,
+  faqsData,
+  contact,
   images: ProductImages,
   filters,
 };

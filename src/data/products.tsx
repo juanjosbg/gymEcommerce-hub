@@ -13,7 +13,7 @@ export const products = [
   {
     slug: "cbum5peat",
     name: "cbum5peat",
-    category: "Pre-entrenamiento",
+    category: "Pre-entreno",
     price: 10000,
     previousPrice: 2000,
     rating: 4.9,
@@ -52,7 +52,7 @@ export const products = [
   {
     slug: "peachbum",
     name: "PEACHBUM",
-    category: "Pre-entrenamiento",
+    category: "Pre-entreno",
     price: 10000,
     previousPrice: 2000,
     rating: 4.9,
@@ -91,7 +91,7 @@ export const products = [
   {
     slug: "Vemon",
     name: "VEMON",
-    category: "Pre-entrenamiento",
+    category: "Pre-entreno",
     price: 199,
     previousPrice: 250,
     rating: 4.9,
@@ -130,7 +130,7 @@ export const products = [
   {
     slug: "psychotic-orange",
     name: "PSYCHOTIC",
-    category: "Pre-Entrenamiento",
+    category: "Pre-entreno",
     price: 280,
     previousPrice: 350,
     rating: 4.8,
