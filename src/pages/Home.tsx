@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Header } from "@/components/Header";
 import { ProductCard } from "@/components/ProductCard";
-import { supabase } from "@/integrations/supabase/client";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import PromotionalPage from "@/components/Promocional-product/PromotionalPag";
@@ -13,13 +12,16 @@ import Filter from "@/components/Filters/Filter";
 
 import { productsSection } from "@/data/ui";
 import { filterProducts as applyFilters } from "@/data/filterByProduct";
+import { products as localCatalog } from "@/data/products";
+import { ProductImages } from "@/data/ImgContent";
 
 interface Product {
   id: string;
   name: string;
   description: string;
   price: number;
-  image_url: string;
+  previousPrice?: number;
+  image_url?: string | null;
   category: string;
   stock: number;
 }
@@ -35,39 +37,36 @@ const Home = () => {
     {
       title: "Energía, fuerza y recuperación",
       subtitle: "Todo lo que necesitas para alcanzar tus metas.",
-      image:
-        "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=1920&h=800&fit=crop",
+      image: ProductImages.cbum5peat[0],
     },
     {
-      title: "Encuentra el suplemento perfecto",
-      subtitle: "Potencia tu rendimiento con nuestras fórmulas avanzadas.",
-      image:
-        "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=1920&h=800&fit=crop",
+      title: "Proteína de elite",
+      subtitle: "ISO 100 y CBUM Itholate para tu mejor versión.",
+      image: ProductImages.iso100[0],
+    },
+    {
+      title: "Pre-entreno extremo",
+      subtitle: "Psychotic y Venom para romper tus límites.",
+      image: ProductImages.psychotic[0],
     },
   ];
 
-  // ------ FETCH PRODUCTS ------
+  // ------ LOAD PRODUCTS FROM LOCAL DATA ------
   useEffect(() => {
-    fetchProducts();
+    const mapped = localCatalog.map((p) => ({
+      id: p.slug,
+      name: p.name,
+      description: p.overview || "",
+      price: p.price,
+      previousPrice: p.previousPrice,
+      image_url: p.coverImage || p.shots?.[0],
+      category: p.category,
+      stock: 20, // valor ficticio para mostrar disponibilidad
+    }));
+    setProducts(mapped);
+    setFilteredProducts(mapped);
+    setLoading(false);
   }, []);
-
-  const fetchProducts = async () => {
-    try {
-      const { data, error } = await supabase
-        .from("products")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (error) throw error;
-
-      setProducts(data || []);
-      setFilteredProducts(data || []);
-    } catch (error) {
-      console.error("Error fetching products:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   // ------ SLIDER AUTO ------
   useEffect(() => {

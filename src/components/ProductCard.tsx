@@ -1,8 +1,9 @@
-import { Card, CardContent, CardFooter } from './ui/card';
-import { Button } from './ui/button';
-import { ShoppingCart } from 'lucide-react';
-import { useCart } from '@/contexts/CartContext';
-import { Badge } from './ui/badge';
+import { Card, CardContent, CardFooter } from "./ui/card";
+import { Button } from "./ui/button";
+import { ShoppingCart } from "lucide-react";
+import { useCart } from "@/contexts/CartContext";
+import { Badge } from "./ui/badge";
+import { ProductImages } from "@/data/ImgContent";
 
 interface ProductCardProps {
   product: {
@@ -10,14 +11,54 @@ interface ProductCardProps {
     name: string;
     description: string;
     price: number;
-    image_url: string;
+    image_url?: string | null;
     stock: number;
     category: string;
   };
 }
 
+const imageKeyMap: Record<string, keyof typeof ProductImages> = {
+  cbum5peat: "cbum5peat",
+  peachbum: "peachbum",
+  vemon: "venom",
+  venom: "venom",
+  psychotic: "psychotic",
+  iso100: "iso100",
+  cbumitholateprotein: "cbum",
+  cbumitholateproteincake: "cake",
+  rawitholatementachispas: "cream",
+  goldstandardchocolate: "gold",
+  goldstandardwheyprotein: "whey",
+  creatinemicronized: "creatine",
+  aninox: "aminox",
+  ryse: "ryse",
+  pak: "pak",
+  muscletech: "muscletech",
+  falcon: "falcon",
+  bordan: "bordan",
+  bcaasglutamina: "bcaas",
+  moderneaa: "modernEaa",
+  omega390softgels: "omega3",
+  creatinamonohidratadabirdman450g: "creatinaBirdman",
+  creatinadragon: "dragonCreatine",
+  glutaminacreatina600g: "glutamina",
+};
+
+const getProductImage = (name: string, fallback?: string | null) => {
+  const normalized = name.toLowerCase().replace(/[^a-z0-9]/g, "");
+  const mappedKey = imageKeyMap[normalized];
+
+  if (mappedKey) {
+    const image = ProductImages[mappedKey]?.[0];
+    if (image) return image;
+  }
+
+  return fallback || "/placeholder.svg";
+};
+
 export const ProductCard = ({ product }: ProductCardProps) => {
   const { addToCart } = useCart();
+  const imageSrc = getProductImage(product.name, product.image_url);
 
   return (
     <Card className="overflow-hidden transition-all hover:shadow-xl border-gray-200">
@@ -27,7 +68,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
         </Badge>
         <div className="aspect-square overflow-hidden bg-gray-50">
           <img
-            src={product.image_url || '/placeholder.svg'}
+            src={imageSrc}
             alt={product.name}
             className="h-full w-full object-cover transition-transform hover:scale-110"
           />
