@@ -39,7 +39,7 @@ const ProductCard: FC<ProductCardProps> = ({
         />
 
         {/* Imagen */}
-        <Link to={`/products/${product.slug}`}>
+        <Link to={`/producto/${product.slug}`}>
           <img
             src={product.coverImage}
             alt={product.name}

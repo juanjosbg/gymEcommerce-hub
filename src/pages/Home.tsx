@@ -57,7 +57,7 @@ const Home = () => {
       previousPrice: p.previousPrice,
       image_url: p.coverImage || p.shots?.[0],
       category: p.category,
-      stock: 20, // valor ficticio para mostrar disponibilidad
+      stock: 20,
     }));
     setProducts(mapped);
     setFilteredProducts(mapped);
@@ -95,7 +95,6 @@ const Home = () => {
     setLimit((prev) => prev + 4);
   };
 
-  // ------ RENDER ------
   return (
     <div className="min-h-screen bg-white">
       {/* HERO CAROUSEL */}

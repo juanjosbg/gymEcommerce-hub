@@ -17,15 +17,15 @@ const SingleProductPage = () => {
       <div className="mb-20">
         <SectionProductHeader
           shots={pathOr([], ["shots"], selectedProduct)}
-          shoeName={pathOr("", ["shoeName"], selectedProduct)}
+          shoeName={pathOr("", ["name"], selectedProduct)}
           prevPrice={pathOr(0, ["previousPrice"], selectedProduct)}
-          currentPrice={pathOr(0, ["currentPrice"], selectedProduct)}
+          currentPrice={pathOr(0, ["price"], selectedProduct)}
           rating={pathOr(0, ["rating"], selectedProduct)}
           pieces_sold={pathOr(0, ["pieces_sold"], selectedProduct)}
           reviews={pathOr(0, ["reviews"], selectedProduct)}
           coverImage={pathOr("", ["coverImage"], selectedProduct)}
           slug={pathOr("", ["slug"], selectedProduct)}
-          shoeCategory={pathOr("", ["shoeCategory"], selectedProduct)}
+          shoeCategory={pathOr("", ["category"], selectedProduct)}
         />
       </div>
       <div className="mb-28">
