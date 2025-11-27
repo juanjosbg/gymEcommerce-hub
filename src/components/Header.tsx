@@ -132,8 +132,8 @@ export const Header = () => {
 
               <Link to="/cart">
                 <Button variant="ghost" className="relative gap-2">
-                  <ShoppingCart className="h-5 w-5 text-primary" />
-                  <span className="text-primary font-medium">{cartCount} items</span>
+                  <ShoppingCart className="h-5 w-5 "/>
+                  <span className="font-medium">{cartCount} items</span>
                 </Button>
               </Link>
 
