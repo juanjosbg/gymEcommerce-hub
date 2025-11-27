@@ -9,7 +9,7 @@ import { useWishlist } from "@/hooks/useWishlist";
 export interface LikeButtonProps {
   className?: string;
   product: any;
-  onRequireLogin?: () => void; // opcional si quieres seguir usando tu modal
+  onRequireLogin?: () => void;
 }
 
 const LikeButton: React.FC<LikeButtonProps> = ({ className = "", product, onRequireLogin }) => {

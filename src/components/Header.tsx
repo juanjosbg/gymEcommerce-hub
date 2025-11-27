@@ -127,7 +127,7 @@ export const Header = () => {
             {/* Right Actions */}
             <div className="flex items-center gap-4">
               <Button variant="ghost" size="icon" className="relative">
-                <Bell className="h-5 w-5" />
+                <Bell className="h-10 w-10" />
               </Button>
 
               <Link to="/cart">
@@ -141,13 +141,41 @@ export const Header = () => {
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="gap-2">
-                      <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center">
-                        <User className="h-5 w-5" />
+                      <div className="h-10 w-10 overflow-hidden rounded-full bg-gray-200">
+                        <img
+                          src="/avatar.png"
+                          alt="Avatar"
+                          className="h-full w-full object-cover"
+                        />
                       </div>
-                      <span>Mi cuenta</span>
+                      <div className="flex flex-col items-start">
+                        <span className="text-sm font-semibold leading-tight">
+                          {user.user_metadata?.full_name || "Mi cuenta"}
+                        </span>
+                        <span className="text-xs text-neutral-500 leading-tight">
+                          {user.email}
+                        </span>
+                      </div>
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
+                  <DropdownMenuContent align="end" className="w-56">
+                    <div className="flex items-center gap-3 px-3 py-2">
+                      <div className="h-10 w-10 overflow-hidden rounded-full bg-gray-200">
+                        <img
+                          src="/avatar.png"
+                          alt="Avatar"
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-sm font-semibold">
+                          {user.user_metadata?.full_name || "Usuario"}
+                        </span>
+                        <span className="text-xs text-neutral-500">
+                          {user.email}
+                        </span>
+                      </div>
+                    </div>
                     <DropdownMenuItem onClick={() => signOut()}>
                       Cerrar sesión
                     </DropdownMenuItem>
