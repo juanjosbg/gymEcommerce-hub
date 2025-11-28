@@ -1,22 +1,26 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { toast } from 'sonner';
 import { z } from 'zod';
 
-const registerSchema = z.object({
-  fullName: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
-  email: z.string().email('Email inválido'),
-  password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres'),
-  confirmPassword: z.string(),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: 'Las contraseñas no coinciden',
-  path: ['confirmPassword'],
-});
+import HeroPort from "../../../public/Logo/apple-icon.png"
+
+const registerSchema = z
+  .object({
+    fullName: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
+    email: z.string().email('Email inválido'),
+    password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres'),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: 'Las contraseñas no coinciden',
+    path: ['confirmPassword'],
+  });
 
 const Register = () => {
   const [fullName, setFullName] = useState('');
@@ -30,33 +34,65 @@ const Register = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    try {
-      registerSchema.parse({ fullName, email, password, confirmPassword });
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        toast.error(error.errors[0].message);
-        return;
-      }
+    const validation = registerSchema.safeParse({ fullName, email, password, confirmPassword });
+    if (!validation.success) {
+      const message = validation.error.errors[0]?.message ?? 'Revisa los datos ingresados.';
+      await Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: message,
+      });
+      return;
     }
 
     setLoading(true);
 
     try {
       const { error } = await signUp(email, password, fullName);
-      
+
       if (error) {
-        if (error.message.includes('already registered')) {
-          toast.error('Este email ya está registrado');
-        } else {
-          toast.error(error.message);
-        }
+        const message = error.message.includes('already registered')
+          ? 'Este email ya está registrado'
+          : error.message;
+        await Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: message,
+          footer: '<a href="#">Why do I have this issue?</a>',
+        });
         return;
       }
 
-      toast.success('¡Cuenta creada exitosamente!');
+      const result = await Swal.fire({
+        background: '#0f0f0f',
+        color: '#ffffff',
+        title: `HOLA ${fullName.trim() ? fullName.trim().toUpperCase() : 'AMIGO'}!`,
+        html: `
+          Bienvenido a <span style="color:#ef4444;font-weight:800;">FITMEX STORE</span>.<br/>
+          ¿Deseas recibir mensajes de productos en descuento y nuestras promociones?
+        `,
+        imageUrl: HeroPort,
+        imageWidth: 400,
+        imageHeight: 200,
+        imageAlt: 'Custom image',
+        showCancelButton: true,
+        confirmButtonText: '¡Acepto!',
+        cancelButtonText: 'No aceptar',
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#6b7280',
+        padding: '1.5rem',
+      });
+
+      const consent = result.isConfirmed ? 'accepted' : 'declined';
+      localStorage.setItem('marketingConsent', consent);
       navigate('/');
     } catch (error: any) {
-      toast.error('Error al crear la cuenta');
+      await Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Error al crear la cuenta',
+        footer: '<a href="#">Why do I have this issue?</a>',
+      });
     } finally {
       setLoading(false);
     }
