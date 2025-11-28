@@ -6,8 +6,6 @@ import { MdArrowBack } from "react-icons/md";
 
 import ButtonCircle3 from "@/shared/Button/ButtonCircle3";
 
-const tabs = ["Home", "Banner", "New Arrival"];
-
 const SectionNavigation = () => {
   const [activeTab, setActiveTab] = useState("New Arrival");
 
@@ -18,19 +16,6 @@ const SectionNavigation = () => {
           <MdArrowBack className="text-2xl" />
         </ButtonCircle3>
       </Link>
-
-      <div className="flex items-center gap-4">
-        {tabs.map((tab) => (
-          <button
-            key={tab}
-            type="button"
-            onClick={() => setActiveTab(tab)}
-            className={activeTab === tab ? "text-primary" : "text-neutral-500"}
-          >
-            {tab}
-          </button>
-        ))}
-      </div>
     </div>
   );
 };

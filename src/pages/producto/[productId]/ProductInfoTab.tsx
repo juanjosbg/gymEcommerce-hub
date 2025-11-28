@@ -56,7 +56,7 @@ const ProductInfoTab: FC<ProductInfoTabProps> = ({
             <div className="grid gap-5 md:grid-cols-2">
               {shipment_details.map((detail) => (
                 <div key={detail.title} className="flex items-center gap-2">
-                  <ButtonCircle3 size="w-12 h-12" className="bg-gray">
+                  <ButtonCircle3 size="w-12 h-12" className="bg-[#cecece]">
                     {detail.icon}
                   </ButtonCircle3>
 

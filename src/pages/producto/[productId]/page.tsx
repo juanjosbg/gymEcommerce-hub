@@ -20,6 +20,7 @@ const SingleProductPage = () => {
           shoeName={pathOr("", ["name"], selectedProduct)}
           prevPrice={pathOr(0, ["previousPrice"], selectedProduct)}
           currentPrice={pathOr(0, ["price"], selectedProduct)}
+          overview={pathOr("", ["overview"], selectedProduct)}
           rating={pathOr(0, ["rating"], selectedProduct)}
           pieces_sold={pathOr(0, ["pieces_sold"], selectedProduct)}
           reviews={pathOr(0, ["reviews"], selectedProduct)}
