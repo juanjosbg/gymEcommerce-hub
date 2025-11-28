@@ -1,5 +1,22 @@
 import React, { useMemo, useState } from "react";
-import { ShoppingCart, User, Search, Bell } from "lucide-react";
+import {
+  Bell,
+  BellRing,
+  Clock3,
+  CreditCard,
+  FileBox,
+  MapPin,
+  MessageSquare,
+  ScrollText,
+  Search,
+  ShoppingCart,
+  Store,
+  Ticket,
+  User,
+  UserRound,
+  UserRoundCog,
+  Repeat2,
+} from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/contexts/CartContext";
@@ -71,7 +88,7 @@ export const Header = () => {
       </div>
 
       {/* Main Header */}
-      <header className="bg-white border-b sticky top-0 z-50">
+      <header className="bg-white border-b sticky top-0 z-50 pt-2 pb-2 shadow-md">
         <div className="container py-4">
           <div className="flex items-center justify-between gap-4">
             {/* Logo */}
@@ -158,9 +175,9 @@ export const Header = () => {
                       </div>
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56">
-                    <div className="flex items-center gap-3 px-3 py-2">
-                      <div className="h-10 w-10 overflow-hidden rounded-full bg-gray-200">
+                  <DropdownMenuContent align="end" className="w-72 p-0">
+                    <div className="flex items-center gap-3 px-4 py-3 border-b">
+                      <div className="h-12 w-12 overflow-hidden rounded-full bg-gray-200">
                         <img
                           src="/avatar.png"
                           alt="Avatar"
@@ -168,17 +185,60 @@ export const Header = () => {
                         />
                       </div>
                       <div className="flex flex-col">
-                        <span className="text-sm font-semibold">
+                        <span className="text-sm font-semibold truncate">
                           {user.user_metadata?.full_name || "Usuario"}
                         </span>
-                        <span className="text-xs text-neutral-500">
+                        <span className="text-xs text-neutral-500 truncate">
                           {user.email}
                         </span>
                       </div>
                     </div>
-                    <DropdownMenuItem onClick={() => signOut()}>
-                      Cerrar sesión
-                    </DropdownMenuItem>
+
+                    <div className="py-2 px-2">
+                      <DropdownMenuItem className="gap-3">
+                        <UserRound className="h-4 w-4" />
+                        <span>Your profile</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem className="gap-3">
+                        <Store className="h-4 w-4" />
+                        <span>Your orders</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem className="gap-3">
+                        <FileBox className="h-4 w-4" />
+                        <span>Productos de interes</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem className="gap-3">
+                        <Ticket className="h-4 w-4" />
+                        <span>Coupons &amp; offers</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem className="gap-3">
+                        <CreditCard className="h-4 w-4" />
+                        <span>Credit balance</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem className="gap-3">
+                        <MapPin className="h-4 w-4" />
+                        <span>Addresses</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem className="gap-3">
+                        <ScrollText className="h-4 w-4" />
+                        <span>Permissions</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem className="gap-3">
+                        <BellRing className="h-4 w-4" />
+                        <span>Notifications</span>
+                      </DropdownMenuItem>
+                    </div>
+
+                    <div className="border-t py-2 px-2">
+                      <DropdownMenuItem className="gap-3">
+                        <Repeat2 className="h-4 w-4" />
+                        <span>Switch accounts</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => signOut()} className="gap-3">
+                        <UserRoundCog className="h-4 w-4" />
+                        <span>Sign out</span>
+                      </DropdownMenuItem>
+                    </div>
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : (
