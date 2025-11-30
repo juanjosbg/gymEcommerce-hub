@@ -2,7 +2,6 @@ import React, { useMemo, useState } from "react";
 import {
   Bell,
   BellRing,
-  Clock3,
   CreditCard,
   FileBox,
   MapPin,
@@ -29,6 +28,7 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { products } from "@/data/content";
+import Notifications from "@/components/header/Notifications/pages"
 
 export const Header = () => {
   const { user, signOut } = useAuth();
@@ -143,9 +143,7 @@ export const Header = () => {
 
             {/* Right Actions */}
             <div className="flex items-center gap-4">
-              <Button variant="ghost" size="icon" className="relative">
-                <Bell className="h-10 w-10" />
-              </Button>
+              <Notifications/>
 
               <Link to="/cart">
                 <Button variant="ghost" className="relative gap-2">
@@ -195,34 +193,34 @@ export const Header = () => {
                     </div>
 
                     <div className="py-2 px-2">
-                      <DropdownMenuItem className="gap-3">
-                        <UserRound className="h-4 w-4" />
-                        <span>Your profile</span>
+                      <DropdownMenuItem asChild className="gap-3">
+                        <Link to="/profile" className="flex w-full items-center gap-3">
+                          <UserRound className="h-4 w-4" />
+                          <span>Your profile</span>
+                        </Link>
                       </DropdownMenuItem>
-                      <DropdownMenuItem className="gap-3">
-                        <Store className="h-4 w-4" />
+                      {/* <DropdownMenuItem className="gap-3">
+                        <ScrollText className="h-4 w-4" />
                         <span>Your orders</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem className="gap-3">
-                        <FileBox className="h-4 w-4" />
-                        <span>Productos de interes</span>
+                      </DropdownMenuItem> */}
+                      <DropdownMenuItem asChild className="gap-3">
+                        <Link to="/wishlist" className="flex w-full items-center gap-3">
+                          <Store className="h-4 w-4" />
+                          <span>Productos de interés</span>
+                        </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem className="gap-3">
                         <Ticket className="h-4 w-4" />
                         <span>Coupons &amp; offers</span>
                       </DropdownMenuItem>
-                      <DropdownMenuItem className="gap-3">
+                      {/* <DropdownMenuItem className="gap-3">
                         <CreditCard className="h-4 w-4" />
                         <span>Credit balance</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem className="gap-3">
+                      </DropdownMenuItem> */}
+                      {/* <DropdownMenuItem className="gap-3">
                         <MapPin className="h-4 w-4" />
                         <span>Addresses</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem className="gap-3">
-                        <ScrollText className="h-4 w-4" />
-                        <span>Permissions</span>
-                      </DropdownMenuItem>
+                      </DropdownMenuItem> */}
                       <DropdownMenuItem className="gap-3">
                         <BellRing className="h-4 w-4" />
                         <span>Notifications</span>

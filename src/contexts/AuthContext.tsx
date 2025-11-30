@@ -6,8 +6,13 @@ import { useNavigate } from 'react-router-dom';
 interface AuthContextType {
   user: User | null;
   session: Session | null;
-  signUp: (email: string, password: string, fullName: string) => Promise<{ error: any }>;
+  signUp: (
+    email: string,
+    password: string,
+    fullName: string
+  ) => Promise<{ error: any; data: Awaited<ReturnType<typeof supabase.auth.signUp>>["data"] }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
+  signInWithGoogle: () => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error: any }>;
 }
@@ -20,6 +25,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  const ensureProfile = async (currentUser: User | null) => {
+    if (!currentUser) return;
+    const { id, email, user_metadata } = currentUser;
+    const full_name =
+      user_metadata?.full_name ||
+      user_metadata?.name ||
+      user_metadata?.fullName ||
+      email ||
+      "";
+
+    // Upsert mínimo; RLS permite porque auth.uid() = id
+    await supabase.from("user_profiles").upsert({
+      id,
+      full_name,
+      email,
+    });
+  };
+
   useEffect(() => {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -27,6 +50,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
+        if (session?.user) {
+          ensureProfile(session.user);
+        }
       }
     );
 
@@ -35,6 +61,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+      if (session?.user) {
+        ensureProfile(session.user);
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -42,8 +71,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signUp = async (email: string, password: string, fullName: string) => {
     const redirectUrl = `${window.location.origin}/`;
-    
-    const { error } = await supabase.auth.signUp({
+
+    const { error, data } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -53,13 +82,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       }
     });
-    return { error };
+    return { error, data };
   };
 
   const signIn = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
+    });
+    return { error };
+  };
+
+  const signInWithGoogle = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/`,
+      },
     });
     return { error };
   };
@@ -81,6 +120,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     session,
     signUp,
     signIn,
+    signInWithGoogle,
     signOut,
     resetPassword,
   };

@@ -15,11 +15,11 @@ export interface LikeButtonProps {
 const LikeButton: React.FC<LikeButtonProps> = ({ className = "", product, onRequireLogin }) => {
   const { user } = useAuth();
   const { isInWishlist, add, remove } = useWishlist();
-  const liked = user && product && product.id ? isInWishlist(product.id) : false;
+  const productId = product?.id || product?.slug || product?.name;
+  const liked = user && productId ? isInWishlist(productId) : false;
 
   const handleClick = async () => {
     if (!user) {
-      // Si tienes un modal externo, dispáralo; de lo contrario usa SweetAlert
       if (onRequireLogin) {
         onRequireLogin();
       } else {
@@ -34,12 +34,12 @@ const LikeButton: React.FC<LikeButtonProps> = ({ className = "", product, onRequ
       return;
     }
 
-    if (!product || !product.id) return;
+    if (!productId) return;
 
     if (liked) {
-      await remove(product.id);
+      await remove(productId);
     } else {
-      await add(product);
+      await add({ ...product, id: productId });
     }
   };
 

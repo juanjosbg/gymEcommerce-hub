@@ -1,28 +1,32 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { toast } from 'sonner';
-import { z } from 'zod';
+"use client";
+
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { FaEye, FaEyeSlash, FaGoogle } from "react-icons/fa";
+
+import { useAuth } from "@/contexts/AuthContext";
+import ButtonPrimary from "@/shared/Button/ButtonPrimary";
+import ButtonSecondary from "@/shared/Button/ButtonSecondary";
+import FormItem from "@/shared/Auth/FormItem";
+import Input from "@/shared/Input/Input";
+import { toast } from "sonner";
+import { z } from "zod";
 
 const loginSchema = z.object({
-  email: z.string().email('Email inválido'),
-  password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres'),
+  email: z.string().email("Email inválido"),
+  password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres"),
 });
 
 const Login = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const { signIn } = useAuth();
+  const [showPassword, setShowPassword] = useState(false);
+  const { signIn, signInWithGoogle } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     try {
       loginSchema.parse({ email, password });
     } catch (error) {
@@ -33,84 +37,103 @@ const Login = () => {
     }
 
     setLoading(true);
+    const { error } = await signIn(email, password);
+    setLoading(false);
 
-    try {
-      const { error } = await signIn(email, password);
-      
-      if (error) {
-        if (error.message.includes('Invalid login credentials')) {
-          toast.error('Email o contraseña incorrectos');
-        } else {
-          toast.error(error.message);
-        }
-        return;
-      }
+    if (error) {
+      toast.error(error.message || "Correo o contraseña incorrectos.");
+      return;
+    }
+    toast.success("¡Bienvenido de vuelta!");
+    navigate("/");
+  };
 
-      toast.success('¡Bienvenido de vuelta!');
-      navigate('/');
-    } catch (error: any) {
-      toast.error('Error al iniciar sesión');
-    } finally {
-      setLoading(false);
+  const handleGoogleLogin = async () => {
+    const { error } = await signInWithGoogle();
+    if (error) {
+      toast.error(error.message || "Error al iniciar con Google.");
+    } else {
+      toast.info("Redirigiendo a Google...");
     }
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted/50 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">Iniciar Sesión</CardTitle>
-          <CardDescription className="text-center">
-            Ingresa tus credenciales para acceder
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="tu@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Contraseña</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Iniciando sesión...' : 'Iniciar sesión'}
-            </Button>
-          </form>
-
-          <div className="mt-6 space-y-2 text-center text-sm">
-            <Link
-              to="/auth/forgot-password"
-              className="text-primary hover:underline block"
-            >
-              ¿Olvidaste tu contraseña? No hay problema
-            </Link>
+    <div className="nc-PageLogin" data-nc-id="PageLogin">
+      <div className="container mb-24 lg:mb-32">
+        <h2 className="my-20 flex items-center justify-center text-3xl font-semibold leading-[115%] md:text-5xl md:leading-[115%]">
+          Iniciar sesión
+        </h2>
+        <div className="mx-auto max-w-md">
+          <div className="space-y-6">
             <div>
-              <span className="text-muted-foreground">¿No posees cuenta? </span>
-              <Link
-                to="/auth/register"
-                className="text-primary hover:underline"
+              <ButtonSecondary
+                className="flex w-full items-center gap-3 border-2 border-primary text-primary"
+                onClick={handleGoogleLogin}
+                type="button"
               >
-                Regístrate
+                <FaGoogle className="text-2xl" /> Continue with Google
+              </ButtonSecondary>
+            </div>
+            <div className="relative text-center">
+              <span className="relative z-10 inline-block rounded-full bg-neutral-300 px-4 text-sm font-medium ">
+                OR
+              </span>
+              <div className="absolute left-0 top-1/2 w-full -translate-y-1/2 border border-neutral-300" />
+            </div>
+            <form onSubmit={handleLogin}>
+              <div className="grid gap-6">
+                <FormItem label="Email address">
+                  <Input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    rounded="rounded-full"
+                    sizeClass="h-12 px-4 py-3"
+                    placeholder="example@example.com"
+                    className="border-neutral-300 bg-transparent placeholder:text-neutral-500 focus:border-primary"
+                  />
+                </FormItem>
+                <FormItem label="Password">
+                  <div className="relative">
+                    <Input
+                      type={showPassword ? "text" : "password"}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      rounded="rounded-full"
+                      sizeClass="h-12 px-4 py-3"
+                      placeholder="*********"
+                      className="border-neutral-300 bg-transparent pr-10 placeholder:text-neutral-500 focus:border-primary"
+                    />
+                    <button
+                      type="button"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500"
+                      onClick={() => setShowPassword((v) => !v)}
+                      tabIndex={-1}
+                    >
+                      {showPassword ? <FaEyeSlash /> : <FaEye />}
+                    </button>
+                  </div>
+                </FormItem>
+                <ButtonPrimary type="submit" disabled={loading}>
+                  {loading ? "Iniciando..." : "Continue"}
+                </ButtonPrimary>
+              </div>
+            </form>
+            <div className="flex flex-col items-center justify-center gap-2">
+              <Link to="/auth/forgot-password" className="text-sm text-neutral-500">
+                ¿Olvidaste tu contraseña?
+                <span className="text-primary"> No hay problema</span>
               </Link>
+              <span className="block text-center text-sm text-neutral-500">
+                ¿No posees cuenta?{" "}
+                <Link to="/auth/register" className="text-primary">
+                  Regístrate
+                </Link>
+              </span>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 };

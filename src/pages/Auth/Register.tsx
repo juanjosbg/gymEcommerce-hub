@@ -1,45 +1,51 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import Swal from 'sweetalert2';
-import { useAuth } from '@/contexts/AuthContext';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { z } from 'zod';
+"use client";
 
-import HeroPort from "../../../public/Logo/apple-icon.png"
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { FaEye, FaEyeSlash, FaGoogle } from "react-icons/fa";
+import Swal from "sweetalert2";
+import { z } from "zod";
+import { toast } from "sonner";
 
-const registerSchema = z
-  .object({
-    fullName: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
-    email: z.string().email('Email inválido'),
-    password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres'),
-    confirmPassword: z.string(),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: 'Las contraseñas no coinciden',
-    path: ['confirmPassword'],
-  });
+import { useAuth } from "@/contexts/AuthContext";
+import ButtonPrimary from "@/shared/Button/ButtonPrimary";
+import ButtonSecondary from "@/shared/Button/ButtonSecondary";
+import FormItem from "@/shared/Input/FormItem";
+import Input from "@/shared/Input/Input";
+import HeroPort from "../../../public/Logo/apple-icon.png";
+import { upsertUserProfile } from "@/lib/supabase/profile";
+
+const registerSchema = z.object({
+  fullName: z.string().min(2, "El nombre debe tener al menos 2 caracteres"),
+  email: z.string().email("Email inválido"),
+  phone: z.string().min(6, "Ingresa un teléfono válido"),
+  password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres"),
+});
 
 const Register = () => {
-  const [fullName, setFullName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { signUp } = useAuth();
+  const { signUp, signInWithGoogle } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    const validation = registerSchema.safeParse({
+      fullName,
+      email,
+      phone,
+      password,
+    });
 
-    const validation = registerSchema.safeParse({ fullName, email, password, confirmPassword });
     if (!validation.success) {
-      const message = validation.error.errors[0]?.message ?? 'Revisa los datos ingresados.';
+      const message = validation.error.errors[0]?.message ?? "Revisa los datos ingresados.";
       await Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
+        icon: "error",
+        title: "Oops...",
         text: message,
       });
       return;
@@ -48,25 +54,31 @@ const Register = () => {
     setLoading(true);
 
     try {
-      const { error } = await signUp(email, password, fullName);
+      const { error, data } = await signUp(email, password, fullName);
 
       if (error) {
-        const message = error.message.includes('already registered')
-          ? 'Este email ya está registrado'
+        const message = error.message.includes("already registered")
+          ? "Este email ya está registrado"
           : error.message;
         await Swal.fire({
-          icon: 'error',
-          title: 'Oops...',
+          icon: "error",
+          title: "Oops...",
           text: message,
           footer: '<a href="#">Why do I have this issue?</a>',
         });
         return;
       }
 
+      await Swal.fire({
+        icon: "success",
+        title: "¡Registro exitoso!",
+        text: "Gracias por registrarte. Hemos enviado un correo de confirmación, por favor revísalo.",
+      });
+
       const result = await Swal.fire({
-        background: '#0f0f0f',
-        color: '#ffffff',
-        title: `HOLA ${fullName.trim() ? fullName.trim().toUpperCase() : 'AMIGO'}!`,
+        background: "#0f0f0f",
+        color: "#ffffff",
+        title: `HOLA ${fullName.trim() ? fullName.trim().toUpperCase() : "AMIGO"}!`,
         html: `
           Bienvenido a <span style="color:#ef4444;font-weight:800;">FITMEX STORE</span>.<br/>
           ¿Deseas recibir mensajes de productos en descuento y nuestras promociones?
@@ -74,23 +86,50 @@ const Register = () => {
         imageUrl: HeroPort,
         imageWidth: 400,
         imageHeight: 200,
-        imageAlt: 'Custom image',
+        imageAlt: "FITMEX",
         showCancelButton: true,
-        confirmButtonText: '¡Acepto!',
-        cancelButtonText: 'No aceptar',
-        confirmButtonColor: '#ef4444',
-        cancelButtonColor: '#6b7280',
-        padding: '1.5rem',
+        confirmButtonText: "¡Acepto!",
+        cancelButtonText: "No aceptar",
+        confirmButtonColor: "#ef4444",
+        cancelButtonColor: "#6b7280",
+        padding: "1.5rem",
       });
 
-      const consent = result.isConfirmed ? 'accepted' : 'declined';
-      localStorage.setItem('marketingConsent', consent);
-      navigate('/');
+      const consent = result.isConfirmed ? "accepted" : "declined";
+
+      const userId = data?.user?.id;
+      const session = data?.session;
+
+      // Si no hay sesión (por ejemplo, registro con verificación de email), no podemos insertar por RLS.
+      if (!userId || !session) {
+        await Swal.fire({
+          icon: "info",
+          title: "Verifica tu correo",
+          text: "Te enviamos un correo de confirmación. Después de confirmar, inicia sesión y completaremos tu perfil.",
+        });
+        navigate("/auth/login");
+        return;
+      }
+
+      const { error: profileError } = await upsertUserProfile({
+        id: userId,
+        full_name: fullName,
+        email,
+        phone,
+        marketing_consent: consent,
+      });
+
+      if (profileError) {
+        throw profileError;
+      }
+
+      navigate("/");
     } catch (error: any) {
+      console.error("Error al registrar:", error);
       await Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
-        text: 'Error al crear la cuenta',
+        icon: "error",
+        title: "Oops...",
+        text: error?.message || "Error al crear la cuenta",
         footer: '<a href="#">Why do I have this issue?</a>',
       });
     } finally {
@@ -98,75 +137,112 @@ const Register = () => {
     }
   };
 
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-muted/50 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">Crear Cuenta</CardTitle>
-          <CardDescription className="text-center">
-            Regístrate para comenzar a comprar
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="fullName">Nombre completo</Label>
-              <Input
-                id="fullName"
-                type="text"
-                placeholder="Juan Pérez"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="tu@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Contraseña</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirmar contraseña</Label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-              />
-            </div>
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Creando cuenta...' : 'Crear cuenta'}
-            </Button>
-          </form>
+  const handleGoogleSignUp = async () => {
+    const { error } = await signInWithGoogle();
+    if (error) {
+      toast.error(error.message || "Error al iniciar con Google");
+    } else {
+      toast.info("Redirigiendo a Google...");
+    }
+  };
 
-          <div className="mt-6 text-center text-sm">
-            <span className="text-muted-foreground">¿Ya tienes cuenta? </span>
-            <Link
-              to="/auth/login"
-              className="text-primary hover:underline"
-            >
-              Inicia sesión
-            </Link>
+  return (
+    <div className="nc-PageSignUp" data-nc-id="PageSignUp">
+      <div className="container mb-24 lg:mb-32">
+        <h2 className="my-20 flex items-center justify-center text-3xl font-semibold leading-[115%] md:text-5xl md:leading-[115%]">
+          Registrarse
+        </h2>
+        <div className="mx-auto max-w-md ">
+          <div className="space-y-6">
+            <div>
+              <ButtonSecondary
+                className="flex w-full items-center gap-3 border-2 border-primary text-primary"
+                onClick={handleGoogleSignUp}
+                type="button"
+              >
+                <FaGoogle className="text-2xl" /> Continue with Google
+              </ButtonSecondary>
+            </div>
+            <div className="relative text-center">
+              <span className="relative z-10 inline-block rounded-full bg-gray px-4 text-sm font-medium bg-neutral-200">
+                OR
+              </span>
+              <div className="absolute left-0 top-1/2 w-full -translate-y-1/2 border border-neutral-200" />
+            </div>
+            <form onSubmit={handleRegister}>
+              <div className="grid grid-cols-1 gap-6">
+                <FormItem label="Nombre Completo">
+                  <Input
+                    type="text"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    rounded="rounded-full"
+                    sizeClass="h-12 px-4 py-3"
+                    placeholder="Tu Nombre Completo"
+                    className="border-neutral-300 bg-transparent placeholder:text-neutral-500 focus:border-primary"
+                    required
+                  />
+                </FormItem>
+                <FormItem label="Email address">
+                  <Input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    rounded="rounded-full"
+                    sizeClass="h-12 px-4 py-3"
+                    placeholder="example@example.com"
+                    className="border-neutral-300 bg-transparent placeholder:text-neutral-500 focus:border-primary"
+                    required
+                  />
+                </FormItem>
+                <FormItem label="Número de teléfono">
+                  <Input
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    rounded="rounded-full"
+                    sizeClass="h-12 px-4 py-3"
+              placeholder="+1 234 567 8901"
+              className="border-neutral-300 bg-transparent placeholder:text-neutral-500 focus:border-primary"
+              required
+            />
+          </FormItem>
+                <FormItem label="Password">
+                  <div className="relative">
+                    <Input
+                      type={showPassword ? "text" : "password"}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      rounded="rounded-full"
+                      sizeClass="h-12 px-4 py-3"
+                      placeholder="*********"
+                      className="border-neutral-300 bg-transparent pr-10 placeholder:text-neutral-500 focus:border-primary"
+                      required
+                    />
+                    <button
+                      type="button"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500"
+                      onClick={() => setShowPassword((v) => !v)}
+                      tabIndex={-1}
+                    >
+                      {showPassword ? <FaEyeSlash /> : <FaEye />}
+                    </button>
+                  </div>
+                </FormItem>
+                <ButtonPrimary type="submit" disabled={loading}>
+                  {loading ? "Creando..." : "Registrar"}
+                </ButtonPrimary>
+              </div>
+            </form>
+            <span className="block text-center text-sm text-neutral-500">
+              ¿Ya cuentas con cuenta?{" "}
+              <Link to="/auth/login" className="text-primary">
+                Inicia sesión
+              </Link>
+            </span>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 };

@@ -134,6 +134,82 @@ export type Database = {
         }
         Relationships: []
       }
+      user_profiles: {
+        Row: {
+          id: string
+          full_name: string | null
+          email: string | null
+          phone: string | null
+          marketing_consent: string | null
+          created_at: string | null
+        }
+        Insert: {
+          id: string
+          full_name?: string | null
+          email?: string | null
+          phone?: string | null
+          marketing_consent?: string | null
+          created_at?: string | null
+        }
+        Update: {
+          id?: string
+          full_name?: string | null
+          email?: string | null
+          phone?: string | null
+          marketing_consent?: string | null
+          created_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_profiles_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      notifications: {
+        Row: {
+          id: number
+          user_id: string
+          type: string
+          title: string
+          body: string | null
+          metadata: Json | null
+          is_read: boolean | null
+          created_at: string | null
+        }
+        Insert: {
+          id?: number
+          user_id: string
+          type: string
+          title: string
+          body?: string | null
+          metadata?: Json | null
+          is_read?: boolean | null
+          created_at?: string | null
+        }
+        Update: {
+          id?: number
+          user_id?: string
+          type?: string
+          title?: string
+          body?: string | null
+          metadata?: Json | null
+          is_read?: boolean | null
+          created_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
     }
     Views: {
       [_ in never]: never

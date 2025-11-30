@@ -1,25 +1,43 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { toast } from 'sonner';
-import { z } from 'zod';
+"use client";
+
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { z } from "zod";
+
+import { useAuth } from "@/contexts/AuthContext";
+import ButtonPrimary from "@/shared/Button/ButtonPrimary";
+import FormItem from "@/shared/Input/FormItem";
+import Input from "@/shared/Input/Input";
+import { toast } from "sonner";
 
 const emailSchema = z.object({
-  email: z.string().email('Email inválido'),
+  email: z.string().email("Email inválido"),
 });
 
 const ForgotPassword = () => {
-  const [email, setEmail] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [sent, setSent] = useState(false);
   const { resetPassword } = useAuth();
+  const [email, setEmail] = useState("");
+  const [message, setMessage] = useState<string | null>(null);
+  const [timer, setTimer] = useState(0);
+  const [showVerification, setShowVerification] = useState(false);
+
+  useEffect(() => {
+    if (timer === 0) return;
+    const interval = window.setInterval(() => {
+      setTimer((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [timer]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setMessage(null);
 
     try {
       emailSchema.parse({ email });
@@ -30,91 +48,85 @@ const ForgotPassword = () => {
       }
     }
 
-    setLoading(true);
-
-    try {
-      const { error } = await resetPassword(email);
-      
-      if (error) {
-        toast.error(error.message);
-        return;
-      }
-
-      setSent(true);
-      toast.success('Email de recuperación enviado. Revisa tu correo.');
-    } catch (error: any) {
-      toast.error('Error al enviar email de recuperación');
-    } finally {
-      setLoading(false);
+    const { error } = await resetPassword(email);
+    if (error) {
+      setShowVerification(false);
+      setMessage(error.message || "No se pudo enviar el correo. Verifica el email.");
+      toast.error(error.message || "No se pudo enviar el correo.");
+      return;
     }
+
+    setShowVerification(true);
+    setMessage("¡Se envió un enlace de recuperación! Verifica tu correo electrónico.");
+    setTimer(20);
+    toast.success("Email enviado, revisa tu bandeja.");
+  };
+
+  const handleVerified = () => {
+    setEmail("");
+    setShowVerification(false);
+    setMessage(null);
+    setTimer(0);
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted/50 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">
-            Recuperar Contraseña
-          </CardTitle>
-          <CardDescription className="text-center">
-            {sent
-              ? 'Revisa tu correo para continuar'
-              : 'Ingresa tu email para recibir instrucciones'}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {!sent ? (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email de tu cuenta</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="tu@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-              </div>
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? 'Enviando...' : 'Enviar instrucciones'}
-              </Button>
+    <div className="container mb-24 lg:mb-32">
+      <header className="mx-auto mb-14 max-w-2xl text-center sm:mb-16 lg:mb-20">
+        <h2 className="mt-20 flex items-center justify-center text-3xl font-semibold leading-[115%] md:text-5xl md:leading-[115%]">
+          ¿Olvidaste tu contraseña?
+        </h2>
+      </header>
 
-              <div className="mt-4 text-center text-sm">
-                <Link
-                  to="/auth/login"
-                  className="text-primary hover:underline"
-                >
-                  Volver al inicio de sesión
-                </Link>
-              </div>
-            </form>
-          ) : (
-            <div className="space-y-4">
-              <p className="text-center text-muted-foreground">
-                Hemos enviado un enlace de recuperación a{' '}
-                <strong>{email}</strong>. Revisa tu bandeja de entrada y sigue
-                las instrucciones.
-              </p>
-              <Button
-                onClick={() => setSent(false)}
-                variant="outline"
-                className="w-full"
-              >
-                Enviar nuevamente
-              </Button>
-              <div className="text-center text-sm">
-                <Link
-                  to="/auth/login"
-                  className="text-primary hover:underline"
-                >
-                  Volver al inicio de sesión
-                </Link>
-              </div>
+      <div className="mx-auto max-w-md space-y-6">
+        <form onSubmit={handleSubmit}>
+          <FormItem label="Email address">
+            <Input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              rounded="rounded-full"
+              sizeClass="h-12 px-4 py-3"
+              placeholder="example@example.com"
+              className="border-neutral-300 bg-transparent placeholder:text-neutral-500 focus:border-primary"
+              required
+              disabled={showVerification && timer > 0}
+            />
+          </FormItem>
+
+          {timer === 0 && (
+            <div className="flex justify-center">
+              <ButtonPrimary className="-mb-3 mt-4" type="submit">
+                {showVerification ? "Volver a reenviar verificación" : "Recuperar contraseña"}
+              </ButtonPrimary>
             </div>
           )}
-        </CardContent>
-      </Card>
+        </form>
+
+        {showVerification && timer > 0 && (
+          <div className="text-center text-sm text-primary">
+            {message}
+            <div className="mt-2 text-neutral-700">
+              Tienes {timer} segundos para revisar tu correo.
+            </div>
+            <div className="mt-4">
+              <ButtonPrimary type="button" onClick={handleVerified} disabled={timer > 0}>
+                Ya verifiqué mi correo
+              </ButtonPrimary>
+            </div>
+          </div>
+        )}
+
+        <span className="block text-center text-neutral-500">
+          Regresar a{" "}
+          <Link to="/auth/login" className="text-primary">
+            Iniciar sesión
+          </Link>
+          {" / "}
+          <Link to="/auth/register" className="text-primary">
+            Registrarse
+          </Link>
+        </span>
+      </div>
     </div>
   );
 };
