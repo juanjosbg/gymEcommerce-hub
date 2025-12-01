@@ -11,16 +11,43 @@ import ButtonSecondary from "@/shared/Button/ButtonSecondary";
 import LikeButton from "../LikeButton";
 import { useCart } from "@/hooks/useCart";
 import { useAuth } from "@/hooks/useAuth";
-import { Link } from "react-router-dom";
-import { ShoppingCart } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const CartSideBar: React.FC = () => {
   const [isVisable, setIsVisable] = useState(false);
   const { cart, removeFromCart, updateQuantity } = useCart();
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   const handleOpenMenu = () => setIsVisable(true);
   const handleCloseMenu = () => setIsVisable(false);
+
+  const handleCheckout = async () => {
+    if (!user) {
+      toast.error("Debes iniciar sesión");
+      return;
+    }
+
+    const payload = cart.map((item) => ({
+      product_id: item.id,
+      quantity: item.cantidad || 1,
+    }));
+
+    const { error } = await (supabase as any).rpc("reserve_stock", { items: payload });
+    if (error) {
+      if (error.message?.includes("stock_insufficient")) {
+        toast.error("Stock insuficiente en alguno de los productos");
+      } else {
+        toast.error("No se pudo reservar stock");
+      }
+      return;
+    }
+
+    handleCloseMenu();
+    navigate("/checkout");
+  };
 
   const renderProduct = (item: any) => {
     const {
@@ -29,7 +56,7 @@ const CartSideBar: React.FC = () => {
       precio,
       id,
       rating,
-      category,
+      shoeCategory,
       cantidad,
     } = item;
     return (
@@ -56,7 +83,7 @@ const CartSideBar: React.FC = () => {
                   </Link>
                 </h3>
                 <span className="my-1 text-sm text-neutral-500">
-                  {category}
+                  {shoeCategory}
                 </span>
                 <div className="flex items-center gap-1">
                   <MdStar className="text-yellow-400" />
@@ -177,25 +204,23 @@ const CartSideBar: React.FC = () => {
                             )}
                           </span>
                         </p>
-                        <div className="mt-5 flex flex-row items-center gap-5">
+                        <div className="mt-5 flex items-center gap-5">
+                          <ButtonPrimary
+                            onClick={handleCheckout}
+                            className="w-full flex-1"
+                          >
+                            Checkout
+                          </ButtonPrimary>
+
                           <Link to="/cart">
                             <ButtonSecondary
                               onClick={handleCloseMenu}
                               href="/cart"
                               className="w-full flex-1 border-2 border-primary text-primary"
                             >
-                              <ShoppingCart className="h-5 w-5 mr-4" />
                               Ver carrito
                             </ButtonSecondary>
                           </Link>
-
-                          <ButtonPrimary
-                            href="/checkout"
-                            onClick={handleCloseMenu}
-                            className="w-full flex-1"
-                          >
-                            Checkout
-                          </ButtonPrimary>
                         </div>
                       </div>
                     )}
@@ -212,10 +237,7 @@ const CartSideBar: React.FC = () => {
               leaveFrom="opacity-100"
               leaveTo="opacity-0"
             >
-              <div
-                className="fixed inset-0 bg-neutral-900/60"
-                aria-hidden="true"
-              />
+              <div className="fixed inset-0 bg-neutral-900/60" aria-hidden="true" />
             </Transition.Child>
           </div>
         </Dialog>
