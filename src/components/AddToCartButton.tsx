@@ -2,6 +2,7 @@
 
 import { useCart } from "@/hooks/useCart";
 import { useAuth } from "@/hooks/useAuth";
+import Swal from "sweetalert2";
 import { BsBag } from "react-icons/bs";
 
 interface AddToCartButtonProps {
@@ -14,7 +15,12 @@ const AddToCartButton: React.FC<AddToCartButtonProps> = ({ producto }) => {
 
   const handleAddToCart = () => {
     if (!user) {
-      alert("Debes iniciar sesión");
+      Swal.fire({
+        icon: "info",
+        title: "Inicia sesion",
+        text: "Debes iniciar sesion antes de agregar productos al carrito.",
+        confirmButtonText: "Entendido",
+      });
       return;
     }
     console.log("Producto a agregar al carrito:", producto);
@@ -27,7 +33,7 @@ const AddToCartButton: React.FC<AddToCartButtonProps> = ({ producto }) => {
       className="flex w-full items-center justify-center gap-2
         border-2 rounded-full border-primary text-primary px-5 py-3"
       type="button"
-      >
+    >
       <BsBag /> Agregar al carrito
     </button>
   );

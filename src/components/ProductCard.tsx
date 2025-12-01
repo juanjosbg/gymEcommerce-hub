@@ -91,19 +91,6 @@ export const ProductCard = ({ product }: ProductCardProps) => {
           )}
         </CardContent>
       </Link>
-      {/* Btn Buy
-      
-      <CardFooter className="p-4 pt-0">
-        <Button
-          className="w-40 bg-primary hover:bg-primary/90 rounded-full"
-          onClick={() => addToCart(product.id)}
-          disabled={product.stock <= 0}
-        >
-          <ShoppingCart className="ml-1 h-4 w-4" />
-          Agregar al carrito
-        </Button>
-      </CardFooter> 
-      */}
     </Card>
   );
 };

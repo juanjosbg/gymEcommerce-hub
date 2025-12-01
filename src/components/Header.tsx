@@ -28,7 +28,8 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { products } from "@/data/content";
-import Notifications from "@/components/header/Notifications/pages"
+import Notifications from "@/components/header/Notifications/pages";
+import CartSideBar from "./header/CartSideBar";
 
 export const Header = () => {
   const { user, signOut } = useAuth();
@@ -66,13 +67,19 @@ export const Header = () => {
             <Link to="/" className="hover:text-gray-300 transition-colors">
               Inicio
             </Link>
-            <Link to="/products" className="hover:text-gray-300 transition-colors">
+            <Link
+              to="/products"
+              className="hover:text-gray-300 transition-colors"
+            >
               colecciones
             </Link>
             <Link to="/faqs" className="hover:text-gray-300 transition-colors">
               FAQs
             </Link>
-            <Link to="/contact" className="hover:text-gray-300 transition-colors">
+            <Link
+              to="/contact"
+              className="hover:text-gray-300 transition-colors"
+            >
               Contacto
             </Link>
           </nav>
@@ -100,7 +107,10 @@ export const Header = () => {
             </Link>
 
             {/* Search Bar con sugerencias */}
-            <form onSubmit={handleSearch} className="flex-1 max-w-2xl relative rounded-full">
+            <form
+              onSubmit={handleSearch}
+              className="flex-1 max-w-2xl relative rounded-full"
+            >
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 type="search"
@@ -130,7 +140,9 @@ export const Header = () => {
                         className="h-12 w-12 rounded object-cover"
                       />
                       <div className="flex flex-col">
-                        <span className="font-semibold text-sm">{item.name}</span>
+                        <span className="font-semibold text-sm">
+                          {item.name}
+                        </span>
                         <span className="text-xs text-neutral-500 capitalize">
                           {item.category}
                         </span>
@@ -143,14 +155,16 @@ export const Header = () => {
 
             {/* Right Actions */}
             <div className="flex items-center gap-4">
-              <Notifications/>
+              <Notifications />
 
+              <CartSideBar />
+              {/*
               <Link to="/cart">
                 <Button variant="ghost" className="relative gap-2">
                   <ShoppingCart className="h-5 w-5 "/>
                   <span className="font-medium">{cartCount} items</span>
                 </Button>
-              </Link>
+              </Link>*/}
 
               {user ? (
                 <DropdownMenu>
@@ -194,7 +208,10 @@ export const Header = () => {
 
                     <div className="py-2 px-2">
                       <DropdownMenuItem asChild className="gap-3">
-                        <Link to="/profile" className="flex w-full items-center gap-3">
+                        <Link
+                          to="/profile"
+                          className="flex w-full items-center gap-3"
+                        >
                           <UserRound className="h-4 w-4" />
                           <span>Your profile</span>
                         </Link>
@@ -204,7 +221,10 @@ export const Header = () => {
                         <span>Your orders</span>
                       </DropdownMenuItem> */}
                       <DropdownMenuItem asChild className="gap-3">
-                        <Link to="/wishlist" className="flex w-full items-center gap-3">
+                        <Link
+                          to="/wishlist"
+                          className="flex w-full items-center gap-3"
+                        >
                           <Store className="h-4 w-4" />
                           <span>Productos de interés</span>
                         </Link>
@@ -232,7 +252,10 @@ export const Header = () => {
                         <Repeat2 className="h-4 w-4" />
                         <span>Switch accounts</span>
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => signOut()} className="gap-3">
+                      <DropdownMenuItem
+                        onClick={() => signOut()}
+                        className="gap-3"
+                      >
                         <UserRoundCog className="h-4 w-4" />
                         <span>Sign out</span>
                       </DropdownMenuItem>

@@ -13,6 +13,9 @@ export interface CartItem {
   cantidad: number;
   precio: number;
   nombreProducto: string;
+  coverImage?: string;
+  rating?: number;
+  shoeCategory?: string;
 }
 
 export function useCart() {
