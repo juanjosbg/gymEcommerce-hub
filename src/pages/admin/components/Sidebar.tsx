@@ -1,5 +1,5 @@
 // Sidebar.tsx
-import { BarChart3, ShoppingBag, Users, PieChart, Globe2 } from "lucide-react";
+import { BarChart3, ShoppingBag, Users, PieChart, } from "lucide-react";
 
 export function Sidebar() {
   return (
@@ -33,7 +33,7 @@ export function Sidebar() {
           href="#"
         >
           <Users className="h-4 w-4" />
-          Customers
+          Stock de productos
         </a>
         <div className="mt-6 text-xs uppercase tracking-wide text-neutral-400">
           System
@@ -44,13 +44,6 @@ export function Sidebar() {
         >
           <PieChart className="h-4 w-4" />
           Reports
-        </a>
-        <a
-          className="flex items-center gap-3 rounded-xl px-3 py-2 hover:bg-neutral-100"
-          href="#"
-        >
-          <Globe2 className="h-4 w-4" />
-          Regions
         </a>
       </nav>
       <div className="mt-auto flex items-center gap-3 rounded-xl border p-3">

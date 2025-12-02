@@ -12,6 +12,7 @@ import { DonutLegend } from "./components/DonutLegend";
 
 import type { StatCard } from "./types/dashboard";
 import { statCards as statCardsStatic } from "./data/dashboard";
+import GraficUser from "./components/GraficUser";
 
 const AdminDashboard: React.FC = () => {
   const [usersCount, setUsersCount] = useState<number | null>(null);
@@ -218,13 +219,23 @@ const AdminDashboard: React.FC = () => {
 
                     <div className="flex items-center justify-between rounded-lg bg-neutral-50 px-4 py-2 text-sm font-semibold text-neutral-800">
                       <div>
-                        <span className="text-neutral-800 text-sm">Total de productos: </span>
-                        <span className="ml-2 font-semibold text-primary"> {productsCount} </span>
+                        <span className="text-neutral-800 text-sm">
+                          Total de productos:{" "}
+                        </span>
+                        <span className="ml-2 font-semibold text-primary">
+                          {" "}
+                          {productsCount}{" "}
+                        </span>
                       </div>
 
                       <div>
-                        <span className="text-neutral-800 text-sm">Cantidad de productos: </span>
-                        <span className="ml-2 font-semibold text-primary"> {totalStock} </span>
+                        <span className="text-neutral-800 text-sm">
+                          Cantidad de productos:{" "}
+                        </span>
+                        <span className="ml-2 font-semibold text-primary">
+                          {" "}
+                          {totalStock}{" "}
+                        </span>
                       </div>
                     </div>
                   </>
@@ -234,6 +245,36 @@ const AdminDashboard: React.FC = () => {
           </div>
 
           <div className="mt-6 grid gap-6 lg:grid-cols-2">
+            <div className="rounded-2xl border bg-white p-6 shadow-sm">
+               <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-lg font-semibold text-neutral-900">
+                    Flujo de usuarios
+                  </h2>
+                  <p className="text-sm text-neutral-500">
+                    Margen bruto vs. Ingresos
+                  </p>
+                </div>
+                <div className="flex items-center gap-3 text-sm text-neutral-500">
+                  <span className="flex items-center gap-2">
+                    <span className="h-3 w-3 rounded-full bg-sky-300" />
+                    Nuevos
+                  </span>
+                  
+                  <span className="flex items-center gap-2">
+                    <span className="h-3 w-3 rounded-full bg-amber-300" />
+                    Viejos
+                  </span>
+
+                  <span className="flex items-center gap-2">
+                    <span className="h-3 w-3 rounded-full bg-green-300" />
+                    Recurrentes
+                  </span>
+                </div>
+              </div>
+                <GraficUser/>
+            </div>
+
             <div className="rounded-2xl border bg-white p-6 shadow-sm">
               <h2 className="text-lg font-semibold text-neutral-900">
                 Sales by product category
@@ -246,17 +287,6 @@ const AdminDashboard: React.FC = () => {
                   <DonutChart />
                 </div>
               </div>
-            </div>
-
-            <div className="rounded-2xl border bg-white p-6 shadow-sm">
-              <h2 className="text-lg font-semibold text-neutral-900">Notes</h2>
-              <ul className="mt-4 space-y-3 text-sm text-neutral-600">
-                <li>
-                  • Mantén la operación enfocada en categorías con mayor margen.
-                </li>
-                <li>• Revisa devoluciones crecientes en la última semana.</li>
-                <li>• Refuerza campañas en los países top 3.</li>
-              </ul>
             </div>
           </div>
         </main>
