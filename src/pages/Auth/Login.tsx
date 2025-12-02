@@ -45,23 +45,30 @@ const Login = () => {
       toast.error(error.message || "Correo o contraseña incorrectos.");
       return;
     }
-    toast.success("¡Bienvenido de vuelta!");
-    // Detectar rol admin y redirigir
-    const { data: sessionData } = await supabase.auth.getSession();
-    const userId = sessionData.session?.user.id;
+    const { data: userData } = await supabase.auth.getUser();
+    const userEmail = userData?.user?.email?.toLowerCase();
+    const userId = userData?.user?.id;
+
+    if (userEmail === "fitmexstore@gmail.com") {
+      toast.success("¡Bienvenido, admin!");
+      navigate("/admin");
+      return;
+    }
+
     if (userId) {
-      // Cast supabase to any here to avoid deep TS instantiation issues
-      const { data: roleData } = (await (supabase as any)
+      const { data: roleRow } = await (supabase as any)
         .from("user_roles")
         .select("role")
         .eq("user_id", userId)
-        .maybeSingle()) as { data?: { role?: string } | null };
-
-      if (roleData?.role === "admin") {
+        .single();
+      if (roleRow?.role === "admin") {
+        toast.success("¡Bienvenido, admin!");
         navigate("/admin");
         return;
       }
     }
+
+    toast.success("¡Bienvenido de vuelta!");
     navigate("/");
   };
 
@@ -137,7 +144,10 @@ const Login = () => {
               </div>
             </form>
             <div className="flex flex-col items-center justify-center gap-2">
-              <Link to="/auth/forgot-password" className="text-sm text-neutral-500">
+              <Link
+                to="/auth/forgot-password"
+                className="text-sm text-neutral-500"
+              >
                 ¿Olvidaste tu contraseña?
                 <span className="text-primary"> No hay problema</span>
               </Link>

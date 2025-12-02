@@ -10,9 +10,22 @@ const WishlistPage = () => {
   const { wishlist } = useWishlist();
 
   const normalizedWishlist = useMemo(
-    () => wishlist.map((item) => ({ ...item, id: item.id || item.slug || item.name })),
-    [wishlist],
-  );
+  () =>
+    wishlist.map((item) => {
+      const data = (item as any).product_data || item;
+      return {
+        id: item.id || data.slug || data.name,
+        name: data.name ?? "Producto",
+        description: data.overview ?? "",
+        price: data.price ?? 0,
+        stock: data.stock ?? 0,
+        category: data.category ?? "",
+        image_url: data.cover_image ?? data.image_url ?? "/placeholder.svg",
+      };
+    }),
+  [wishlist]
+);
+
 
   const isEmpty = normalizedWishlist.length === 0;
 

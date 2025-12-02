@@ -59,7 +59,7 @@ export async function fetchCartItems() {
       product_id,
       quantity,
       price_at_add,
-      product:products(id, name, price, image_url)
+      product:products(id, name, price, image_url:cover_image)
     `)
     .eq("cart_id", cartId);
 

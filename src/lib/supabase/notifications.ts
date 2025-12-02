@@ -1,14 +1,12 @@
+// src/lib/supabase/notifications.ts
 import { supabase } from "@/integrations/supabase/client";
 import type { TablesInsert, Tables } from "@/integrations/supabase/types";
 
 export type NotificationRow = Tables<"notifications">;
 
-export const fetchNotifications = async (userId: string) => {
-  return supabase
-    .from("notifications")
-    .select("*")
-    .eq("user_id", userId)
-    .order("created_at", { ascending: false });
+export const fetchNotifications = async (userId: string, isAdmin = false) => {
+  const query = supabase.from("notifications").select("*").order("created_at", { ascending: false });
+  return isAdmin ? query : query.eq("user_id", userId);
 };
 
 export const addNotification = async (payload: TablesInsert<"notifications">) => {

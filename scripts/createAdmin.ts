@@ -11,14 +11,32 @@ async function main() {
   const email = "fitmexstore@gmail.com";
   const password = "adminFit-3211*";
 
+  let userId: string | undefined;
+
   const { data, error } = await supabase.auth.admin.createUser({
     email,
     password,
     email_confirm: true,
   });
-  if (error) throw error;
 
-  const userId = data.user?.id;
+  if (error) {
+    if (error.code === "email_exists") {
+      // Busca el usuario existente
+      const { data: usersData, error: listErr } = await supabase.auth.admin.listUsers({
+        page: 1,
+        perPage: 1000,
+      });
+      if (listErr) throw listErr;
+      userId = usersData?.users?.find((u) => u.email === email)?.id;
+      if (!userId) throw new Error("No se encontró el usuario existente");
+      await supabase.auth.admin.updateUserById(userId, { password });
+    } else {
+      throw error;
+    }
+  } else {
+    userId = data.user?.id;
+  }
+
   if (!userId) throw new Error("No user id");
 
   const { error: roleErr } = await supabase
@@ -26,7 +44,7 @@ async function main() {
     .upsert({ user_id: userId, role: "admin" });
   if (roleErr) throw roleErr;
 
-  console.log("Admin creado y marcado:", email, userId);
+  console.log("Admin creado/marcado:", email, userId);
 }
 
 main().catch((e) => {

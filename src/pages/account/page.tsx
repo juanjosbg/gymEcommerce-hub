@@ -1,14 +1,11 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import Image from "next/image";
+import React, { useState } from "react";
 import Input from "@/shared/Input/Input";
 import ButtonPrimary from "@/shared/Button/ButtonPrimary";
 import ButtonSecondary from "@/shared/Button/ButtonSecondary";
 import { TbTruckDelivery } from "react-icons/tb";
 import { MdContactMail } from "react-icons/md";
-import { db } from "@/firebase/config";
-import { doc, setDoc, getDoc } from "firebase/firestore";
 import { useAuth } from "@/hooks/useAuth";
 
 const AccountPage = () => {
@@ -31,19 +28,6 @@ const AccountPage = () => {
     country: "",
     postalCode: "",
   });
-
-  useEffect(() => {
-    const fetchUserData = async () => {
-      if (!user) return;
-      const userDoc = await getDoc(doc(db, "users", user.uid));
-      if (userDoc.exists()) {
-        const data = userDoc.data();
-        if (data.contactInfo) setContactInfo(data.contactInfo);
-        if (data.shippingAddress) setShippingAddress(data.shippingAddress);
-      }
-    };
-    fetchUserData();
-  }, [user]);
 
   const isContactValid =
     contactInfo.fullName &&
@@ -73,15 +57,11 @@ const AccountPage = () => {
     setStep(1);
   };
 
-  const handleNext = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleNext = () => {
     setStep(2);
   };
 
-  const handleBack = (e: React.FormEvent) => {
-    e.preventDefault();
-    setStep(1);
-  };
+  const handleBack = () => setStep(1);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -89,21 +69,20 @@ const AccountPage = () => {
       alert("Por favor completa todos los campos requeridos.");
       return;
     }
-    if (!user) {
+    if (!user?.id) {
       alert("Debes iniciar sesión para guardar tus datos.");
       return;
     }
-    await setDoc(doc(db, "users", user.uid), {
-      contactInfo,
-      shippingAddress,
-    });
-    alert("Datos guardados correctamente");
+    // TODO: Persistir en Supabase u otro backend; por ahora solo mensaje.
+    alert("Datos guardados correctamente (faltaría integrar backend)");
     setIsEditing(false);
     setStep(1);
   };
 
   const inputClass = (editing: boolean) =>
-    `bg-white ${editing ? "text-neutral-900" : "text-neutral-400"} placeholder:text-neutral-400`;
+    `bg-white ${
+      editing ? "text-neutral-900" : "text-neutral-400"
+    } placeholder:text-neutral-400`;
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -119,11 +98,7 @@ const AccountPage = () => {
         <div className="flex flex-col lg:flex-row gap-10 items-start">
           <form
             className="flex-1 w-full max-w-xl space-y-10 mt-6"
-            onSubmit={
-              step === 1
-                ? handleNext
-                : handleSave
-            }
+            onSubmit={step === 1 ? handleNext : handleSave}
           >
             <div className="bg-white rounded-2xl shadow p-8 space-y-6">
               <div className="flex items-center justify-between mb-4">
@@ -132,7 +107,9 @@ const AccountPage = () => {
                     <span className="hidden sm:block">
                       <MdContactMail className="text-3xl text-primary" />
                     </span>
-                    <h3 className="text-lg font-semibold">Información de contacto</h3>
+                    <h3 className="text-lg font-semibold">
+                      Información de contacto
+                    </h3>
                   </div>
                 )}
                 {step === 2 && (
@@ -140,7 +117,9 @@ const AccountPage = () => {
                     <span className="hidden sm:block">
                       <TbTruckDelivery className="text-3xl text-primary" />
                     </span>
-                    <h3 className="text-lg font-semibold">Dirección de envío</h3>
+                    <h3 className="text-lg font-semibold">
+                      Dirección de envío
+                    </h3>
                   </div>
                 )}
                 {isEditing && (
@@ -167,7 +146,9 @@ const AccountPage = () => {
               {step === 1 && (
                 <>
                   <div>
-                    <label className="block mb-1 font-medium">Nombre completo</label>
+                    <label className="block mb-1 font-medium">
+                      Nombre completo
+                    </label>
                     <Input
                       name="fullName"
                       value={contactInfo.fullName}
@@ -179,7 +160,9 @@ const AccountPage = () => {
                     />
                   </div>
                   <div>
-                    <label className="block mb-1 font-medium">Número telefónico</label>
+                    <label className="block mb-1 font-medium">
+                      Número telefónico
+                    </label>
                     <Input
                       name="phone"
                       value={contactInfo.phone}
@@ -191,7 +174,9 @@ const AccountPage = () => {
                     />
                   </div>
                   <div>
-                    <label className="block mb-1 font-medium">Correo electrónico</label>
+                    <label className="block mb-1 font-medium">
+                      Correo electrónico
+                    </label>
                     <Input
                       name="email"
                       value={contactInfo.email}
@@ -204,7 +189,9 @@ const AccountPage = () => {
                     />
                   </div>
                   <div>
-                    <label className="block mb-1 font-medium">Fecha de nacimiento</label>
+                    <label className="block mb-1 font-medium">
+                      Fecha de nacimiento
+                    </label>
                     <Input
                       name="birthDate"
                       value={contactInfo.birthDate}
@@ -221,7 +208,9 @@ const AccountPage = () => {
               {step === 2 && (
                 <>
                   <div>
-                    <label className="block mb-1 font-medium">Calle y número</label>
+                    <label className="block mb-1 font-medium">
+                      Calle y número
+                    </label>
                     <Input
                       name="street"
                       value={shippingAddress.street}
@@ -233,7 +222,9 @@ const AccountPage = () => {
                     />
                   </div>
                   <div>
-                    <label className="block mb-1 font-medium">Departamento, casa, etc.</label>
+                    <label className="block mb-1 font-medium">
+                      Departamento, casa, etc.
+                    </label>
                     <Input
                       name="apartment"
                       value={shippingAddress.apartment}
@@ -256,7 +247,9 @@ const AccountPage = () => {
                     />
                   </div>
                   <div>
-                    <label className="block mb-1 font-medium">Estado o provincia</label>
+                    <label className="block mb-1 font-medium">
+                      Estado o provincia
+                    </label>
                     <Input
                       name="state"
                       value={shippingAddress.state}
@@ -280,7 +273,9 @@ const AccountPage = () => {
                     />
                   </div>
                   <div>
-                    <label className="block mb-1 font-medium">Código postal</label>
+                    <label className="block mb-1 font-medium">
+                      Código postal
+                    </label>
                     <Input
                       name="postalCode"
                       value={shippingAddress.postalCode}
@@ -320,13 +315,12 @@ const AccountPage = () => {
             </div>
           </form>
           <div className="hidden lg:flex flex-1 justify-center items-center">
-            <Image
+            <img
               src="/OFF.webp"
               alt="Imagen de perfil"
               width={400}
               height={400}
               className="rounded-2xl object-cover shadow"
-              priority
             />
           </div>
         </div>

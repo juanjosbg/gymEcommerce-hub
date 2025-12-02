@@ -30,7 +30,7 @@ const CartSideBar: React.FC = () => {
 
   const handleOpenMenu = () => {
     if (!user) {
-      Swal.fire("Primero debes iniciar sesión para ver tu carrito");
+      Swal.fire("Ups!. Primero debes iniciar sesión para ver tu carrito");
       return;
     }
     setIsVisable(true);
