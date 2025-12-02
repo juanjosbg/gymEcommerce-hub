@@ -16,7 +16,9 @@ import { statCards as statCardsStatic } from "./data/dashboard";
 const AdminDashboard: React.FC = () => {
   const [usersCount, setUsersCount] = useState<number | null>(null);
   const [productsCount, setProductsCount] = useState<number | null>(null);
-  const [products, setProducts] = useState<Array<{ name: string; stock: number }>>([]);
+  const [products, setProducts] = useState<
+    Array<{ name: string; stock: number }>
+  >([]);
   const [showAllProducts, setShowAllProducts] = useState(false);
 
   useEffect(() => {
@@ -64,10 +66,17 @@ const AdminDashboard: React.FC = () => {
     () =>
       statCardsStatic.map((card) => {
         if (card.title === "Clientes Registrados") {
-          return { ...card, value: usersCount !== null ? usersCount.toLocaleString() : "--" };
+          return {
+            ...card,
+            value: usersCount !== null ? usersCount.toLocaleString() : "--",
+          };
         }
         if (card.title === "Total Productos") {
-          return { ...card, value: productsCount !== null ? productsCount.toLocaleString() : "--" };
+          return {
+            ...card,
+            value:
+              productsCount !== null ? productsCount.toLocaleString() : "--",
+          };
         }
         return card;
       }),
@@ -81,19 +90,25 @@ const AdminDashboard: React.FC = () => {
   }, [products, showAllProducts]);
 
   const totalStock = useMemo(
-    () => products.reduce((acc, p) => acc + (Number.isFinite(p.stock) ? p.stock : 0), 0),
+    () =>
+      products.reduce(
+        (acc, p) => acc + (Number.isFinite(p.stock) ? p.stock : 0),
+        0
+      ),
     [products]
   );
 
-return (
-  <div className="min-h-screen bg-gradient-to-br from-neutral-50 to-slate-100 text-neutral-900">
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-neutral-50 to-slate-100 text-neutral-900">
       <div className="flex w-full">
         <Sidebar />
         <main className="flex-1 p-6 lg:p-10">
           <div className="mb-8 flex items-center justify-between">
             <div>
               <p className="text-sm text-neutral-500">Overview</p>
-              <h1 className="text-2xl font-bold text-neutral-900 lg:text-3xl">Dashboard</h1>
+              <h1 className="text-2xl font-bold text-neutral-900 lg:text-3xl">
+                Dashboard
+              </h1>
             </div>
             <button className="flex items-center gap-2 rounded-xl border border-dashed border-neutral-300 px-4 py-2 text-sm font-medium text-primary hover:border-primary/50">
               <Plus className="h-4 w-4" />
@@ -104,7 +119,10 @@ return (
           {/* Cards */}
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             {statCards.map((card) => (
-              <div key={card.title} className="rounded-2xl border bg-white p-4 shadow-sm">
+              <div
+                key={card.title}
+                className="rounded-2xl border bg-white p-4 shadow-sm"
+              >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 text-sm font-semibold text-neutral-600">
                     {(() => {
@@ -115,19 +133,24 @@ return (
                   </div>
                   <StatChip trend={card.trend} delta={card.delta} />
                 </div>
-                <p className="mt-3 text-3xl font-bold text-neutral-900">{card.value}</p>
+                <p className="mt-3 text-3xl font-bold text-neutral-900">
+                  {card.value}
+                </p>
               </div>
             ))}
           </div>
 
           <div className="mt-6 grid gap-6 xl:grid-cols-3">
-            
             {/* Dashboard */}
             <div className="xl:col-span-2 rounded-2xl border bg-white p-6 shadow-sm">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-lg font-semibold text-neutral-900">Ventas de productos</h2>
-                  <p className="text-sm text-neutral-500">Margen bruto vs. Ingresos</p>
+                  <h2 className="text-lg font-semibold text-neutral-900">
+                    Ventas de productos
+                  </h2>
+                  <p className="text-sm text-neutral-500">
+                    Margen bruto vs. Ingresos
+                  </p>
                 </div>
                 <div className="flex items-center gap-3 text-sm text-neutral-500">
                   <span className="flex items-center gap-2">
@@ -142,25 +165,69 @@ return (
               </div>
               <BarChart />
             </div>
-            
+
             {/* Products */}
             <div className="rounded-2xl border bg-white p-6 shadow-sm">
-              <h2 className="text-lg font-semibold text-neutral-900">Inventario de productos</h2>
-              <p className="text-sm text-neutral-500">Consulta el stock actual por producto.</p>
+              <h2 className="text-lg font-semibold text-neutral-900">
+                Inventario de productos
+              </h2>
+              <p className="text-sm text-neutral-500">
+                Consulta el stock actual por producto.
+              </p>
               <div className="mt-4 space-y-3">
                 {products.length === 0 ? (
                   <div className="p-4 text-sm text-neutral-500">
                     No hay productos registrados aún.
                   </div>
                 ) : (
-                  <ul className="divide-y divide-neutral-200 rounded-lg mt-4">
-                    {products.map((p) => (
-                      <li key={p.name} className="flex items-center justify-between px-4 py-2 text-sm">
-                        <span className="text-neutral-800">{p.name}</span>
-                        <span className="font-semibold text-neutral-900">{p.stock}</span>
-                      </li>
-                    ))}
-                  </ul>
+                  <>
+                    <ul className="divide-y divide-primary/10 rounded-lg">
+                      {displayedProducts.map((p) => (
+                        <li
+                          key={p.name}
+                          className="flex items-center justify-between px-4 py-2 text-sm"
+                        >
+                          <span className="text-neutral-800">{p.name}</span>
+                          <span className="font-semibold text-primary">
+                            {p.stock}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+
+                    {products.length > displayedProducts.length &&
+                      !showAllProducts && (
+                        <button
+                          type="button"
+                          className="w-full rounded-full px-4 py-2 text-sm font-medium hover:bg-primary/80 bg-primary text-white"
+                          onClick={() => setShowAllProducts(true)}
+                        >
+                          Ver más
+                        </button>
+                      )}
+
+                    {showAllProducts && products.length > 0 && (
+                      <button
+                        type="button"
+                        className="w-full rounded-full px-4 py-2 text-sm font-medium hover:bg-primary/80 bg-primary text-white"
+                        onClick={() => setShowAllProducts(false)}
+                      >
+                        Ver menos
+                      </button>
+                    )}
+
+                    <div className="flex items-center justify-between rounded-lg bg-neutral-50 px-4 py-2 text-sm font-semibold text-neutral-800">
+                      <div>
+                        <span className="text-neutral-800 text-sm">Total de productos: </span>
+                        <span className="ml-2 font-semibold text-primary"> {productsCount} </span>
+                      </div>
+
+                      <div>
+                        <span className="text-neutral-800 text-sm">Cantidad de productos: </span>
+                        <span className="ml-2 font-semibold text-primary"> {totalStock} </span>
+                      </div>
+                    </div>
+                  </>
                 )}
               </div>
             </div>
@@ -168,17 +235,25 @@ return (
 
           <div className="mt-6 grid gap-6 lg:grid-cols-2">
             <div className="rounded-2xl border bg-white p-6 shadow-sm">
-              <h2 className="text-lg font-semibold text-neutral-900">Sales by product category</h2>
-              <div className="mt-4 flex flex-col gap-6 lg:flex-row lg:items-center">
-                <DonutLegend />
-                <DonutChart />
+              <h2 className="text-lg font-semibold text-neutral-900">
+                Sales by product category
+              </h2>
+              <div className="mt-4 flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
+                <div className="flex-1">
+                  <DonutLegend />
+                </div>
+                <div className="flex-1 flex justify-center">
+                  <DonutChart />
+                </div>
               </div>
             </div>
 
             <div className="rounded-2xl border bg-white p-6 shadow-sm">
               <h2 className="text-lg font-semibold text-neutral-900">Notes</h2>
               <ul className="mt-4 space-y-3 text-sm text-neutral-600">
-                <li>• Mantén la operación enfocada en categorías con mayor margen.</li>
+                <li>
+                  • Mantén la operación enfocada en categorías con mayor margen.
+                </li>
                 <li>• Revisa devoluciones crecientes en la última semana.</li>
                 <li>• Refuerza campañas en los países top 3.</li>
               </ul>

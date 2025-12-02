@@ -21,7 +21,7 @@ export function DonutChart() {
         );
       })}
       <circle cx="60" cy="60" r="25" className="fill-white" />
-      <text x="50%" y="50%" dominantBaseline="middle" textAnchor="middle" className="text-sm font-semibold fill-neutral-700">Sales</text>
+      {/* <text x="50%" y="50%" dominantBaseline="middle" textAnchor="middle" className="text-sm font-semibold fill-neutral-700"></text> */}
     </svg>
   );
 }
