@@ -20,6 +20,7 @@ import SingleProductPage from "./pages/producto/[productId]/page";
 import WishlistPage from "./pages/wishlist/page";
 import ProfilePage from "./pages/profile/page";
 import { Header } from "./components/Header";
+import AdminPage from "./pages/admin/page";
 
 const queryClient = new QueryClient();
 
@@ -59,6 +60,7 @@ const App = () => (
                   element={<Navigate to="/producto" replace />}
                 />
                 <Route path="/profile" element={<ProfilePage />} />
+                <Route path="/admin" element={<AdminPage />} />
 
                 <Route path="*" element={<NotFound />} />
               </Routes>

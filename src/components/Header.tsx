@@ -156,16 +156,7 @@ export const Header = () => {
             {/* Right Actions */}
             <div className="flex items-center gap-4">
               <Notifications />
-
               <CartSideBar />
-              {/*
-              <Link to="/cart">
-                <Button variant="ghost" className="relative gap-2">
-                  <ShoppingCart className="h-5 w-5 "/>
-                  <span className="font-medium">{cartCount} items</span>
-                </Button>
-              </Link>*/}
-
               {user ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>

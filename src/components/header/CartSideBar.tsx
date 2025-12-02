@@ -1,7 +1,7 @@
 "use client";
 
 import { Dialog, Transition } from "@headlessui/react";
-import React, { Fragment, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import { AiOutlineDelete } from "react-icons/ai";
 import { FaBagShopping } from "react-icons/fa6";
 import { MdClose, MdStar } from "react-icons/md";
@@ -14,6 +14,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import Swal from "sweetalert2";
 
 const CartSideBar: React.FC = () => {
   const [isVisable, setIsVisable] = useState(false);
@@ -21,7 +22,19 @@ const CartSideBar: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  const handleOpenMenu = () => setIsVisable(true);
+  useEffect(() => {
+    if (!user && isVisable) {
+      setIsVisable(false);
+    }
+  }, [user, isVisable]);
+
+  const handleOpenMenu = () => {
+    if (!user) {
+      Swal.fire("Primero debes iniciar sesión para ver tu carrito");
+      return;
+    }
+    setIsVisable(true);
+  };
   const handleCloseMenu = () => setIsVisable(false);
 
   const handleCheckout = async () => {

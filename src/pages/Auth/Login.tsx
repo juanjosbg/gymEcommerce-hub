@@ -11,6 +11,7 @@ import FormItem from "@/shared/Auth/FormItem";
 import Input from "@/shared/Input/Input";
 import { toast } from "sonner";
 import { z } from "zod";
+import { supabase } from "@/integrations/supabase/client";
 
 const loginSchema = z.object({
   email: z.string().email("Email inválido"),
@@ -45,6 +46,22 @@ const Login = () => {
       return;
     }
     toast.success("¡Bienvenido de vuelta!");
+    // Detectar rol admin y redirigir
+    const { data: sessionData } = await supabase.auth.getSession();
+    const userId = sessionData.session?.user.id;
+    if (userId) {
+      // Cast supabase to any here to avoid deep TS instantiation issues
+      const { data: roleData } = (await (supabase as any)
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId)
+        .maybeSingle()) as { data?: { role?: string } | null };
+
+      if (roleData?.role === "admin") {
+        navigate("/admin");
+        return;
+      }
+    }
     navigate("/");
   };
 

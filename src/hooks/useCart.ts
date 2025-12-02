@@ -22,6 +22,7 @@ export function useCart() {
   const { user } = useAuth();
   const [cart, setCart] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState(false);
+  const getUserId = (u: any) => u?.id || u?.uid || "anon";
 
   useEffect(() => {
     if (!user) {
@@ -29,7 +30,8 @@ export function useCart() {
       return;
     }
     setLoading(true);
-    const unsubscribe = subscribeToCart(user.uid, (items) => {
+    const userId = getUserId(user);
+    const unsubscribe = subscribeToCart(userId, (items) => {
       setCart(items);
       setLoading(false);
     });
@@ -38,22 +40,26 @@ export function useCart() {
 
   const handleAddToCart = async (item: CartItem) => {
     if (!user) return;
-    await addToCart(user.uid, item);
+    const userId = getUserId(user);
+    await addToCart(userId, item);
   };
 
   const handleRemoveFromCart = async (itemId: string) => {
     if (!user) return;
-    await removeFromCart(user.uid, itemId);
+    const userId = getUserId(user);
+    await removeFromCart(userId, itemId);
   };
 
   const handleUpdateQuantity = async (itemId: string, cantidad: number) => {
     if (!user) return;
-    await updateCartItemQuantity(user.uid, itemId, cantidad);
+    const userId = getUserId(user);
+    await updateCartItemQuantity(userId, itemId, cantidad);
   };
 
   const handleClearCart = async () => {
     if (!user) return;
-    await clearUserCart(user.uid);
+    const userId = getUserId(user);
+    await clearUserCart(userId);
     setCart([]);
   };
 

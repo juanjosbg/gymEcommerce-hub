@@ -1,13 +1,7 @@
 // /src/hooks/useAuth.ts
-"use client";
-import { useState } from "react";
+// Mantiene la misma firma pero utiliza el AuthContext real.
+import { useAuth as useAuthContext } from "@/contexts/AuthContext";
 
 export function useAuth() {
-  // Usuario simulado temporalmente
-  const [user] = useState({
-    uid: "local-user-123",
-    email: "test@example.com",
-  });
-
-  return { user };
+  return useAuthContext();
 }

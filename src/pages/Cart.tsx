@@ -62,6 +62,13 @@ const Cart = () => {
     );
   };
 
+  const handleRemoveSelected = async () => {
+    if (!selectedIds.length) return;
+    await Promise.all(selectedIds.map((id) => removeFromCart(id)));
+    setSelectedIds([]);
+    setManageOpen(false);
+  };
+
   const renderEmptyState = () => (
     <div className="grid lg:grid-cols-[2fr_1fr] gap-6">
       <div className="space-y-4">
@@ -481,6 +488,7 @@ const Cart = () => {
         selectedIds={selectedIds}
         onToggleItem={toggleSelectItem}
         onSelectAll={toggleSelectAll}
+        onDeleteSelected={handleRemoveSelected}
       />
       <ShareCartModal
         open={shareOpen}
@@ -504,7 +512,16 @@ const ManageCartModal: React.FC<{
   selectedIds: string[];
   onToggleItem: (id: string) => void;
   onSelectAll: () => void;
-}> = ({ open, onClose, items, selectedIds, onToggleItem, onSelectAll }) => {
+  onDeleteSelected: () => void | Promise<void>;
+}> = ({
+  open,
+  onClose,
+  items,
+  selectedIds,
+  onToggleItem,
+  onSelectAll,
+  onDeleteSelected,
+}) => {
   if (!open) return null;
 
   return (
@@ -567,7 +584,7 @@ const ManageCartModal: React.FC<{
             Seleccionar todo
           </button>
           <button
-            onClick={onClose}
+            onClick={onDeleteSelected}
             className="rounded-full border border-neutral-300 px-4 py-2 text-sm font-semibold hover:bg-neutral-100"
           >
             Eliminar
