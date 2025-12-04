@@ -29,6 +29,7 @@ const AddProductModal: React.FC<Props> = ({ open, onClose, onCreated }) => {
   const [name, setName] = useState("");
   const [category, setCategory] = useState(productCategories[0] || "");
   const [hasDiscount, setHasDiscount] = useState(false);
+  const [discountPercent, setDiscountPercent] = useState<number>(0);
   const [price, setPrice] = useState<number | null>(null);
   const [stock, setStock] = useState<number | null>(null);
   const [overview, setOverview] = useState("");
@@ -45,6 +46,20 @@ const AddProductModal: React.FC<Props> = ({ open, onClose, onCreated }) => {
   const [error, setError] = useState<string | null>(null);
 
   const slug = useMemo(() => slugify(name || "producto"), [name]);
+  const discountOptions = useMemo(() => {
+    const initial = [2, 3, 4, 5];
+    const stepped: number[] = [];
+    for (let i = 10; i <= 50; i += 5) {
+      stepped.push(i);
+    }
+    return [...initial, ...stepped];
+  }, []);
+  const discountedPrice = useMemo(() => {
+    if (price === null) return null;
+    if (!hasDiscount || !discountPercent) return price;
+    const result = price * (1 - discountPercent / 100);
+    return Number(result.toFixed(2));
+  }, [price, hasDiscount, discountPercent]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,14 +96,17 @@ const AddProductModal: React.FC<Props> = ({ open, onClose, onCreated }) => {
     coverUrl = uploaded[0] || null;
 
     // Inserta producto
+    const finalPrice = hasDiscount ? discountedPrice ?? price : price;
+    const previousPrice = hasDiscount ? price : null;
+
     const { data, error: insertErr } = await supabase
       .from("products")
       .insert({
         slug,
         name,
         category: category || null,
-        price,
-        previous_price: null,
+        price: finalPrice,
+        previous_price: previousPrice,
         stock,
         cover_image: coverUrl,
         overview: overview || null,
@@ -121,6 +139,8 @@ const AddProductModal: React.FC<Props> = ({ open, onClose, onCreated }) => {
     setStock(null);
     setOverview("");
     setFiles([]);
+    setHasDiscount(false);
+    setDiscountPercent(0);
   };
 
   if (!open) return null;
@@ -227,7 +247,15 @@ const AddProductModal: React.FC<Props> = ({ open, onClose, onCreated }) => {
                     <select
                       className="mt-2 w-full rounded-xl border border-neutral-200 px-3 py-2 text-sm outline-none focus:border-primary bg-white"
                       value={hasDiscount ? "si" : "no"}
-                      onChange={(e) => setHasDiscount(e.target.value === "si")}
+                      onChange={(e) => {
+                        const enabled = e.target.value === "si";
+                        setHasDiscount(enabled);
+                        if (!enabled) {
+                          setDiscountPercent(0);
+                        } else if (!discountPercent) {
+                          setDiscountPercent(2);
+                        }
+                      }}
                     >
                       <option value="no">No</option>
                       <option value="si">Sí</option>
@@ -235,45 +263,45 @@ const AddProductModal: React.FC<Props> = ({ open, onClose, onCreated }) => {
                   </div>
                 </div>
 
-                <div className="mt-3 flex gap-4">
-                  <div className="flex-1">
-                    <label className="text-sm font-medium text-neutral-700">
-                      % Para el descuento
-                    </label>
-                    <select
-                      className="mt-2 w-full rounded-xl border border-neutral-200 px-3 py-2 text-sm outline-none focus:border-primary bg-white"
-                      value={category}
-                      onChange={(e) => setCategory(e.target.value)}
-                    >
-                      {productCategories.map((cat) => (
-                        <option key={cat} value={cat}>
-                          {cat}
-                        </option>
-                      ))}
-                    </select>
+                {hasDiscount && (
+                  <div className="mt-3 flex gap-4">
+                    <div className="flex-1">
+                      <label className="text-sm font-medium text-neutral-700">
+                        % Para el descuento
+                      </label>
+                      <select
+                        className="mt-2 w-full rounded-xl border border-neutral-200 px-3 py-2 text-sm outline-none focus:border-primary bg-white"
+                        value={discountPercent || ""}
+                        onChange={(e) => setDiscountPercent(Number(e.target.value))}
+                      >
+                        {discountOptions.map((option) => (
+                          <option key={option} value={option}>
+                            {option}%
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    
+                    <div className="flex-1">
+                      <label className="text-sm font-medium text-neutral-700">
+                        Nuevo precio (aplicado)
+                      </label>
+                      <input
+                        className="mt-2 w-full rounded-xl border border-neutral-200 px-3 py-2 text-sm outline-none bg-neutral-50 text-neutral-700"
+                        value={discountedPrice ?? ""}
+                        readOnly
+                        placeholder="Calculado automáticamente"
+                      />
+                    </div>
                   </div>
-                  
-                  <div className="flex-1">
-                    <label className="text-sm font-medium text-neutral-700">
-                      Precio con descuento
-                    </label>
-                    <input
-                      type="number"
-                      className="mt-2 w-full rounded-xl border border-neutral-200 px-3 py-2 text-sm outline-none focus:border-primary"
-                      value={price ?? ""}
-                      onChange={(e) => setPrice(Number(e.target.value) || 0)}
-                      min={0}
-                      placeholder="0"
-                      step="0.01"
-                    />
-                  </div>
-                </div>
+                )}
 
                 <hr className="mt-5"/>
+                
                 <div className="mt-3 flex gap-4">
                   <div className="flex-1">
                     <label className="text-sm font-medium text-neutral-700">
-                      Categoría
+                      Categoria
                     </label>
                     <select
                       className="mt-2 w-full rounded-xl border border-neutral-200 px-3 py-2 text-sm outline-none focus:border-primary bg-white"
