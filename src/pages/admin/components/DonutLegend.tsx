@@ -1,24 +1,12 @@
 // DonutLegend.tsx
-import { useEffect, useState } from "react";
-import { categories } from "../data/dashboard";
-import { supabase } from "@/integrations/supabase/client";
+import { Fragment } from "react";
+import type { CategorySlice } from "../types/dashboard";
 
-export function DonutLegend() {
-  const [productsCount, setProductsCount] = useState<number | null>(null);
-  useEffect(() => {
-    const loadCounts = async () => {
-      try {
-        const { count, error } = await supabase
-          .from("products")
-          .select("*", { head: true, count: "exact" });
-        if (!error && typeof count === "number") setProductsCount(count);
-      } catch {
-        setProductsCount(null);
-      }
-    };
-    loadCounts();
-  }, []);
+type Props = {
+  categories: CategorySlice[];
+};
 
+export function DonutLegend({ categories }: Props) {
   return (
     <div className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
       {categories.map((cat) => (

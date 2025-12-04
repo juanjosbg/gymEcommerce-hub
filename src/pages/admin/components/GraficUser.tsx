@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 type Series = { label: string; color: string; points: number[] };
 type Bucket = {
-  hour: string;
+  label: string; // ej: 12 Ene
   nuevos: number;
   viejos: number;
   recurrentes: number;
@@ -15,37 +15,59 @@ type ProfileRow = { id: string; created_at: string };
 const GraficUser: React.FC = () => {
   const [data, setData] = useState<Bucket[]>([]);
 
-  // Agrupa por hora (ejemplo). Ajusta para tu caso real.
+  const formatDay = (date: Date) =>
+    new Intl.DateTimeFormat("es-ES", {
+      day: "2-digit",
+      month: "short",
+    }).format(date);
+
+  // Construye los buckets de los últimos 30 días:
+  // - nuevos: registros en el día
+  // - viejos: usuarios existentes antes de ese día
+  // - recurrentes: usuarios con más de 14 días de antigüedad (proxy de cuentas “frecuentes”)
   const buildBuckets = (rows: ProfileRow[]): Bucket[] => {
-    const buckets: Record<string, Bucket> = {};
-    rows.forEach((r) => {
-      const d = new Date(r.created_at);
-      const hourLabel = d.toLocaleTimeString("es-ES", {
-        hour: "numeric",
-        hour12: true,
+    const today = new Date();
+    const start = new Date(today);
+    start.setDate(today.getDate() - 29); // 30 días atrás
+
+    const all = rows
+      .map((r) => ({ ...r, createdAt: new Date(r.created_at) }))
+      .filter((r) => r.createdAt <= today)
+      .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+
+    const buckets: Bucket[] = [];
+    let cumulative = 0;
+
+    for (
+      let cursor = new Date(start);
+      cursor <= today;
+      cursor.setDate(cursor.getDate() + 1)
+    ) {
+      const dayStart = new Date(cursor);
+      dayStart.setHours(0, 0, 0, 0);
+      const dayEnd = new Date(cursor);
+      dayEnd.setHours(23, 59, 59, 999);
+
+      const nuevos = all.filter(
+        (u) => u.createdAt >= dayStart && u.createdAt <= dayEnd
+      ).length;
+
+      const before = all.filter((u) => u.createdAt < dayStart).length;
+      const cutoff14 = new Date(dayStart);
+      cutoff14.setDate(cutoff14.getDate() - 14);
+      const recurrentes = all.filter((u) => u.createdAt < cutoff14).length;
+
+      cumulative += nuevos;
+      buckets.push({
+        label: formatDay(dayStart),
+        nuevos,
+        viejos: before,
+        recurrentes,
       });
+    }
 
-      if (!buckets[hourLabel]) {
-        buckets[hourLabel] = {
-          hour: hourLabel,
-          nuevos: 0,
-          viejos: 0,
-          recurrentes: 0,
-        };
-      }
-
-      // Ejemplo: todo se considera “nuevo”
-      buckets[hourLabel].nuevos += 1;
-    });
-
-    return Object.values(buckets).sort((a, b) => {
-      const toNum = (h: string) => {
-        const [num, ap] = h.split(" ");
-        const n = Number(num);
-        return ap?.toLowerCase().startsWith("p") ? n + 12 : n;
-      };
-      return toNum(a.hour) - toNum(b.hour);
-    });
+    // Si no hay datos, devolvemos arreglo vacío y el fallback tomará el control
+    return buckets.filter((b) => b.nuevos || b.viejos || b.recurrentes);
   };
 
   useEffect(() => {
@@ -55,32 +77,36 @@ const GraficUser: React.FC = () => {
         .select("id, created_at")
         .order("created_at", { ascending: true });
 
-      if (error || !rows) return;
-      setData(buildBuckets(rows as ProfileRow[]));
+      if (error) {
+        console.error("Error cargando usuarios:", error);
+        return;
+      }
+      if (!rows) return;
+      const buckets = buildBuckets(rows as ProfileRow[]);
+      setData(buckets);
     };
 
     load();
   }, []);
 
-  // Fallback ilustrativo si aún no hay datos
+  // Fallback ilustrativo si no hay datos
   const fallback: Bucket[] = [
-    { hour: "7 am", nuevos: 8, viejos: 5, recurrentes: 3 },
-    { hour: "9 am", nuevos: 10, viejos: 7, recurrentes: 4 },
-    { hour: "11 am", nuevos: 12, viejos: 6, recurrentes: 6 },
-    { hour: "1 pm", nuevos: 6, viejos: 5, recurrentes: 5 },
-    { hour: "3 pm", nuevos: 15, viejos: 9, recurrentes: 7 },
-    { hour: "5 pm", nuevos: 9, viejos: 7, recurrentes: 6 },
-    { hour: "7 pm", nuevos: 11, viejos: 8, recurrentes: 7 },
-    { hour: "9 pm", nuevos: 7, viejos: 6, recurrentes: 5 },
+    { label: "01 Ene", nuevos: 8, viejos: 5, recurrentes: 2 },
+    { label: "05 Ene", nuevos: 10, viejos: 7, recurrentes: 3 },
+    { label: "10 Ene", nuevos: 12, viejos: 9, recurrentes: 5 },
+    { label: "15 Ene", nuevos: 6, viejos: 10, recurrentes: 8 },
+    { label: "20 Ene", nuevos: 15, viejos: 11, recurrentes: 9 },
+    { label: "25 Ene", nuevos: 9, viejos: 13, recurrentes: 10 },
+    { label: "30 Ene", nuevos: 11, viejos: 14, recurrentes: 12 },
   ];
 
   const buckets = data.length ? data : fallback;
 
   const chartWidth = 480;
-  const chartHeight = 180;
+  const chartHeight = 200;
 
   const { series, maxVal, labels } = useMemo(() => {
-    const labels = buckets.map((d) => d.hour);
+    const labels = buckets.map((d) => d.label);
     const series: Series[] = [
       {
         label: "Nuevos",
@@ -102,53 +128,88 @@ const GraficUser: React.FC = () => {
     return { series, maxVal, labels };
   }, [buckets]);
 
-  const buildPath = (values: number[]) => {
+  // Curva suavizada (linea estilo "onda")
+  const buildSmoothPath = (values: number[]) => {
     if (!values.length) return "";
     const stepX = chartWidth / Math.max(values.length - 1, 1);
-    return values
-      .map((v, i) => {
-        const x = i * stepX;
-        const y = chartHeight - (v / maxVal) * chartHeight;
-        return `${i === 0 ? "M" : "L"}${x},${y}`;
-      })
-      .join(" ");
+    const points = values.map((v, i) => {
+      const x = i * stepX;
+      const y = chartHeight - (v / maxVal) * chartHeight;
+      return { x, y };
+    });
+
+    let d = `M ${points[0].x},${points[0].y}`;
+    for (let i = 0; i < points.length - 1; i++) {
+      const p0 = points[i];
+      const p1 = points[i + 1];
+      const cx = (p0.x + p1.x) / 2;
+      d += ` Q ${cx},${p0.y} ${p1.x},${p1.y}`;
+    }
+    return d;
   };
 
   return (
     <div className="p-4 text-neutral-900">
-      <div>
+      <div className="relative rounded-2xl bg-gradient-to-br from-white via-white to-slate-50 shadow-inner ring-1 ring-neutral-100/70">
         <svg
-          width="100%"
+          className="block w-full"
           viewBox={`0 0 ${chartWidth} ${chartHeight}`}
           preserveAspectRatio="none"
         >
-          {series.map((s, idx) => (
-            <path
-              key={s.label}
-              d={buildPath(s.points)}
-              fill="none"
-              stroke={s.color}
-              strokeWidth={2.5}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              opacity={idx === 0 ? 0.9 : 0.8}
-            />
-          ))}
+          <defs>
+            <linearGradient id="lineGlow" x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0%" stopColor="#e2e8f0" stopOpacity="0.35" />
+              <stop offset="100%" stopColor="#fff" stopOpacity="0.9" />
+            </linearGradient>
+            <pattern
+              id="dots"
+              x="0"
+              y="0"
+              width="12"
+              height="12"
+              patternUnits="userSpaceOnUse"
+            >
+              <circle cx="1" cy="1" r="1" fill="#e5e7eb" opacity="0.35" />
+            </pattern>
+          </defs>
+
+          <rect
+            x="0"
+            y="0"
+            width={chartWidth}
+            height={chartHeight}
+            fill="url(#dots)"
+          />
+
+          {series
+            .filter((s) => s.points.some((p) => p > 0))
+            .map((s, idx) => (
+              <path
+                key={s.label}
+                d={buildSmoothPath(s.points)}
+                fill="none"
+                stroke={s.color}
+                strokeWidth={3}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                opacity={idx === 0 ? 0.95 : 0.8}
+              />
+            ))}
         </svg>
 
-        <div className="mt-3 grid grid-cols-8 text-xs">
-          {labels.map((label) => (
-            <span key={label} className="text-center text-neutral-600">
+        <div className="mt-3 grid grid-cols-6 gap-2 text-xs font-medium text-neutral-600">
+          {labels.map((label, idx) => (
+            <span key={label + idx} className="text-center">
               {label}
             </span>
           ))}
         </div>
       </div>
-
-      <p className="mt-3 text-xs text-neutral-500">
-        Ajusta el agrupado en <code>buildBuckets</code> y las reglas de
-        “nuevos/viejos/recurrentes” usando <code>user_profiles.created_at</code>{" "}
-        (por hora/día/mes, según necesites).
+      <p className="mt-4 text-xs text-neutral-500">
+        Datos agrupados por día (últimos 30). <br />
+        Nuevos = registros del día. <br />
+        Viejos = usuarios existentes antes del día. <br />
+        Recurrentes = cuentas con más de 14 días de antigüedad (se muestra solo si hay datos).
       </p>
     </div>
   );

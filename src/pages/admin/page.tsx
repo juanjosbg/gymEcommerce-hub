@@ -13,6 +13,7 @@ import { DonutLegend } from "./components/DonutLegend";
 import type { StatCard } from "./types/dashboard";
 import { statCards as statCardsStatic } from "./data/dashboard";
 import GraficUser from "./components/GraficUser";
+import { useCategorySales } from "./hooks/useCategorySales";
 
 const AdminDashboard: React.FC = () => {
   const [usersCount, setUsersCount] = useState<number | null>(null);
@@ -21,6 +22,7 @@ const AdminDashboard: React.FC = () => {
     Array<{ name: string; stock: number }>
   >([]);
   const [showAllProducts, setShowAllProducts] = useState(false);
+  const { categories: categorySlices } = useCategorySales();
 
   useEffect(() => {
     const loadCounts = async () => {
@@ -275,16 +277,16 @@ const AdminDashboard: React.FC = () => {
                 <GraficUser/>
             </div>
 
-            <div className="rounded-2xl border bg-white p-6 shadow-sm">
-              <h2 className="text-lg font-semibold text-neutral-900">
-                Sales by product category
-              </h2>
-              <div className="mt-4 flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
-                <div className="flex-1">
-                  <DonutLegend />
+          <div className="rounded-2xl border bg-white p-6 shadow-sm">
+            <h2 className="text-lg font-semibold text-neutral-900">
+              Sales by product category
+            </h2>
+            <div className="mt-4 flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
+              <div className="flex-1">
+                  <DonutLegend categories={categorySlices} />
                 </div>
                 <div className="flex-1 flex justify-center">
-                  <DonutChart />
+                  <DonutChart categories={categorySlices} />
                 </div>
               </div>
             </div>
