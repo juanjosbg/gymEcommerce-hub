@@ -3,6 +3,7 @@ import { Sidebar } from "../../components/Sidebar";
 import { Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { ProductImages } from "@/data/ImgContent";
+import AddProductModal from "./AddProductModal";
 
 type Product = {
   id: string;
@@ -12,6 +13,7 @@ type Product = {
   stock: number | null;
   coverImage?: string | null;
   category?: string | null;
+  overview?: string | null;
 };
 
 const slugify = (str: string) =>
@@ -80,6 +82,7 @@ const AdminProductosPage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -135,7 +138,10 @@ const AdminProductosPage: React.FC = () => {
                 Total items en inventario: {totalStock}
               </p>
             </div>
-            <button className="flex items-center gap-2 rounded-xl border border-dashed border-neutral-300 px-4 py-2 text-sm font-medium text-primary hover:border-primary/50">
+            <button
+              onClick={() => setShowModal(true)}
+              className="flex items-center gap-2 rounded-xl border border-dashed border-neutral-300 px-4 py-2 text-sm font-medium text-primary hover:border-primary/50"
+            >
               <Plus className="h-4 w-4" />
               Add product
             </button>
@@ -213,6 +219,13 @@ const AdminProductosPage: React.FC = () => {
           </div>
         </main>
       </div>
+      <AddProductModal
+        open={showModal}
+        onClose={() => setShowModal(false)}
+        onCreated={(p) => {
+          setProducts((prev) => [p as any, ...prev]);
+        }}
+      />
     </div>
   );
 };
