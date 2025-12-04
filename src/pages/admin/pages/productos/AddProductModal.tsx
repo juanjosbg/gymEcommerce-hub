@@ -12,8 +12,12 @@ type Props = {
     name: string;
     category: string | null;
     price: number | null;
+    previousPrice?: number;
     stock: number | null;
     coverImage: string | null;
+    shots?: string[];
+    overview?: string;
+    shipment_details?: any[];
   }) => void;
 };
 
@@ -49,9 +53,7 @@ const AddProductModal: React.FC<Props> = ({ open, onClose, onCreated }) => {
   const discountOptions = useMemo(() => {
     const initial = [2, 3, 4, 5];
     const stepped: number[] = [];
-    for (let i = 10; i <= 50; i += 5) {
-      stepped.push(i);
-    }
+    for (let i = 10; i <= 50; i += 5) stepped.push(i);
     return [...initial, ...stepped];
   }, []);
   const discountedPrice = useMemo(() => {
@@ -64,6 +66,7 @@ const AddProductModal: React.FC<Props> = ({ open, onClose, onCreated }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
     if (!name.trim()) {
       setError("El nombre es obligatorio");
       return;
@@ -72,33 +75,43 @@ const AddProductModal: React.FC<Props> = ({ open, onClose, onCreated }) => {
       setError("Debes subir exactamente 3 imágenes.");
       return;
     }
-    setUploading(true);
-    let coverUrl: string | null = null;
-    const uploaded: string[] = [];
 
-    // Sube imagen si existe
+    setUploading(true);
+    const uploaded: string[] = [];
+    let coverUrl: string | null = null;
+
+    // Subir imágenes con logs
     for (const file of files) {
-      const fileExt = file.name.split(".").pop();
       const filePath = `${slug}/${Date.now()}-${file.name}`.replace(/\s+/g, "-");
-      const { error: uploadErr } = await supabase.storage
+      console.log("Subiendo a:", filePath, "size:", file.size, "type:", file.type);
+
+      const { error: uploadErr, data: uploadData } = await supabase.storage
         .from("product-images")
-        .upload(filePath, file);
+        .upload(filePath, file, { upsert: true });
+
+      console.log("Upload response:", { uploadData, uploadErr });
+
       if (uploadErr) {
-        setError("No se pudo subir la imagen");
+        setError(uploadErr.message || "No se pudo subir la imagen");
         setUploading(false);
         return;
       }
+
       const { data: publicData } = supabase.storage
         .from("product-images")
         .getPublicUrl(filePath);
+
+      console.log("Public URL response:", publicData);
+
       uploaded.push(publicData.publicUrl);
     }
     coverUrl = uploaded[0] || null;
 
-    // Inserta producto
+    // Datos finales de precio
     const finalPrice = hasDiscount ? discountedPrice ?? price : price;
     const previousPrice = hasDiscount ? price : null;
 
+    // Insertar en Supabase
     const { data, error: insertErr } = await supabase
       .from("products")
       .insert({
@@ -109,6 +122,7 @@ const AddProductModal: React.FC<Props> = ({ open, onClose, onCreated }) => {
         previous_price: previousPrice,
         stock,
         cover_image: coverUrl,
+        images: uploaded,
         overview: overview || null,
         shipment_details: shipmentDetails,
       })
@@ -122,6 +136,7 @@ const AddProductModal: React.FC<Props> = ({ open, onClose, onCreated }) => {
       return;
     }
 
+    // Mapear a camelCase para el front
     const row: any = data;
     onCreated({
       id: row.id,
@@ -129,12 +144,17 @@ const AddProductModal: React.FC<Props> = ({ open, onClose, onCreated }) => {
       name: row.name,
       category: row.category,
       price: row.price,
+      previousPrice: row.previous_price ?? undefined,
       stock: row.stock,
       coverImage: row.cover_image || row.image_url || coverUrl,
+      shots: row.images ?? [],
+      overview: row.overview ?? undefined,
+      shipment_details: row.shipment_details ?? [],
     });
+
     onClose();
     setName("");
-    setCategory("");
+    setCategory(productCategories[0] || "");
     setPrice(null);
     setStock(null);
     setOverview("");
@@ -224,7 +244,7 @@ const AddProductModal: React.FC<Props> = ({ open, onClose, onCreated }) => {
                   </div>
                 </div>
 
-                <hr className="mt-5"/>
+                <hr className="mt-5" />
                 <div className="mt-3 flex gap-4">
                   <div className="flex-1">
                     <label className="text-sm font-medium text-neutral-700">
@@ -281,7 +301,7 @@ const AddProductModal: React.FC<Props> = ({ open, onClose, onCreated }) => {
                         ))}
                       </select>
                     </div>
-                    
+
                     <div className="flex-1">
                       <label className="text-sm font-medium text-neutral-700">
                         Nuevo precio (aplicado)
@@ -296,8 +316,8 @@ const AddProductModal: React.FC<Props> = ({ open, onClose, onCreated }) => {
                   </div>
                 )}
 
-                <hr className="mt-5"/>
-                
+                <hr className="mt-5" />
+
                 <div className="mt-3 flex gap-4">
                   <div className="flex-1">
                     <label className="text-sm font-medium text-neutral-700">
@@ -326,10 +346,26 @@ const AddProductModal: React.FC<Props> = ({ open, onClose, onCreated }) => {
               <p className="text-sm font-semibold text-neutral-800 mb-3">
                 Añadir imágenes
               </p>
-              <label className={`flex h-48 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed ${files.length === 3 ? "border-green-400 bg-green-50/60" : "border-primary/40 bg-white"} transition hover:border-primary/70`}>
-                <Upload className={`h-10 w-10 ${files.length === 3 ? "text-green-500" : "text-primary/60"}`} />
+              <label
+                className={`flex h-48 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed ${
+                  files.length === 3
+                    ? "border-green-400 bg-green-50/60"
+                    : "border-primary/40 bg-white"
+                } transition hover:border-primary/70`}
+              >
+                <Upload
+                  className={`h-10 w-10 ${
+                    files.length === 3 ? "text-green-500" : "text-primary/60"
+                  }`}
+                />
                 <span className="mt-2 text-sm text-neutral-600">
-                  {files.length === 3 ? "Listo: 3 imágenes cargadas" : <>Arrastra o suelta, o <span className="text-primary">explora</span></>}
+                  {files.length === 3 ? (
+                    "Listo: 3 imágenes cargadas"
+                  ) : (
+                    <>
+                      Arrastra o suelta, o <span className="text-primary">explora</span>
+                    </>
+                  )}
                 </span>
                 <input
                   type="file"
@@ -337,7 +373,9 @@ const AddProductModal: React.FC<Props> = ({ open, onClose, onCreated }) => {
                   className="hidden"
                   multiple
                   onChange={(e) => {
-                    const incoming = e.target.files ? Array.from(e.target.files) : [];
+                    const incoming = e.target.files
+                      ? Array.from(e.target.files)
+                      : [];
                     setFiles((prev) => {
                       const next = [...prev, ...incoming].slice(0, 3);
                       return next;
@@ -355,9 +393,7 @@ const AddProductModal: React.FC<Props> = ({ open, onClose, onCreated }) => {
                     <div className="flex items-center gap-3">
                       <Image className="h-5 w-5 text-primary" />
                       <div>
-                        <p className="font-medium text-neutral-800">
-                          {f.name}
-                        </p>
+                        <p className="font-medium text-neutral-800">{f.name}</p>
                         <p className="text-xs text-neutral-500">
                           {Math.round(f.size / 1024)} KB
                         </p>

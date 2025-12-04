@@ -156,7 +156,8 @@ const AdminProductosPage: React.FC = () => {
                     <th className="px-4 py-3 font-semibold">Nombre</th>
                     <th className="px-4 py-3 font-semibold">Categoría</th>
                     <th className="px-4 py-3 font-semibold">Precio</th>
-                    <th className="px-4 py-3 font-semibold">Und. <br />Disponibles</th>
+                    <th className="px-4 py-3 font-semibold">Undidad</th>
+                    <th className="px-4 py-3 font-semibold">Edit</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-neutral-100 text-neutral-800">
@@ -211,6 +212,7 @@ const AdminProductosPage: React.FC = () => {
                         <td className="px-4 py-3 font-semibold text-primary">
                           {typeof p.stock === "number" ? p.stock : 0}
                         </td>
+                        <td className="px-4 py-3 font-semibold text-primary"></td>
                       </tr>
                     ))}
                 </tbody>
