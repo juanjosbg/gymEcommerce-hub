@@ -13,7 +13,10 @@ export function Sidebar() {
         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold">
           FIT
         </div>
-        <div className="text-lg font-semibold text-neutral-900">Admin</div>
+        <div>
+          <p className="text-sm font-semibold">Admin</p>
+          <p className="text-xs text-neutral-500">admin@fitmex.com</p>
+        </div>
       </div>
 
       <nav className="flex flex-1 flex-col gap-3 text-sm font-medium text-neutral-600">
