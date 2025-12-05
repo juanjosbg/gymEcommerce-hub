@@ -1,24 +1,17 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
-  Bell,
   BellRing,
-  CreditCard,
-  FileBox,
-  MapPin,
-  MessageSquare,
-  ScrollText,
   Search,
-  ShoppingCart,
   Store,
   Ticket,
   User,
   UserRound,
   UserRoundCog,
-  Repeat2,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/contexts/CartContext";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import {
@@ -37,6 +30,46 @@ export const Header = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [open, setOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const checkRole = async () => {
+      if (!user) {
+        setIsAdmin(false);
+        return;
+      }
+
+      const email = user.email?.toLowerCase();
+      if (email === "fitmexstore@gmail.com") {
+        setIsAdmin(true);
+        return;
+      }
+
+      try {
+        const { data } = await (supabase as any)
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", user.id)
+          .single();
+
+        if (!cancelled) {
+          setIsAdmin(data?.role === "admin");
+        }
+      } catch {
+        if (!cancelled) {
+          setIsAdmin(false);
+        }
+      }
+    };
+
+    checkRole();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user]);
 
   const filtered = useMemo(() => {
     const term = searchTerm.trim().toLowerCase();
@@ -198,51 +231,59 @@ export const Header = () => {
                     </div>
 
                     <div className="py-2 px-2">
-                      <DropdownMenuItem asChild className="gap-3">
-                        <Link
-                          to="/profile"
-                          className="flex w-full items-center gap-3"
-                        >
-                          <UserRound className="h-4 w-4" />
-                          <span>Your profile</span>
-                        </Link>
-                      </DropdownMenuItem>
-                      {/* <DropdownMenuItem className="gap-3">
-                        <ScrollText className="h-4 w-4" />
-                        <span>Your orders</span>
-                      </DropdownMenuItem> */}
-                      <DropdownMenuItem asChild className="gap-3">
-                        <Link
-                          to="/wishlist"
-                          className="flex w-full items-center gap-3"
-                        >
-                          <Store className="h-4 w-4" />
-                          <span>Productos de interés</span>
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem className="gap-3">
-                        <Ticket className="h-4 w-4" />
-                        <span>Coupons &amp; offers</span>
-                      </DropdownMenuItem>
-                      {/* <DropdownMenuItem className="gap-3">
-                        <CreditCard className="h-4 w-4" />
-                        <span>Credit balance</span>
-                      </DropdownMenuItem> */}
-                      {/* <DropdownMenuItem className="gap-3">
-                        <MapPin className="h-4 w-4" />
-                        <span>Addresses</span>
-                      </DropdownMenuItem> */}
-                      <DropdownMenuItem className="gap-3">
-                        <BellRing className="h-4 w-4" />
-                        <span>Notifications</span>
-                      </DropdownMenuItem>
+                      {isAdmin ? (
+                        <>
+                          <DropdownMenuItem asChild className="gap-3">
+                            <Link
+                              to="/admin"
+                              className="flex w-full items-center gap-3"
+                            >
+                              <UserRound className="h-4 w-4" />
+                              <span>Admin</span>
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem className="gap-3">
+                            <BellRing className="h-4 w-4" />
+                            <span>Notifications</span>
+                          </DropdownMenuItem>
+                        </>
+                      ) : (
+                        <>
+                          <DropdownMenuItem asChild className="gap-3">
+                            <Link
+                              to="/profile"
+                              className="flex w-full items-center gap-3"
+                            >
+                              <UserRound className="h-4 w-4" />
+                              <span>Your profile</span>
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem asChild className="gap-3">
+                            <Link
+                              to="/wishlist"
+                              className="flex w-full items-center gap-3"
+                            >
+                              <Store className="h-4 w-4" />
+                              <span>Productos de interés</span>
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem className="gap-3">
+                            <Ticket className="h-4 w-4" />
+                            <span>Coupons &amp; offers</span>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem className="gap-3">
+                            <BellRing className="h-4 w-4" />
+                            <span>Notifications</span>
+                          </DropdownMenuItem>
+                        </>
+                      )}
                     </div>
 
                     <div className="border-t py-2 px-2">
-                      <DropdownMenuItem className="gap-3">
+                      {/* <DropdownMenuItem className="gap-3">
                         <Repeat2 className="h-4 w-4" />
                         <span>Switch accounts</span>
-                      </DropdownMenuItem>
+                      </DropdownMenuItem> */}
                       <DropdownMenuItem
                         onClick={() => signOut()}
                         className="gap-3"
