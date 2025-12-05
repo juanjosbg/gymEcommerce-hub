@@ -15,6 +15,7 @@ type Product = {
   coverImage?: string | null;
   category?: string | null;
   overview?: string | null;
+  created_at?: string | null;
 };
 
 const slugify = (str: string) =>
@@ -85,6 +86,8 @@ const AdminProductosPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [sortByDate, setSortByDate] = useState<"desc" | "asc">("desc");
 
   useEffect(() => {
     const load = async () => {
@@ -92,7 +95,9 @@ const AdminProductosPage: React.FC = () => {
       setError(null);
       const { data, error } = await supabase
         .from("products")
-        .select("id, slug, name, price, stock, category, cover_image, images")
+        .select(
+          "id, slug, name, price, stock, category, cover_image, images, created_at"
+        )
         .order("name");
       if (error) {
         setError(error.message);
@@ -109,6 +114,7 @@ const AdminProductosPage: React.FC = () => {
             stock: p.stock ?? null,
             category: p.category ?? null,
             coverImage: p.cover_image || coverFromImages || fallback,
+            created_at: p.created_at ?? null,
           };
         });
         setProducts(normalized);
@@ -127,6 +133,27 @@ const AdminProductosPage: React.FC = () => {
     [products]
   );
 
+  const categories = useMemo(() => {
+    const set = new Set<string>();
+    products.forEach((p) => {
+      if (p.category) set.add(p.category);
+    });
+    return Array.from(set);
+  }, [products]);
+
+  const filteredProducts = useMemo(() => {
+    const list = products.filter((p) => {
+      if (categoryFilter !== "all" && p.category !== categoryFilter)
+        return false;
+      return true;
+    });
+    return list.sort((a, b) => {
+      const da = a.created_at ? new Date(a.created_at).getTime() : 0;
+      const db = b.created_at ? new Date(b.created_at).getTime() : 0;
+      return sortByDate === "desc" ? db - da : da - db;
+    });
+  }, [products, categoryFilter, sortByDate]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-neutral-50 to-slate-100 text-neutral-900">
       <div className="flex w-full">
@@ -142,13 +169,46 @@ const AdminProductosPage: React.FC = () => {
                 Total items en inventario: {totalStock}
               </p>
             </div>
-            <button
-              onClick={() => setShowModal(true)}
-              className="flex items-center gap-2 rounded-xl border border-dashed border-neutral-300 px-4 py-2 text-sm font-medium text-primary hover:border-primary/50"
-            >
-              <Plus className="h-4 w-4" />
-              Add product
-            </button>
+
+            <div className="flex items-center justify-between gap-3">
+              <button
+                onClick={() => setShowModal(true)}
+                className="flex items-center gap-2 rounded-xl border border-dashed border-neutral-300 px-4 py-2 text-sm font-medium text-primary hover:border-primary/50"
+              >
+                <Plus className="h-4 w-4" />
+                Add product
+              </button>
+            </div>
+          </div>
+          <div className="mb-6 flex flex-wrap gap-4">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-neutral-600">Categoría:</span>
+              <select
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value)}
+                className="gap-2 rounded-xl border border-dashed border-neutral-300 px-4 py-2 text-sm hover:border-primary/50 hover:shadow-sm"
+              >
+                <option value="all">Todas</option>
+                {categories.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {cat}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-neutral-600">Orden:</span>
+              <select
+                value={sortByDate}
+                onChange={(e) =>
+                  setSortByDate(e.target.value === "asc" ? "asc" : "desc")
+                }
+                className="gap-2 rounded-xl border border-dashed border-neutral-300 px-4 py-2 text-sm hover:border-primary/50 hover:shadow-sm"
+              >
+                <option value="desc">Más recientes</option>
+                <option value="asc">Más antiguos</option>
+              </select>
+            </div>
           </div>
 
           <div className="rounded-2xl border bg-white shadow-sm">
@@ -167,7 +227,10 @@ const AdminProductosPage: React.FC = () => {
                 <tbody className="divide-y divide-neutral-100 text-neutral-800">
                   {loading && (
                     <tr>
-                      <td colSpan={5} className="px-4 py-6 text-center text-neutral-500">
+                      <td
+                        colSpan={5}
+                        className="px-4 py-6 text-center text-neutral-500"
+                      >
                         Cargando productos…
                       </td>
                     </tr>
@@ -175,7 +238,10 @@ const AdminProductosPage: React.FC = () => {
 
                   {error && !loading && (
                     <tr>
-                      <td colSpan={5} className="px-4 py-6 text-center text-red-600">
+                      <td
+                        colSpan={5}
+                        className="px-4 py-6 text-center text-red-600"
+                      >
                         Error: {error}
                       </td>
                     </tr>
@@ -183,7 +249,10 @@ const AdminProductosPage: React.FC = () => {
 
                   {!loading && !error && products.length === 0 && (
                     <tr>
-                      <td colSpan={5} className="px-4 py-6 text-center text-neutral-500">
+                      <td
+                        colSpan={5}
+                        className="px-4 py-6 text-center text-neutral-500"
+                      >
                         No hay productos registrados.
                       </td>
                     </tr>
@@ -191,7 +260,7 @@ const AdminProductosPage: React.FC = () => {
 
                   {!loading &&
                     !error &&
-                    products.map((p) => (
+                    filteredProducts.map((p) => (
                       <tr key={p.id} className="hover:bg-neutral-50">
                         <td className="px-4 py-3">
                           <div className="h-12 w-12 overflow-hidden rounded-lg border bg-neutral-100">
@@ -211,7 +280,9 @@ const AdminProductosPage: React.FC = () => {
                         <td className="px-4 py-3">{p.name ?? "Producto"}</td>
                         <td className="px-4 py-3">{p.category ?? "—"}</td>
                         <td className="px-4 py-3">
-                          {typeof p.price === "number" ? `$${p.price.toFixed(2)}` : "—"}
+                          {typeof p.price === "number"
+                            ? `$${p.price.toFixed(2)}`
+                            : "—"}
                         </td>
                         <td className="px-4 py-3 font-semibold text-primary">
                           {typeof p.stock === "number" ? p.stock : 0}
@@ -221,7 +292,9 @@ const AdminProductosPage: React.FC = () => {
                             productName={p.name ?? undefined}
                             disabled={deletingId === p.id}
                             onEdit={() => {
-                              alert("Editar producto aún no está implementado.");
+                              alert(
+                                "Editar producto aún no está implementado."
+                              );
                             }}
                             onDelete={async () => {
                               if (!p.id) return;
@@ -241,7 +314,8 @@ const AdminProductosPage: React.FC = () => {
                                 );
                               } catch (err: any) {
                                 alert(
-                                  err?.message || "No se pudo eliminar el producto"
+                                  err?.message ||
+                                    "No se pudo eliminar el producto"
                                 );
                               } finally {
                                 setDeletingId(null);
