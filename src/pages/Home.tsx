@@ -12,6 +12,16 @@ import Filter from "@/components/Filters/Filter";
 import { productsSection } from "@/data/ui";
 import { filterProducts as applyFilters } from "@/data/filterByProduct";
 import { products as localCatalog } from "@/data/products";
+import { supabase } from "@/integrations/supabase/client";
+import { ProductImages } from "@/data/ImgContent";
+
+const slugify = (str: string) =>
+  str
+    ?.normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 
 import Hero1 from "../../public/Hero/hero_bg_1_1.png"
 import Hero2 from "../../public/Hero/hero_bg_1_2.png"
@@ -47,21 +57,100 @@ const Home = () => {
     },
   ];
 
-  // ------ LOAD PRODUCTS FROM LOCAL DATA ------
+  const getFallbackCover = (slug: string, name: string) => {
+    const keyDirect = ProductImages[slug as keyof typeof ProductImages]
+      ? slug
+      : undefined;
+
+    const keyByMatch =
+      keyDirect ||
+      (Object.keys(ProductImages).find((k) => {
+        const lowerK = k.toLowerCase();
+        const lowerSlug = slug.toLowerCase();
+        const lowerName = name.toLowerCase();
+        return (
+          lowerSlug.includes(lowerK) ||
+          lowerK.includes(lowerSlug) ||
+          lowerName.includes(lowerK)
+        );
+      }) as keyof typeof ProductImages | undefined);
+
+    if (keyByMatch) {
+      const imgSet = ProductImages[keyByMatch];
+      if (imgSet?.length) return imgSet[0];
+    }
+    return null;
+  };
+
+  // ------ LOAD PRODUCTS (Supabase first, fallback to local data) ------
   useEffect(() => {
-    const mapped = localCatalog.map((p) => ({
-      id: p.slug,
-      name: p.name,
-      description: p.overview || "",
-      price: p.price,
-      previousPrice: p.previousPrice,
-      image_url: p.coverImage || p.shots?.[0],
-      category: p.category,
-      stock: 20,
-    }));
-    setProducts(mapped);
-    setFilteredProducts(mapped);
-    setLoading(false);
+    const loadProducts = async () => {
+      setLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from("products")
+          .select("*")
+          .order("created_at", { ascending: false });
+
+        if (error) throw error;
+
+        const rows = (data ?? []) as any[];
+        const mappedFromDb = rows.map((p) => {
+          const slug = p.slug || slugify(p.name || String(p.id));
+          const cover =
+            p.cover_image ||
+            (Array.isArray(p.images) && p.images.length ? p.images[0] : null) ||
+            getFallbackCover(slug, p.name || "");
+
+          return {
+            id: p.id?.toString() || slug,
+            name: p.name || "Producto",
+            description: p.overview || "",
+            price: Number(p.price ?? 0),
+            previousPrice:
+              typeof p.previous_price === "number" ? p.previous_price : undefined,
+            image_url: cover,
+            category: typeof p.category === "string" ? p.category : "Otros",
+            stock: Number.isFinite(p.stock) ? Number(p.stock) : 0,
+          } as Product;
+        });
+
+        const finalList =
+          mappedFromDb.length > 0
+            ? mappedFromDb
+            : localCatalog.map((p) => ({
+                id: p.slug,
+                name: p.name,
+                description: p.overview || "",
+                price: p.price,
+                previousPrice: p.previousPrice,
+                image_url: p.coverImage || p.shots?.[0],
+                category: p.category,
+                stock: 20,
+              }));
+
+        setProducts(finalList);
+        setFilteredProducts(finalList);
+      } catch (err) {
+        console.error("Error loading products:", err);
+        const mapped = localCatalog.map((p) => ({
+          id: p.slug,
+          name: p.name,
+          description: p.overview || "",
+          price: p.price,
+          previousPrice: p.previousPrice,
+          image_url: p.coverImage || p.shots?.[0],
+          category: p.category,
+          stock: 20,
+        }));
+        setProducts(mapped);
+        setFilteredProducts(mapped);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadProducts();
   }, []);
 
   // ------ SLIDER AUTO ------

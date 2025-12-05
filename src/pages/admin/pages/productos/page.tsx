@@ -4,6 +4,7 @@ import { Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { ProductImages } from "@/data/ImgContent";
 import AddProductModal from "./AddProductModal";
+import CrudActions from "../../components/crud";
 
 type Product = {
   id: string;
@@ -83,6 +84,7 @@ const AdminProductosPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -90,21 +92,23 @@ const AdminProductosPage: React.FC = () => {
       setError(null);
       const { data, error } = await supabase
         .from("products")
-        .select("id, slug, name, price, stock, category, cover_image")
+        .select("id, slug, name, price, stock, category, cover_image, images")
         .order("name");
       if (error) {
         setError(error.message);
       } else {
         const normalized = (data ?? []).map((p: any) => {
           const fallback = findFallbackImage(p.slug, p.name);
+          const coverFromImages =
+            Array.isArray(p.images) && p.images.length ? p.images[0] : null;
           return {
-            id: p.id,
+            id: p.id ?? p.slug ?? p.name ?? crypto.randomUUID(),
             slug: p.slug ?? null,
             name: p.name ?? null,
             price: p.price ?? null,
             stock: p.stock ?? null,
             category: p.category ?? null,
-            coverImage: p.cover_image || fallback,
+            coverImage: p.cover_image || coverFromImages || fallback,
           };
         });
         setProducts(normalized);
@@ -212,7 +216,39 @@ const AdminProductosPage: React.FC = () => {
                         <td className="px-4 py-3 font-semibold text-primary">
                           {typeof p.stock === "number" ? p.stock : 0}
                         </td>
-                        <td className="px-4 py-3 font-semibold text-primary"></td>
+                        <td className="px-4 py-3 font-semibold text-[#81afcd]">
+                          <CrudActions
+                            productName={p.name ?? undefined}
+                            disabled={deletingId === p.id}
+                            onEdit={() => {
+                              alert("Editar producto aún no está implementado.");
+                            }}
+                            onDelete={async () => {
+                              if (!p.id) return;
+                              const confirmDelete = window.confirm(
+                                "¿Eliminar este producto?"
+                              );
+                              if (!confirmDelete) return;
+                              try {
+                                setDeletingId(p.id);
+                                const { error: delErr } = await supabase
+                                  .from("products")
+                                  .delete()
+                                  .eq("id", p.id);
+                                if (delErr) throw delErr;
+                                setProducts((prev) =>
+                                  prev.filter((item) => item.id !== p.id)
+                                );
+                              } catch (err: any) {
+                                alert(
+                                  err?.message || "No se pudo eliminar el producto"
+                                );
+                              } finally {
+                                setDeletingId(null);
+                              }
+                            }}
+                          />
+                        </td>
                       </tr>
                     ))}
                 </tbody>

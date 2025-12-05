@@ -3,6 +3,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { X, Upload, Loader2, Image, Trash2 } from "lucide-react";
 import { productCategories } from "@/data/Filter";
 
+// Usa el bucket sin espacios/acentos (ajusta al ID real del bucket en Supabase)
+const BUCKET = "product-images";
+
 type Props = {
   open: boolean;
   onClose: () => void;
@@ -81,12 +84,19 @@ const AddProductModal: React.FC<Props> = ({ open, onClose, onCreated }) => {
     let coverUrl: string | null = null;
 
     // Subir imágenes con logs
-    for (const file of files) {
-      const filePath = `${slug}/${Date.now()}-${file.name}`.replace(/\s+/g, "-");
+    for (const [index, file] of files.entries()) {
+      const extFromName = file.name.split(".").pop()?.toLowerCase();
+      const extFromType = file.type.split("/")[1];
+      const ext = extFromName || extFromType || "jpg";
+      const filePath = `${slug}/${Date.now()}-${index}.${ext}`.replace(
+        /\s+/g,
+        "-"
+      );
+
       console.log("Subiendo a:", filePath, "size:", file.size, "type:", file.type);
 
       const { error: uploadErr, data: uploadData } = await supabase.storage
-        .from("product-images")
+        .from(BUCKET)
         .upload(filePath, file, { upsert: true });
 
       console.log("Upload response:", { uploadData, uploadErr });
@@ -98,7 +108,7 @@ const AddProductModal: React.FC<Props> = ({ open, onClose, onCreated }) => {
       }
 
       const { data: publicData } = supabase.storage
-        .from("product-images")
+        .from(BUCKET)
         .getPublicUrl(filePath);
 
       console.log("Public URL response:", publicData);

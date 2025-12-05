@@ -47,6 +47,7 @@ const imageKeyMap: Record<string, keyof typeof ProductImages> = {
 };
 
 const getProductImage = (name: string, fallback?: string | null) => {
+  if (fallback) return fallback;
   const normalized = name.toLowerCase().replace(/[^a-z0-9]/g, "");
   const mappedKey = imageKeyMap[normalized];
 
@@ -55,7 +56,7 @@ const getProductImage = (name: string, fallback?: string | null) => {
     if (image) return image;
   }
 
-  return fallback || "/placeholder.svg";
+  return "/placeholder.svg";
 };
 
 export const ProductCard = ({ product }: ProductCardProps) => {

@@ -25,6 +25,7 @@ import AdminPage from "./pages/admin/page";
 import AdminProductosPage from "./pages/admin/pages/productos/page";
 import AdminOrdenesPage from "./pages/admin/pages/ordenes/page";
 import AdminStockPage from "./pages/admin/pages/stock/page";
+import GlobalLoadingOverlay from "./components/Load/GlobalLoadingOverlay";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +35,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <GlobalLoadingOverlay />
         <AuthProvider>
           <CartProvider>
             <WishlistProvider>

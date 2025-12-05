@@ -20,7 +20,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { products } from "@/data/content";
+import { products as staticProducts } from "@/data/content";
 import Notifications from "@/components/header/Notifications/pages";
 import CartSideBar from "./header/CartSideBar";
 
@@ -31,6 +31,7 @@ export const Header = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [open, setOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [searchProducts, setSearchProducts] = useState(staticProducts);
 
   useEffect(() => {
     let cancelled = false;
@@ -71,13 +72,47 @@ export const Header = () => {
     };
   }, [user]);
 
+  useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("products")
+          .select("*")
+          .order("created_at", { ascending: false });
+
+        if (error || !data?.length) {
+          setSearchProducts(staticProducts);
+          return;
+        }
+
+        const rows = (data ?? []) as any[];
+        const mapped = rows.map((p) => {
+          const cover =
+            p.cover_image ||
+            (Array.isArray(p.images) && p.images.length ? p.images[0] : null);
+          return {
+            slug: p.slug || p.id || "producto",
+            name: p.name ?? "Producto",
+            category: p.category ?? "Otros",
+            coverImage: cover || "",
+          };
+        });
+        setSearchProducts(mapped as any);
+      } catch {
+        setSearchProducts(staticProducts);
+      }
+    };
+
+    loadProducts();
+  }, []);
+
   const filtered = useMemo(() => {
     const term = searchTerm.trim().toLowerCase();
     if (!term) return [];
-    return products
+    return searchProducts
       .filter((p) => p.name.toLowerCase().includes(term))
       .slice(0, 10);
-  }, [searchTerm]);
+  }, [searchTerm, searchProducts]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
