@@ -143,7 +143,7 @@ const SectionProductHeader: FC<SectionProductHeaderProps> = ({
         </div>
 
         <div className="mt-5 flex items-center gap-5">
-          <ButtonPrimary className="w-full">Buy Now</ButtonPrimary>
+          <ButtonPrimary href={"/cart"} className="w-full">Comprar ahora</ButtonPrimary>
           <AddToCartButton producto={producto} />
           {/* <ButtonSecondary
             className="flex w-full items-center gap-1 border-2 border-primary text-primary"

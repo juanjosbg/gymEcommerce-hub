@@ -19,6 +19,7 @@ type Props = {
     stock: number | null;
     coverImage: string | null;
     shots?: string[];
+    images?: string[];
     overview?: string;
     shipment_details?: any[];
   }) => void;
@@ -158,6 +159,7 @@ const AddProductModal: React.FC<Props> = ({ open, onClose, onCreated }) => {
       stock: row.stock,
       coverImage: row.cover_image || row.image_url || coverUrl,
       shots: row.images ?? [],
+      images: row.images ?? uploaded,
       overview: row.overview ?? undefined,
       shipment_details: row.shipment_details ?? [],
     });

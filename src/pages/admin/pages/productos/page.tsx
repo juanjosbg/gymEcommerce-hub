@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ProductImages } from "@/data/ImgContent";
 import AddProductModal from "./AddProductModal";
 import CrudActions from "../../components/crud";
-import EditProductModal from "./EdditProductModal";
+//import EditProductModal from "./EdditProductModal";
 
 type Product = {
   id: string;
@@ -14,11 +14,9 @@ type Product = {
   price: number | null;
   stock: number | null;
   coverImage?: string | null;
+  images?: string[] | null;
   category?: string | null;
   overview?: string | null;
-  previousPrice?: number | null;
-  shipment_details?: any[] | null;
-  shots?: string[];
   created_at?: string | null;
 };
 
@@ -89,6 +87,7 @@ const AdminProductosPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
+  const [productToEdit, setProductToEdit] = useState<Product | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [sortByDate, setSortByDate] = useState<"desc" | "asc">("desc");
@@ -104,14 +103,14 @@ const AdminProductosPage: React.FC = () => {
         .select(
           "id, slug, name, price, previous_price, stock, category, cover_image, images, overview, shipment_details, created_at"
         )
-        .order("name");
+        .order("created_at", { ascending: false });
       if (error) {
         setError(error.message);
       } else {
         const normalized = (data ?? []).map((p: any) => {
+          const images = Array.isArray(p.images) ? p.images : [];
           const fallback = findFallbackImage(p.slug, p.name);
-          const coverFromImages =
-            Array.isArray(p.images) && p.images.length ? p.images[0] : null;
+          const coverFromImages = images.length ? images[0] : null;
           return {
             id: p.id ?? p.slug ?? p.name ?? crypto.randomUUID(),
             slug: p.slug ?? null,
@@ -120,10 +119,6 @@ const AdminProductosPage: React.FC = () => {
             stock: p.stock ?? null,
             category: p.category ?? null,
             coverImage: p.cover_image || coverFromImages || fallback,
-            previousPrice: p.previous_price ?? null,
-            overview: p.overview ?? null,
-            shipment_details: p.shipment_details ?? null,
-            shots: Array.isArray(p.images) ? p.images : [],
             created_at: p.created_at ?? null,
           };
         });
@@ -238,7 +233,7 @@ const AdminProductosPage: React.FC = () => {
                   {loading && (
                     <tr>
                       <td
-                        colSpan={5}
+                        colSpan={6}
                         className="px-4 py-6 text-center text-neutral-500"
                       >
                         Cargando productos…
@@ -249,7 +244,7 @@ const AdminProductosPage: React.FC = () => {
                   {error && !loading && (
                     <tr>
                       <td
-                        colSpan={5}
+                        colSpan={6}
                         className="px-4 py-6 text-center text-red-600"
                       >
                         Error: {error}
@@ -260,7 +255,7 @@ const AdminProductosPage: React.FC = () => {
                   {!loading && !error && products.length === 0 && (
                     <tr>
                       <td
-                        colSpan={5}
+                        colSpan={6}
                         className="px-4 py-6 text-center text-neutral-500"
                       >
                         No hay productos registrados.
@@ -302,8 +297,9 @@ const AdminProductosPage: React.FC = () => {
                             productName={p.name ?? undefined}
                             disabled={deletingId === p.id}
                             onEdit={() => {
-                              setEditProduct(p);
-                              setShowEditModal(true);
+                              alert(
+                                "Editar producto aún no está implementado."
+                              );
                             }}
                             onDelete={async () => {
                               if (!p.id) return;
@@ -345,21 +341,6 @@ const AdminProductosPage: React.FC = () => {
         onClose={() => setShowModal(false)}
         onCreated={(p) => {
           setProducts((prev) => [p as any, ...prev]);
-        }}
-      />
-      <EditProductModal
-        open={showEditModal}
-        onClose={() => {
-          setShowEditModal(false);
-          setEditProduct(null);
-        }}
-        product={editProduct}
-        onSaved={(updated) => {
-          setProducts((prev) => {
-            const exists = prev.some((p) => p.id === updated.id);
-            if (!exists) return [updated as any, ...prev];
-            return prev.map((p) => (p.id === updated.id ? (updated as any) : p));
-          });
         }}
       />
     </div>

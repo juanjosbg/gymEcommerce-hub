@@ -1,9 +1,8 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { X, Upload, Loader2, Image, Trash2 } from "lucide-react";
+import { X, Upload, Loader2, Trash2 } from "lucide-react";
 import { productCategories } from "@/data/Filter";
 
-// Usa el bucket sin espacios/acentos (ajusta al ID real del bucket en Supabase)
 const BUCKET = "product-images";
 
 type Props = {
@@ -20,6 +19,7 @@ type Props = {
     stock: number | null;
     coverImage: string | null;
     shots?: string[];
+    images?: string[];
     overview?: string;
     shipment_details?: any[];
   }) => void;
@@ -49,8 +49,24 @@ const EditProductModal: React.FC<Props> = ({ open, onClose, product, onSaved }) 
     { title: "Presentación", description: "" },
     { title: "Llegada estimada", description: "" },
   ]);
-  const [currentShots, setCurrentShots] = useState<string[]>([]);
   const [files, setFiles] = useState<File[]>([]);
+  const [existingImages, setExistingImages] = useState<string[]>([]);
+  const [originalImages, setOriginalImages] = useState<string[]>([]);
+  const [allowImageEdit, setAllowImageEdit] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(0);
+  const [removedExisting, setRemovedExisting] = useState<string[]>([]);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const MAX_IMAGES = 6;
+  const displayImages = useMemo(
+    () =>
+      allowImageEdit
+        ? [
+            ...(files.map((f) => URL.createObjectURL(f)) as string[]),
+            ...existingImages,
+          ]
+        : existingImages,
+    [allowImageEdit, files, existingImages]
+  );
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -68,6 +84,20 @@ const EditProductModal: React.FC<Props> = ({ open, onClose, product, onSaved }) 
     return Number(result.toFixed(2));
   }, [price, hasDiscount, discountPercent]);
 
+  const getStoragePath = (url: string) => {
+    try {
+      const parsed = new URL(url);
+      const marker = `/object/public/${BUCKET}/`;
+      const idx = parsed.pathname.indexOf(marker);
+      if (idx >= 0) {
+        return decodeURIComponent(parsed.pathname.slice(idx + marker.length));
+      }
+    } catch {
+      // fallback abajo
+    }
+    return decodeURIComponent(url.split(`${BUCKET}/`)[1] || "");
+  };
+
   useEffect(() => {
     if (!open || !product) return;
     setName(product.name ?? "");
@@ -75,15 +105,31 @@ const EditProductModal: React.FC<Props> = ({ open, onClose, product, onSaved }) 
     setPrice(product.price ?? null);
     setStock(product.stock ?? null);
     setOverview(product.overview ?? "");
+    setAllowImageEdit(false);
     setShipmentDetails(product.shipment_details ?? [
       { title: "Descuento", description: "" },
       { title: "Tiempo de entrega", description: "" },
       { title: "Presentación", description: "" },
       { title: "Llegada estimada", description: "" },
     ]);
-    setCurrentShots(product?.shots ?? []);
+    const imgs =
+      (Array.isArray(product.images) && product.images.length && product.images) ||
+      (Array.isArray(product.shots) && product.shots.length && product.shots) ||
+      [];
+    const cover = product.coverImage ?? product.cover_image;
+    const baseImages = imgs.length ? imgs : cover ? [cover] : [];
+    setExistingImages(baseImages);
+    setOriginalImages(baseImages);
     setFiles([]);
+    setRemovedExisting([]);
+    setSelectedImage(0);
   }, [open, product]);
+
+  useEffect(() => {
+    setSelectedImage((prev) =>
+      prev >= displayImages.length ? Math.max(0, displayImages.length - 1) : prev
+    );
+  }, [displayImages.length]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -93,14 +139,14 @@ const EditProductModal: React.FC<Props> = ({ open, onClose, product, onSaved }) 
       setError("El nombre es obligatorio");
       return;
     }
-    const uploaded: string[] = [...currentShots];
+    const uploaded: string[] = [...existingImages];
 
     setUploading(true);
-    let coverUrl: string | null = product?.coverImage ?? uploaded[0] ?? null;
+    // Siempre recalculamos portada con el primer slot disponible
+    let coverUrl: string | null = uploaded[0] ?? null;
 
-    // Subir nuevas imágenes si se adjuntan
-    if (files.length) {
-      uploaded.length = 0; // reset and use only new set
+    // Subir nuevas imágenes si se adjuntan y está habilitado
+    if (allowImageEdit && files.length) {
       for (const [index, file] of files.entries()) {
         const extFromName = file.name.split(".").pop()?.toLowerCase();
         const extFromType = file.type.split("/")[1];
@@ -110,7 +156,7 @@ const EditProductModal: React.FC<Props> = ({ open, onClose, product, onSaved }) 
           "-"
         );
 
-        const { error: uploadErr, data: uploadData } = await supabase.storage
+        const { error: uploadErr } = await supabase.storage
           .from(BUCKET)
           .upload(filePath, file, { upsert: true });
 
@@ -127,6 +173,24 @@ const EditProductModal: React.FC<Props> = ({ open, onClose, product, onSaved }) 
         uploaded.push(publicData.publicUrl);
       }
       coverUrl = uploaded[0] || null;
+    }
+
+    if (allowImageEdit && uploaded.length < 3) {
+      setError("Debes tener al menos 3 imágenes en el producto.");
+      setUploading(false);
+      return;
+    }
+
+    // Calcular paths a borrar (las removidas explícitamente + las que ya no están)
+    const pathsFromRemoved = removedExisting.filter(Boolean);
+    const pathsFromDiff = originalImages
+      .filter((url) => !uploaded.includes(url))
+      .map(getStoragePath)
+      .filter(Boolean);
+    const pathsToRemove = Array.from(new Set([...pathsFromRemoved, ...pathsFromDiff]));
+
+    if (pathsToRemove.length) {
+      await supabase.storage.from(BUCKET).remove(pathsToRemove);
     }
 
     // Datos finales de precio
@@ -146,7 +210,7 @@ const EditProductModal: React.FC<Props> = ({ open, onClose, product, onSaved }) 
           previous_price: previousPrice,
           stock,
           cover_image: coverUrl,
-          images: uploaded,
+          images: uploaded.length ? uploaded : product?.images ?? product?.shots ?? [],
           overview: overview || null,
           shipment_details: shipmentDetails,
         },
@@ -174,6 +238,7 @@ const EditProductModal: React.FC<Props> = ({ open, onClose, product, onSaved }) 
       stock: row.stock,
       coverImage: row.cover_image || row.image_url || coverUrl,
       shots: row.images ?? [],
+      images: row.images ?? uploaded,
       overview: row.overview ?? undefined,
       shipment_details: row.shipment_details ?? [],
     });
@@ -190,8 +255,12 @@ const EditProductModal: React.FC<Props> = ({ open, onClose, product, onSaved }) 
       { title: "Presentación", description: "" },
       { title: "Llegada estimada", description: "" },
     ]);
-    setCurrentShots([]);
+    setExistingImages([]);
+    setOriginalImages([]);
     setFiles([]);
+    setRemovedExisting([]);
+    setAllowImageEdit(false);
+    setSelectedImage(0);
     setHasDiscount(false);
     setDiscountPercent(0);
   };
@@ -217,7 +286,7 @@ const EditProductModal: React.FC<Props> = ({ open, onClose, product, onSaved }) 
         </div>
 
         <form onSubmit={handleSubmit} className="grid gap-6 p-6 lg:grid-cols-2">
-          {/* Columna izquierda: formulario de datos */}
+          {/* Columna izquierda: subida de imágenes */}
           <div className="space-y-4">
             <div className="rounded-2xl border border-neutral-200 bg-white px-4 py-4 shadow-sm">
               <div className="flex gap-4">
@@ -246,44 +315,6 @@ const EditProductModal: React.FC<Props> = ({ open, onClose, product, onSaved }) 
                   onChange={(e) => setOverview(e.target.value)}
                   placeholder="Breve descripción del producto"
                 />
-
-                <hr className="mt-5" />
-
-                <label className="text-sm font-medium text-neutral-700 mt-3 block">
-                  Detalles de envío
-                </label>
-                {shipmentDetails.map((detail, idx) => (
-                  <div key={idx} className="mt-3 flex gap-4">
-                    <div className="flex-1">
-                      <input
-                        className="w-full rounded-xl border border-neutral-200 px-3 py-2 text-sm outline-none focus:border-primary bg-white"
-                        value={detail.title}
-                        onChange={(e) =>
-                          setShipmentDetails((prev) =>
-                            prev.map((d, i) =>
-                              i === idx ? { ...d, title: e.target.value } : d
-                            )
-                          )
-                        }
-                        placeholder="Título del detalle"
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <input
-                        className="w-full rounded-xl border border-neutral-200 px-3 py-2 text-sm outline-none focus:border-primary bg-white"
-                        value={detail.description}
-                        onChange={(e) =>
-                          setShipmentDetails((prev) =>
-                            prev.map((d, i) =>
-                              i === idx ? { ...d, description: e.target.value } : d
-                            )
-                          )
-                        }
-                        placeholder="Descripción"
-                      />
-                    </div>
-                  </div>
-                ))}
               </div>
             </div>
 
@@ -411,123 +442,129 @@ const EditProductModal: React.FC<Props> = ({ open, onClose, product, onSaved }) 
             </div>
           </div>
 
-          {/* Columna derecha: subida de imágenes */}
+          {/* Columna derecha: imágenes */}
           <div className="space-y-4">
-            <div className="rounded-2xl border border-neutral-200 bg-neutral-50/80 px-4 py-5">
-              <p className="text-sm font-semibold text-neutral-800 mb-3">
-                Añadir imágenes (reemplazará las actuales)
-              </p>
-              <label
-                className={`flex h-48 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed ${
-                  files.length === 3
-                    ? "border-green-400 bg-green-50/60"
-                    : "border-primary/40 bg-white"
-                } transition hover:border-primary/70`}
-              >
-                <Upload
-                  className={`h-10 w-10 ${
-                    files.length === 3 ? "text-green-500" : "text-primary/60"
-                  }`}
-                />
-                <span className="mt-2 text-sm text-neutral-600">
-                  {files.length === 3 ? (
-                    "Listo: 3 imágenes cargadas"
-                  ) : (
-                    <>
-                      Arrastra o suelta, o <span className="text-primary">explora</span>
-                    </>
-                  )}
-                </span>
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  multiple
-                  onChange={(e) => {
-                    const incoming = e.target.files
-                      ? Array.from(e.target.files)
-                      : [];
-                    setFiles((prev) => {
-                      const next = [...prev, ...incoming].slice(0, 3);
+            <div className="rounded-2xl border border-neutral-200 bg-white px-4 py-4 shadow-sm">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-semibold text-neutral-800">
+                  Imágenes actuales
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAllowImageEdit((v) => {
+                      const next = !v;
+                      setFiles([]);
+                      setSelectedImage(0);
                       return next;
                     });
                   }}
-                  disabled={files.length >= 3}
-                />
-              </label>
-              {files.length > 0 && (
-                <div className="mt-4">
-                  <p className="text-sm font-medium text-neutral-700 mb-2">Nuevas imágenes</p>
-                  <div className="grid grid-cols-3 gap-2">
-                    {files.map((f, idx) => (
-                      <div key={idx} className="relative group">
-                        <img
-                          src={URL.createObjectURL(f)}
-                          alt={`Nueva ${idx + 1}`}
-                          className="w-full h-30 p-3 object-cover rounded-lg border border-neutral-200 bg-white"
-                        />
+                  className="flex items-center gap-2 text-sm text-neutral-600 hover:text-primary"
+                >
+                  <input type="checkbox" checked={allowImageEdit} readOnly />
+                  <span>Editar imágenes</span>
+                </button>
+              </div>
+              <div className="mt-3">
+                {displayImages.length === 0 && (
+                  <p className="text-sm text-neutral-500">
+                    Sin imágenes guardadas.
+                  </p>
+                )}
+                {displayImages.length > 0 && (
+                  <div className="rounded-xl border border-neutral-200 bg-neutral-50 p-3">
+                    <div className="w-full overflow-hidden rounded-xl bg-white">
+                      <img
+                        src={displayImages[selectedImage] || displayImages[0]}
+                        alt="preview"
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+                    <div className="mt-4 grid grid-cols-4 gap-3">
+                      {displayImages.map((url, idx) => (
+                        <div
+                          key={idx}
+                          className={`relative h-16 w-full overflow-hidden rounded-lg border ${
+                            idx === selectedImage ? "border-primary" : "border-neutral-200"
+                          } bg-white`}
+                          onClick={() => setSelectedImage(idx)}
+                        >
+                          <img
+                            src={url}
+                            alt={`img-${idx}`}
+                            className="h-full w-full object-cover"
+                          />
+                          {allowImageEdit && (
+                            <button
+                              type="button"
+                              onClick={async () => {
+                                if (!allowImageEdit) return;
+                                const isFileThumb = idx < files.length;
+                                if (isFileThumb) {
+                                  setFiles((prev) => prev.filter((_, i) => i !== idx));
+                                } else {
+                                  const existingIdx = idx - files.length;
+                                  const urlToRemove = existingImages[existingIdx];
+                                  if (urlToRemove) {
+                                    const path = getStoragePath(urlToRemove);
+                                    if (path) {
+                                      setRemovedExisting((prev) =>
+                                        prev.includes(path) ? prev : [...prev, path]
+                                      );
+                                      try {
+                                        await supabase.storage.from(BUCKET).remove([path]);
+                                      } catch (err) {
+                                        console.error("Error al eliminar imagen", err);
+                                      }
+                                    }
+                                  }
+                                  setExistingImages((prev) =>
+                                    prev.filter((_, i) => i !== existingIdx)
+                                  );
+                                }
+                                setSelectedImage(0);
+                              }}
+                              className="absolute right-1 top-1 rounded-full bg-white/80 p-1 text-red-500 shadow hover:bg-white"
+                              disabled={uploading}
+                              title="Eliminar imagen"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                      {allowImageEdit && displayImages.length < MAX_IMAGES && (
                         <button
                           type="button"
-                          onClick={() =>
-                            setFiles((prev) =>
-                              prev.filter((_, fileIdx) => fileIdx !== idx)
-                            )
-                          }
-                          className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={() => fileInputRef.current?.click()}
+                          className="flex h-16 w-full items-center justify-center rounded-lg border-2 border-dashed border-neutral-200 text-neutral-400 hover:border-primary hover:text-primary"
+                          title="Agregar imagen"
                           disabled={uploading}
                         >
-                          <Trash2 className="h-3 w-3" />
+                          +
                         </button>
-                        <p className="text-xs text-center mt-1 truncate">{f.name}</p>
-                      </div>
-                    ))}
+                      )}
+                    </div>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      className="hidden"
+                      onChange={(e) => {
+                        const selected = e.target.files ? Array.from(e.target.files) : [];
+                        if (!selected.length) return;
+                        const currentTotal = files.length + existingImages.length;
+                        const remainingSlots = MAX_IMAGES - currentTotal;
+                        if (remainingSlots <= 0) return;
+                        const nextFiles = selected.slice(0, remainingSlots);
+                        setFiles((prev) => [...prev, ...nextFiles]);
+                        e.target.value = "";
+                      }}
+                    />
                   </div>
-                </div>
-              )}
-              {!files.length && (
-                <p className="text-xs text-neutral-400 mt-4">
-                  No hay imágenes seleccionadas.
-                </p>
-              )}
-              <p className="text-xs text-neutral-500 mt-2">
-                Requeridas: 3 imágenes. Restantes: {Math.max(0, 3 - files.length)}.
-              </p>
-
-              <p className="text-sm font-semibold text-neutral-800 mb-3 mt-6">
-                Imágenes actuales
-              </p>
-              {currentShots.length > 0 ? (
-                <div className="mt-4">
-                  <div className="grid grid-cols-3 gap-2">
-                    {currentShots.map((url, idx) => (
-                      <div key={idx} className="relative group">
-                        <img
-                          src={url}
-                          alt={`Imagen ${idx + 1}`}
-                          className="w-full h-30 p-3 object-cover rounded-lg border border-neutral-200 bg-white"
-                        />
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setCurrentShots((prev) =>
-                              prev.filter((_, shotIdx) => shotIdx !== idx)
-                            )
-                          }
-                          className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                          disabled={uploading}
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </button>
-                        <p className="text-xs text-center mt-1">Imagen {idx + 1}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                <p className="text-xs text-neutral-400 mt-4">
-                  No hay imágenes actuales.
-                </p>
-              )}
+                )}
+              </div>
             </div>
 
             {error && (
@@ -543,7 +580,7 @@ const EditProductModal: React.FC<Props> = ({ open, onClose, product, onSaved }) 
                 className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white shadow-sm hover:opacity-90 disabled:opacity-60"
               >
                 {uploading && <Loader2 className="h-4 w-4 animate-spin" />}
-                Publicar producto
+                Guardar cambios
               </button>
             </div>
           </div>

@@ -36,6 +36,13 @@ export const Header = () => {
   const { user, signOut } = useAuth();
   const { cartCount } = useCart();
   const navigate = useNavigate();
+  const slugify = (str: string) =>
+    str
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
   const [searchTerm, setSearchTerm] = useState("");
   const [open, setOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -99,6 +106,7 @@ export const Header = () => {
             p.cover_image ||
             (Array.isArray(p.images) && p.images.length ? p.images[0] : null);
           return {
+            id: p.id,
             slug: p.slug || slugify(p.name || "") || p.id || "producto",
             name: p.name ?? "Producto",
             category: p.category ?? "Otros",
@@ -128,10 +136,12 @@ export const Header = () => {
     setOpen(false);
   };
 
-  const handleSelect = (slug: string) => {
+  const handleSelect = (slug?: string, id?: string) => {
     setOpen(false);
     setSearchTerm("");
-    navigate(`/producto/${slug}`);
+    const target = slug || id;
+    if (!target) return;
+    navigate(`/producto/${target}`);
   };
 
   return (
@@ -205,9 +215,9 @@ export const Header = () => {
                   {filtered.map((item) => (
                     <button
                       type="button"
-                      key={item.slug}
+                      key={item.slug || (item as any).id}
                       onMouseDown={(e) => e.preventDefault()}
-                      onClick={() => handleSelect(item.slug)}
+                      onClick={() => handleSelect(item.slug, (item as any).id)}
                       className="flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-gray-50"
                     >
                       <img

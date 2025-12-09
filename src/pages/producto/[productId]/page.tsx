@@ -33,13 +33,16 @@ type DbProduct = {
 
 const SingleProductPage = () => {
   const { productId = "" } = useParams();
+  const normalizedId = slugify(productId);
   const [selectedProduct, setSelectedProduct] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadProduct = async () => {
       setLoading(true);
-      const staticMatch = products.find((item) => item.slug === productId);
+      const staticMatch =
+        products.find((item) => item.slug === productId) ||
+        products.find((item) => item.slug === normalizedId);
       if (staticMatch) {
         setSelectedProduct(staticMatch);
         setLoading(false);
@@ -53,24 +56,52 @@ const SingleProductPage = () => {
         const { data, error } = await (supabase as any)
           .from("products")
           .select("*")
-          .or(`slug.eq.${productId},slug.eq.${normalizedParam},id.eq.${productId}`)
+          .or(`slug.eq.${normalizedId},slug.eq.${productId},id.eq.${productId}`)
           .limit(1)
           .single();
 
         if (!error && data) {
           productRow = data as DbProduct;
         } else {
-          // Fallback: buscar por nombre si el slug está vacío en la BD
-          const { data: fallbackData } = await (supabase as any)
-            .from("products")
-            .select("*")
-            .ilike("name", `%${productId}%`)
-            .limit(1)
-            .maybeSingle();
+          const row = data as DbProduct;
+          // Intenta encontrar un fallback estático por slug o por nombre
+          const staticFallback =
+            products.find((p) => p.slug === row.slug) ||
+            products.find(
+              (p) => slugify(p.name) === slugify(row.name ?? "")
+            );
 
-          if (fallbackData) {
-            productRow = fallbackData as DbProduct;
-          }
+          const shots = Array.isArray(row.images)
+            ? row.images
+            : row.image_url
+            ? [row.image_url]
+            : [];
+          const cover =
+            row.cover_image ||
+            (shots.length ? shots[0] : "") ||
+            row.image_url ||
+            "";
+
+          setSelectedProduct({
+            slug: row.slug ?? normalizedId ?? row.id ?? productId,
+            name: row.name ?? staticFallback?.name ?? "Producto",
+            category: row.category ?? staticFallback?.category ?? "Otros",
+            price: row.price ?? staticFallback?.price ?? 0,
+            previousPrice:
+              row.previous_price ?? staticFallback?.previousPrice ?? 0,
+            overview:
+              row.overview ??
+              row.description ??
+              staticFallback?.overview ??
+              "",
+            rating: staticFallback?.rating ?? 0,
+            pieces_sold: staticFallback?.pieces_sold ?? 0,
+            reviews: staticFallback?.reviews ?? 0,
+            coverImage: cover || staticFallback?.coverImage || "",
+            shots: shots.length ? shots : staticFallback?.shots ?? [],
+            shipment_details:
+              row.shipment_details ?? staticFallback?.shipment_details ?? [],
+          });
         }
 
         if (!productRow) {
