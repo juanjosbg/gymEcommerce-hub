@@ -24,6 +24,14 @@ import { products as staticProducts } from "@/data/content";
 import Notifications from "@/components/header/Notifications/pages";
 import CartSideBar from "./header/CartSideBar";
 
+const slugify = (str: string) =>
+  str
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
 export const Header = () => {
   const { user, signOut } = useAuth();
   const { cartCount } = useCart();
@@ -91,7 +99,7 @@ export const Header = () => {
             p.cover_image ||
             (Array.isArray(p.images) && p.images.length ? p.images[0] : null);
           return {
-            slug: p.slug || p.id || "producto",
+            slug: p.slug || slugify(p.name || "") || p.id || "producto",
             name: p.name ?? "Producto",
             category: p.category ?? "Otros",
             coverImage: cover || "",

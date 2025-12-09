@@ -47,56 +47,76 @@ const SingleProductPage = () => {
       }
 
       try {
+        const normalizedParam = slugify(productId);
+        let productRow: DbProduct | null = null;
+
         const { data, error } = await (supabase as any)
           .from("products")
           .select("*")
-          .or(`slug.eq.${productId},id.eq.${productId}`)
+          .or(`slug.eq.${productId},slug.eq.${normalizedParam},id.eq.${productId}`)
           .limit(1)
           .single();
 
-        if (error || !data) {
-          setSelectedProduct(null);
+        if (!error && data) {
+          productRow = data as DbProduct;
         } else {
-          const row = data as DbProduct;
-          // Intenta encontrar un fallback estático por slug o por nombre
-          const staticFallback =
-            products.find((p) => p.slug === row.slug) ||
-            products.find(
-              (p) => slugify(p.name) === slugify(row.name ?? "")
-            );
+          // Fallback: buscar por nombre si el slug está vacío en la BD
+          const { data: fallbackData } = await (supabase as any)
+            .from("products")
+            .select("*")
+            .ilike("name", `%${productId}%`)
+            .limit(1)
+            .maybeSingle();
 
-          const shots = Array.isArray(row.images)
-            ? row.images
-            : row.image_url
-            ? [row.image_url]
-            : [];
-          const cover =
-            row.cover_image ||
-            (shots.length ? shots[0] : "") ||
-            row.image_url ||
-            "";
-
-          setSelectedProduct({
-            slug: row.slug ?? row.id ?? productId,
-            name: row.name ?? staticFallback?.name ?? "Producto",
-            category: row.category ?? staticFallback?.category ?? "Otros",
-            price: row.price ?? staticFallback?.price ?? 0,
-            previousPrice:
-              row.previous_price ?? staticFallback?.previousPrice ?? 0,
-            overview:
-              row.overview ??
-              row.description ??
-              staticFallback?.overview ??
-              "",
-            rating: staticFallback?.rating ?? 0,
-            pieces_sold: staticFallback?.pieces_sold ?? 0,
-            reviews: staticFallback?.reviews ?? 0,
-            coverImage: cover || staticFallback?.coverImage || "",
-            shots: shots.length ? shots : staticFallback?.shots ?? [],
-            shipment_details:
-              row.shipment_details ?? staticFallback?.shipment_details ?? [],
-          });
+          if (fallbackData) {
+            productRow = fallbackData as DbProduct;
+          }
         }
+
+        if (!productRow) {
+          setSelectedProduct(null);
+          return;
+        }
+
+        const row = productRow;
+        // Intenta encontrar un fallback estático por slug o por nombre
+        const staticFallback =
+          products.find((p) => p.slug === row.slug) ||
+          products.find(
+            (p) => slugify(p.name) === slugify(row.name ?? "")
+          );
+
+        const shots = Array.isArray(row.images)
+          ? row.images
+          : row.image_url
+          ? [row.image_url]
+          : [];
+        const cover =
+          row.cover_image ||
+          (shots.length ? shots[0] : "") ||
+          row.image_url ||
+          "";
+
+        setSelectedProduct({
+          slug: row.slug ?? slugify(row.name ?? "") ?? row.id ?? productId,
+          name: row.name ?? staticFallback?.name ?? "Producto",
+          category: row.category ?? staticFallback?.category ?? "Otros",
+          price: row.price ?? staticFallback?.price ?? 0,
+          previousPrice:
+            row.previous_price ?? staticFallback?.previousPrice ?? 0,
+          overview:
+            row.overview ??
+            row.description ??
+            staticFallback?.overview ??
+            "",
+          rating: staticFallback?.rating ?? 0,
+          pieces_sold: staticFallback?.pieces_sold ?? 0,
+          reviews: staticFallback?.reviews ?? 0,
+          coverImage: cover || staticFallback?.coverImage || "",
+          shots: shots.length ? shots : staticFallback?.shots ?? [],
+          shipment_details:
+            row.shipment_details ?? staticFallback?.shipment_details ?? [],
+        });
       } catch {
         setSelectedProduct(null);
       } finally {
