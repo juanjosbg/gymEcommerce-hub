@@ -281,7 +281,7 @@ const AdminDashboard: React.FC = () => {
             <h2 className="text-lg font-semibold text-neutral-900">
               Sales by product category
             </h2>
-            <div className="mt-4 flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
+            <div className="mt-4 md:flex sm:flex-none gap-8 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex-1">
                   <DonutLegend categories={categorySlices} />
                 </div>
