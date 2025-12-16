@@ -57,8 +57,7 @@ const InfoProducBuy: React.FC<InfoProducBuyProps> = ({
         status: "pending",
       };
 
-      // Use (supabase as any) until types are generated
-      const { error } = await (supabase as any).from("orders").insert(orderData);
+      const { error } = await supabase.from("orders").insert(orderData);
       if (error) throw error;
 
       // Call Supabase Edge Function to send email
