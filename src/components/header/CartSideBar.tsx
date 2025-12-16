@@ -217,21 +217,14 @@ const CartSideBar: React.FC = () => {
                             )}
                           </span>
                         </p>
-                        <div className="mt-5 flex items-center gap-5">
-                          <ButtonPrimary
-                            onClick={handleCheckout}
-                            className="w-full flex-1"
-                          >
-                            Checkout
-                          </ButtonPrimary>
-
+                        <div className="mt-5 items-center gap-5">
                           <Link to="/cart">
                             <ButtonSecondary
                               onClick={handleCloseMenu}
                               href="/cart"
                               className="w-full flex-1 border-2 border-primary text-primary"
                             >
-                              Ver carrito
+                              Ir al carrito
                             </ButtonSecondary>
                           </Link>
                         </div>

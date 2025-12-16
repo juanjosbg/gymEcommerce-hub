@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useCart, type CartItem as HookCartItem } from "@/hooks/useCart";
 import { useState, useEffect } from "react";
+import InfoProducBuy from "@/components/Cart/infoProducBuy";
 import {
   Minus,
   Plus,
@@ -22,6 +23,7 @@ const Cart = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [manageOpen, setManageOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   useEffect(() => {
     setSelectedIds(cart.map((item) => item.id));
@@ -195,289 +197,297 @@ const Cart = () => {
         <div className="container py-8">
           <h1 className="text-3xl font-bold mb-6">Carrito de compras</h1>
 
-        {cart.length === 0 ? (
-          renderEmptyState()
-        ) : (
-          <div className="grid lg:grid-cols-[2fr_1fr] gap-6">
-            <div className="space-y-4">
-              <div className="flex items-center gap-3 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-green-800">
-                <CheckCircle2 className="h-5 w-5" />
-                <div>
-                  <p className="text-sm font-semibold">
-                    Envío especial gratis para ti
-                  </p>
-                  <p className="text-xs text-green-900/80">
-                    Oferta exclusiva disponible en tu compra actual.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between rounded-lg border bg-white px-4 py-3 text-sm">
-                <button
-                  onClick={toggleSelectAll}
-                  className="flex items-center gap-2 text-sm text-neutral-800"
-                >
-                  <span
-                    className={`flex h-4 w-4 items-center justify-center rounded-full border ${
-                      someSelected
-                        ? "border-black bg-black"
-                        : "border-neutral-400"
-                    }`}
-                  >
-                    {someSelected && (
-                      <span className="h-2 w-2 rounded-full bg-white" />
-                    )}
-                  </span>
-                  <span className="font-semibold">Seleccionar todo</span>
-                </button>
-                {someSelected && (
-                  <div className="flex items-center gap-3">
-                    {statusTabs.map((tab, idx) => (
-                      <button
-                        key={tab.key}
-                        onClick={() => {
-                          if (tab.key === "all") {
-                            setSelectedIds(cart.map((i) => i.id));
-                          }
-                        }}
-                        className={`rounded-full border px-4 py-2 text-sm font-semibold ${
-                          idx === 1
-                            ? "border-black text-black"
-                            : "border-neutral-300 text-neutral-700"
-                        }`}
-                      >
-                        {tab.label} ({tab.count})
-                      </button>
-                    ))}
-                    <div className="relative">
-                      <button
-                        onClick={() => setMenuOpen((prev) => !prev)}
-                        className="rounded-full border border-neutral-300 p-2 text-neutral-700 hover:bg-neutral-100"
-                      >
-                        <List className="h-4 w-4" />
-                      </button>
-                      {menuOpen && (
-                        <div className="absolute right-0 z-10 mt-2 w-44 rounded-md border bg-white shadow-lg text-sm text-neutral-700">
-                          <button
-                            className="w-full px-3 py-2 text-left hover:bg-neutral-100"
-                            onClick={() => {
-                              setMenuOpen(false);
-                              setManageOpen(true);
-                            }}
-                          >
-                            Administrar carrito
-                          </button>
-                          <button
-                            className="w-full px-3 py-2 text-left hover:bg-neutral-100"
-                            onClick={() => {
-                              setMenuOpen(false);
-                              setShareOpen(true);
-                            }}
-                          >
-                            Compartir carrito
-                          </button>
-                        </div>
-                      )}
-                    </div>
+          {cart.length === 0 ? (
+            renderEmptyState()
+          ) : (
+            <div className="grid lg:grid-cols-[2fr_1fr] gap-6">
+              <div className="space-y-4">
+                <div className="flex items-center gap-3 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-green-800">
+                  <CheckCircle2 className="h-5 w-5" />
+                  <div>
+                    <p className="text-sm font-semibold">
+                      Envío especial gratis para ti
+                    </p>
+                    <p className="text-xs text-green-900/80">
+                      Oferta exclusiva disponible en tu compra actual.
+                    </p>
                   </div>
-                )}
-              </div>
+                </div>
 
-              {cart.map((item) => (
-                <Card key={item.id} className="px-2 shadow-sm">
-                  <CardContent className="p-6">
-                    <div className="flex gap-4">
+                <div className="flex items-center justify-between rounded-lg border bg-white px-4 py-3 text-sm">
+                  <button
+                    onClick={toggleSelectAll}
+                    className="flex items-center gap-2 text-sm text-neutral-800"
+                  >
+                    <span
+                      className={`flex h-4 w-4 items-center justify-center rounded-full border ${
+                        someSelected
+                          ? "border-black bg-black"
+                          : "border-neutral-400"
+                      }`}
+                    >
+                      {someSelected && (
+                        <span className="h-2 w-2 rounded-full bg-white" />
+                      )}
+                    </span>
+                    <span className="font-semibold">Seleccionar todo</span>
+                  </button>
+                  {someSelected && (
+                    <div className="flex items-center gap-3">
+                      {statusTabs.map((tab, idx) => (
+                        <button
+                          key={tab.key}
+                          onClick={() => {
+                            if (tab.key === "all") {
+                              setSelectedIds(cart.map((i) => i.id));
+                            }
+                          }}
+                          className={`rounded-full border px-4 py-2 text-sm font-semibold ${
+                            idx === 1
+                              ? "border-black text-black"
+                              : "border-neutral-300 text-neutral-700"
+                          }`}
+                        >
+                          {tab.label} ({tab.count})
+                        </button>
+                      ))}
                       <div className="relative">
                         <button
-                          onClick={() => toggleSelectItem(item.id)}
-                          className="absolute -left-6 top-12 h-4 w-4 rounded-full border border-neutral-300 flex items-center justify-center"
+                          onClick={() => setMenuOpen((prev) => !prev)}
+                          className="rounded-full border border-neutral-300 p-2 text-neutral-700 hover:bg-neutral-100"
                         >
-                          {selectedIds.includes(item.id) && (
-                            <span className="h-2.5 w-2.5 rounded-full bg-black" />
-                          )}
+                          <List className="h-4 w-4" />
                         </button>
-                        <img
-                          src={item.coverImage || "/placeholder.svg"}
-                          alt={item.nombreProducto}
-                          className="h-28 w-28 object-cover rounded-md bg-gray-50 border"
-                        />
+                        {menuOpen && (
+                          <div className="absolute right-0 z-10 mt-2 w-44 rounded-md border bg-white shadow-lg text-sm text-neutral-700">
+                            <button
+                              className="w-full px-3 py-2 text-left hover:bg-neutral-100"
+                              onClick={() => {
+                                setMenuOpen(false);
+                                setManageOpen(true);
+                              }}
+                            >
+                              Administrar carrito
+                            </button>
+                            <button
+                              className="w-full px-3 py-2 text-left hover:bg-neutral-100"
+                              onClick={() => {
+                                setMenuOpen(false);
+                                setShareOpen(true);
+                              }}
+                            >
+                              Compartir carrito
+                            </button>
+                          </div>
+                        )}
                       </div>
-                      <div className="flex-1 space-y-2">
-                        <h3 className="font-semibold text-lg leading-tight">
-                          {item.nombreProducto}
-                        </h3>
-                        <div className="flex items-center gap-2 text-xs text-primary font-semibold">
-                          Oferta limitada
-                          <span className="inline-block h-1 w-16 rounded-full bg-[#c55252]" />
+                    </div>
+                  )}
+                </div>
+
+                {cart.map((item) => (
+                  <Card key={item.id} className="px-2 shadow-sm">
+                    <CardContent className="p-6">
+                      <div className="flex gap-4">
+                        <div className="relative">
+                          <button
+                            onClick={() => toggleSelectItem(item.id)}
+                            className="absolute -left-6 top-12 h-4 w-4 rounded-full border border-neutral-300 flex items-center justify-center"
+                          >
+                            {selectedIds.includes(item.id) && (
+                              <span className="h-2.5 w-2.5 rounded-full bg-black" />
+                            )}
+                          </button>
+                          <img
+                            src={item.coverImage || "/placeholder.svg"}
+                            alt={item.nombreProducto}
+                            className="h-28 w-28 object-cover rounded-md bg-gray-50 border"
+                          />
                         </div>
-                        <div className="flex items-center gap-3 text-sm text-neutral-500">
-                          <span className="flex items-center gap-1">
-                            <Truck className="h-4 w-4" /> Entrega rápida
-                          </span>
-                          <span>Envío: Gratis</span>
-                        </div>
-                        <div className="flex items-center gap-4 pt-2">
-                          <div className="flex items-center gap-2  border bg-neutral-50 px-2 rounded-full">
-                            <Button
-                              size="icon"
-                              variant="ghost"
-                              onClick={() =>
-                                updateQuantity(
-                                  item.id,
-                                  Math.max(1, (item.cantidad || 1) - 1)
-                                )
-                              }
-                              disabled={(item.cantidad || 1) <= 1}
-                            >
-                              <Minus className="h-4 w-4" />
-                            </Button>
-                            <span className="w-10 text-center font-semibold">
-                              {item.cantidad}
+                        <div className="flex-1 space-y-2">
+                          <h3 className="font-semibold text-lg leading-tight">
+                            {item.nombreProducto}
+                          </h3>
+                          <div className="flex items-center gap-2 text-xs text-primary font-semibold">
+                            Oferta limitada
+                            <span className="inline-block h-1 w-16 rounded-full bg-[#c55252]" />
+                          </div>
+                          <div className="flex items-center gap-3 text-sm text-neutral-500">
+                            <span className="flex items-center gap-1">
+                              <Truck className="h-4 w-4" /> Entrega rápida
                             </span>
+                            <span>Envío: Gratis</span>
+                          </div>
+                          <div className="flex items-center gap-4 pt-2">
+                            <div className="flex items-center gap-2  border bg-neutral-50 px-2 rounded-full">
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                onClick={() =>
+                                  updateQuantity(
+                                    item.id,
+                                    Math.max(1, (item.cantidad || 1) - 1)
+                                  )
+                                }
+                                disabled={(item.cantidad || 1) <= 1}
+                              >
+                                <Minus className="h-4 w-4" />
+                              </Button>
+                              <span className="w-10 text-center font-semibold">
+                                {item.cantidad}
+                              </span>
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                onClick={() =>
+                                  updateQuantity(
+                                    item.id,
+                                    (item.cantidad || 1) + 1
+                                  )
+                                }
+                              >
+                                <Plus className="h-4 w-4" />
+                              </Button>
+                            </div>
                             <Button
                               size="icon"
                               variant="ghost"
-                              onClick={() =>
-                                updateQuantity(
-                                  item.id,
-                                  (item.cantidad || 1) + 1
-                                )
-                              }
+                              onClick={() => removeFromCart(item.id)}
+                              className="text-red-500 hover:text-red-700 hover:bg-red-50"
                             >
-                              <Plus className="h-4 w-4" />
+                              <Trash2 className="h-4 w-4" />
                             </Button>
                           </div>
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            onClick={() => removeFromCart(item.id)}
-                            className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                        </div>
+                        <div className="text-right min-w-[140px]">
+                          <p className="text-sm text-neutral-400 line-through">
+                            ${(item.precio * 1.2).toFixed(0)}
+                          </p>
+                          <p className="text-2xl font-bold text-black">
+                            ${(item.precio * (item.cantidad || 1)).toFixed(0)}
+                          </p>
+                          <p className="text-xs text-orange-600 font-semibold">
+                            -20% aplicado
+                          </p>
+                          <p className="mt-2 text-xs text-neutral-500">
+                            Cantidad: {item.cantidad}
+                          </p>
                         </div>
                       </div>
-                      <div className="text-right min-w-[140px]">
-                        <p className="text-sm text-neutral-400 line-through">
-                          ${(item.precio * 1.2).toFixed(0)}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+
+              <div className="space-y-4">
+                <Card className="border-primary/80 shadow-sm">
+                  <CardContent className="p-6 space-y-4">
+                    <h2 className="text-lg font-semibold text-neutral-800">
+                      Resumen del pedido
+                    </h2>
+
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-neutral-600">
+                          Total de artículos:
+                        </span>
+                        <div className="text-right">
+                          <p className="text-neutral-400 line-through">
+                            ${(subtotal * 1.1).toFixed(0)}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-neutral-600">
+                          Descuento de artículo(s):
+                        </span>
+                        <span className="font-semibold text-red-500">
+                          -${estimatedDiscount.toFixed(0)}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center border-t pt-3">
+                        <span className="font-bold text-lg">Total</span>
+                        <span className="font-bold text-2xl text-green-600">
+                          ${total.toFixed(0)}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="rounded-md border border-green-300 bg-green-50 px-3 py-2 text-xs text-green-700 flex items-start gap-2">
+                      <CheckCircle2 className="h-4 w-4 mt-0.5" />
+                      <div>
+                        <p className="font-semibold">
+                          Tu compra protegida. Si lo encuentras más barato, te
+                          lo igualamos. ¡Compra ya!
                         </p>
-                        <p className="text-2xl font-bold text-black">
-                          ${(item.precio * (item.cantidad || 1)).toFixed(0)}
-                        </p>
-                        <p className="text-xs text-orange-600 font-semibold">
-                          -20% aplicado
-                        </p>
-                        <p className="mt-2 text-xs text-neutral-500">
-                          Cantidad: {item.cantidad}
-                        </p>
+                      </div>
+                    </div>
+
+                    <p className="text-xs text-neutral-500">
+                      Consulta el monto final de tu pago real.
+                    </p>
+
+                    <Button
+                      onClick={() => setConfirmOpen(true)}
+                      className="w-full rounded-full bg-primary hover:bg-primary/90 text-white text-sm py-5"
+                    >
+                      Pagar ({totalItems})
+                    </Button>
+
+                    <InfoProducBuy
+                      open={confirmOpen}
+                      onClose={() => setConfirmOpen(false)}
+                      cart={cart}
+                      total={total}
+                      totalItems={totalItems}
+                    />
+
+                    <p className="text-xs text-neutral-500 flex items-start gap-2">
+                      <span className="text-neutral-400 text-lg">ⓘ</span>
+                      La disponibilidad y el precio de los artículos no están
+                      garantizados hasta que se finalice el pago.
+                    </p>
+
+                    <p className="flex items-start gap-2 text-sm text-neutral-700">
+                      <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5" />
+                      No se te cobrará hasta que revises este pedido en la
+                      página siguiente
+                    </p>
+
+                    <div className="space-y-2 text-sm text-neutral-700">
+                      <p className="flex items-start gap-2 font-semibold">
+                        <ShieldCheck className="h-4 w-4 text-green-600 mt-0.5" />
+                        Opciones de pago seguro
+                      </p>
+                      <p className="text-xs text-neutral-600">
+                        Temu se compromete a proteger tu información de pago.
+                        Seguimos los estándares PCI DSS, utilizamos un
+                        encriptado sólido y realizamos revisiones periódicas del
+                        sistema para proteger tu privacidad.
+                      </p>
+                      <p className="text-xs font-semibold text-neutral-700">
+                        1. Métodos de pago
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {paymentLogos.map((logo) => (
+                          <span
+                            key={logo.key}
+                            className="rounded p-1 flex items-center justify-center"
+                          >
+                            <img
+                              src={logo.src}
+                              alt={logo.alt}
+                              className="h-6 w-auto object-contain"
+                            />
+                          </span>
+                        ))}
                       </div>
                     </div>
                   </CardContent>
                 </Card>
-              ))}
+              </div>
             </div>
-
-            <div className="space-y-4">
-              <Card className="border-primary/80 shadow-sm">
-                <CardContent className="p-6 space-y-4">
-                  <h2 className="text-lg font-semibold text-neutral-800">
-                    Resumen del pedido
-                  </h2>
-
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-neutral-600">
-                        Total de artículos:
-                      </span>
-                      <div className="text-right">
-                        <p className="text-neutral-400 line-through">
-                          ${(subtotal * 1.1).toFixed(0)}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-neutral-600">
-                        Descuento de artículo(s):
-                      </span>
-                      <span className="font-semibold text-red-500">
-                        -${estimatedDiscount.toFixed(0)}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center border-t pt-3">
-                      <span className="font-bold text-lg">Total</span>
-                      <span className="font-bold text-2xl text-green-600">
-                        ${total.toFixed(0)}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="rounded-md border border-green-300 bg-green-50 px-3 py-2 text-xs text-green-700 flex items-start gap-2">
-                    <CheckCircle2 className="h-4 w-4 mt-0.5" />
-                    <div>
-                      <p className="font-semibold">
-                        Tu compra protegida. Si lo encuentras más barato, te lo
-                        igualamos. ¡Compra ya!
-                      </p>
-                    </div>
-                  </div>
-
-                  <p className="text-xs text-neutral-500">
-                    Consulta el monto final de tu pago real.
-                  </p>
-
-                  <Button className="w-full rounded-full bg-primary hover:bg-primary/90 text-white text-sm py-5">
-                    Pagar ({totalItems}){" "}
-                    <span className="text-white/60 ml-2">
-                      -33,6% tiempo limitado
-                    </span>
-                  </Button>
-
-                  <p className="text-xs text-neutral-500 flex items-start gap-2">
-                    <span className="text-neutral-400 text-lg">ⓘ</span>
-                    La disponibilidad y el precio de los artículos no están
-                    garantizados hasta que se finalice el pago.
-                  </p>
-
-                  <p className="flex items-start gap-2 text-sm text-neutral-700">
-                    <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5" />
-                    No se te cobrará hasta que revises este pedido en la página
-                    siguiente
-                  </p>
-
-                  <div className="space-y-2 text-sm text-neutral-700">
-                    <p className="flex items-start gap-2 font-semibold">
-                      <ShieldCheck className="h-4 w-4 text-green-600 mt-0.5" />
-                      Opciones de pago seguro
-                    </p>
-                    <p className="text-xs text-neutral-600">
-                      Temu se compromete a proteger tu información de pago.
-                      Seguimos los estándares PCI DSS, utilizamos un encriptado
-                      sólido y realizamos revisiones periódicas del sistema para
-                      proteger tu privacidad.
-                    </p>
-                    <p className="text-xs font-semibold text-neutral-700">
-                      1. Métodos de pago
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {paymentLogos.map((logo) => (
-                        <span
-                          key={logo.key}
-                          className="rounded p-1 flex items-center justify-center"
-                        >
-                          <img
-                            src={logo.src}
-                            alt={logo.alt}
-                            className="h-6 w-auto object-contain"
-                          />
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        )}
+          )}
         </div>
       </div>
 
@@ -678,7 +688,9 @@ const ShareCartModal: React.FC<{
           </button>
           <div className="flex flex-col items-end gap-2">
             <div className="flex items-center gap-2 text-xs text-neutral-600">
-              <span className="font-semibold text-neutral-700">Compartir en</span>
+              <span className="font-semibold text-neutral-700">
+                Compartir en
+              </span>
               <div className="flex items-center gap-2">
                 {shareButtons.map((b) => (
                   <span
