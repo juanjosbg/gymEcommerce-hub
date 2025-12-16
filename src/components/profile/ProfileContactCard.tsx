@@ -1,10 +1,14 @@
-import React from "react";
+import React, { useState } from "react";
 import { Mail, Phone, UserRound, Pencil, Calendar } from "lucide-react";
+import { format } from "date-fns";
+import { es } from "date-fns/locale";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 
 interface Props {
   form: {
@@ -30,6 +34,20 @@ const ProfileContactCard: React.FC<Props> = ({
   onSave,
   onToggleEdit,
 }) => {
+  const [calendarOpen, setCalendarOpen] = useState(false);
+
+  const selectedDate = form.birthday ? new Date(form.birthday) : undefined;
+
+  const handleDateSelect = (date: Date | undefined) => {
+    if (date) {
+      const formatted = format(date, "yyyy-MM-dd");
+      onChange({
+        target: { name: "birthday", value: formatted },
+      } as React.ChangeEvent<HTMLInputElement>);
+    }
+    setCalendarOpen(false);
+  };
+
   const formattedBirthday = React.useMemo(() => {
     if (!form.birthday) return "";
     const parsed = new Date(form.birthday);
@@ -147,6 +165,25 @@ const ProfileContactCard: React.FC<Props> = ({
               className="rounded-full pl-9"
             />
             <Calendar className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            {isEditing && (
+              <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+                <PopoverTrigger asChild>
+                  <Calendar className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground cursor-pointer" />
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <CalendarComponent
+                    mode="single"
+                    selected={selectedDate}
+                    onSelect={handleDateSelect}
+                    disabled={(date) =>
+                      date > new Date() || date < new Date("1900-01-01")
+                    }
+                    initialFocus
+                    locale={es}
+                  />
+                </PopoverContent>
+              </Popover>
+            )}
           </div>
         </div>
       </CardContent>
