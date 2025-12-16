@@ -455,80 +455,73 @@ const EditProductModal: React.FC<Props> = ({ open, onClose, product, onSaved }) 
                   disabled={files.length >= 3}
                 />
               </label>
-              <div className="mt-4 space-y-2">
-                {files.map((f, idx) => (
-                  <div
-                    key={idx}
-                    className="flex items-center justify-between rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm"
-                  >
-                    <div className="flex items-center gap-3">
-                      <Image className="h-5 w-5 text-primary" />
-                      <div>
-                        <p className="font-medium text-neutral-800">{f.name}</p>
-                        <p className="text-xs text-neutral-500">
-                          {Math.round(f.size / 1024)} KB
-                        </p>
+              {files.length > 0 && (
+                <div className="mt-4">
+                  <p className="text-sm font-medium text-neutral-700 mb-2">Nuevas imágenes</p>
+                  <div className="grid grid-cols-3 gap-2">
+                    {files.map((f, idx) => (
+                      <div key={idx} className="relative group">
+                        <img
+                          src={URL.createObjectURL(f)}
+                          alt={`Nueva ${idx + 1}`}
+                          className="w-full h-30 p-3 object-cover rounded-lg border border-neutral-200 bg-white"
+                        />
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setFiles((prev) =>
+                              prev.filter((_, fileIdx) => fileIdx !== idx)
+                            )
+                          }
+                          className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                          disabled={uploading}
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </button>
+                        <p className="text-xs text-center mt-1 truncate">{f.name}</p>
                       </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setFiles((prev) =>
-                          prev.filter((_, fileIdx) => fileIdx !== idx)
-                        )
-                      }
-                      className="rounded-full p-2 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700"
-                      disabled={uploading}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+                    ))}
                   </div>
-                ))}
-                {!files.length && (
-                  <p className="text-xs text-neutral-400">
-                    No hay imágenes seleccionadas.
-                  </p>
-                )}
-                <p className="text-xs text-neutral-500">
-                  Requeridas: 3 imágenes. Restantes: {Math.max(0, 3 - files.length)}.
+                </div>
+              )}
+              {!files.length && (
+                <p className="text-xs text-neutral-400 mt-4">
+                  No hay imágenes seleccionadas.
                 </p>
-              </div>
+              )}
+              <p className="text-xs text-neutral-500 mt-2">
+                Requeridas: 3 imágenes. Restantes: {Math.max(0, 3 - files.length)}.
+              </p>
 
               <p className="text-sm font-semibold text-neutral-800 mb-3 mt-6">
                 Imágenes actuales
               </p>
               {currentShots.length > 0 ? (
-                <div className="mt-4 space-y-2">
-                  {currentShots.map((url, idx) => (
-                    <div
-                      key={idx}
-                      className="flex items-center justify-between rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm"
-                    >
-                      <div className="flex items-center gap-3">
+                <div className="mt-4">
+                  <div className="grid grid-cols-3 gap-2">
+                    {currentShots.map((url, idx) => (
+                      <div key={idx} className="relative group">
                         <img
                           src={url}
                           alt={`Imagen ${idx + 1}`}
-                          className="h-10 w-10 object-cover rounded"
+                          className="w-full h-30 p-3 object-cover rounded-lg border border-neutral-200 bg-white"
                         />
-                        <div>
-                          <p className="font-medium text-neutral-800">Imagen {idx + 1}</p>
-                          <p className="text-xs text-neutral-500">Existente</p>
-                        </div>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setCurrentShots((prev) =>
+                              prev.filter((_, shotIdx) => shotIdx !== idx)
+                            )
+                          }
+                          className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                          disabled={uploading}
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </button>
+                        <p className="text-xs text-center mt-1">Imagen {idx + 1}</p>
                       </div>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setCurrentShots((prev) =>
-                            prev.filter((_, shotIdx) => shotIdx !== idx)
-                          )
-                        }
-                        className="rounded-full p-2 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700"
-                        disabled={uploading}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
               ) : (
                 <p className="text-xs text-neutral-400 mt-4">

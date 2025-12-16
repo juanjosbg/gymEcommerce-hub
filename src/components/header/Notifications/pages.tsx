@@ -35,19 +35,20 @@ const formatDateTime = (isoDate?: string) => {
     hour12: true,
   });
 
-  const parts = formatter.formatToParts(date).reduce<Record<string, string>>(
-    (acc, part) => {
+  const parts = formatter
+    .formatToParts(date)
+    .reduce<Record<string, string>>((acc, part) => {
       if (part.type !== "literal") {
         acc[part.type] = part.value;
       }
       return acc;
-    },
-    {},
-  );
+    }, {});
 
   const dayPeriod = (parts.dayPeriod || "").replace(/\./g, "").toUpperCase();
 
-  return `${parts.day ?? ""}/${parts.month ?? ""}/${parts.year ?? ""} ${parts.hour ?? ""}:${parts.minute ?? ""}${dayPeriod ? dayPeriod : ""}`.trim();
+  return `${parts.day ?? ""}/${parts.month ?? ""}/${parts.year ?? ""} ${
+    parts.hour ?? ""
+  }:${parts.minute ?? ""}${dayPeriod ? dayPeriod : ""}`.trim();
 };
 
 const Notifications = () => {
@@ -74,49 +75,7 @@ const Notifications = () => {
         setHasUnread(current.some((n) => !n.is_read));
       }
 
-      // Construye lote de semillas faltantes
-      const toInsert: NotificationRow[] = [];
-      const hasWelcome = current.some((n) => n.type === "welcome");
-      if (!hasWelcome) {
-        const name = user.user_metadata?.full_name || user.email || "Usuario";
-        toInsert.push({
-          id: 0,
-          user_id: user.id,
-          type: "welcome",
-          title: `Bienvenido ${name} a FITMEX STORE`,
-          body: user.created_at ? `Cuenta creada el ${formatDateTime(user.created_at)}` : undefined,
-          metadata: null,
-          is_read: false,
-          created_at: null,
-        });
-      }
-
-      const missingProfile = !user.user_metadata?.phone || !user.user_metadata?.birthday;
-      const hasReminder = current.some((n) => n.type === "profile_reminder");
-      if (missingProfile && !hasReminder) {
-        toInsert.push({
-          id: 0,
-          user_id: user.id,
-          type: "profile_reminder",
-          title: "Completa tu perfil",
-          body: "Te faltan algunos datos en tu perfil. Completa tu información.",
-          metadata: null,
-          is_read: false,
-          created_at: null,
-        });
-      }
-
-      if (toInsert.length > 0) {
-        // Inserta faltantes y refetch una sola vez
-        await supabase
-          .from("notifications")
-          .upsert(toInsert.map(({ id, ...rest }) => rest)); // omitir id para que lo asigne el server
-        const { data: refreshed } = await fetchNotifications(user.id);
-        if (refreshed) {
-          setItems(refreshed);
-          setHasUnread(refreshed.some((n) => !n.is_read));
-        }
-      }
+      // Removido: no re-insertar notificaciones eliminadas para evitar que reaparezcan
       setLoading(false);
     };
     load();
@@ -127,7 +86,11 @@ const Notifications = () => {
     if (nextOpen && hasUnread) {
       const unreadIds = items.filter((n) => !n.is_read).map((n) => n.id);
       unreadIds.forEach((id) => markRead(id));
-      setItems((prev) => prev.map((n) => (unreadIds.includes(n.id) ? { ...n, is_read: true } : n)));
+      setItems((prev) =>
+        prev.map((n) =>
+          unreadIds.includes(n.id) ? { ...n, is_read: true } : n
+        )
+      );
       setHasUnread(false);
     }
   };
