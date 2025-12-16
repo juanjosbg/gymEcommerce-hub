@@ -15,6 +15,7 @@ interface AuthContextType {
   signInWithGoogle: () => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error: any }>;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -24,6 +25,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+
+  const refreshUser = async () => {
+    const { data, error } = await supabase.auth.getUser();
+    if (!error && data.user) {
+      setUser(data.user);
+    }
+  };
 
   const ensureProfile = async (currentUser: User | null) => {
     if (!currentUser) return;
@@ -123,6 +131,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signInWithGoogle,
     signOut,
     resetPassword,
+    refreshUser,
   };
 
   if (loading) {

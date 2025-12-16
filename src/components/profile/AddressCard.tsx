@@ -1,10 +1,12 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { MapPin, Pencil, Calendar, UserRound } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 interface AddressForm {
     country: string;
@@ -17,27 +19,87 @@ interface AddressForm {
     extra: string;
 }
 
-interface Props {
-    form: AddressForm;
-    dirty: boolean;
-    saving: boolean;
-    isEditing: boolean;
-    isDirty: boolean;
-    onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
-    onToggleEdit: () => void;
-    onSave: () => void;
-}
+const AddressCard: React.FC = () => {
+    const { user, refreshUser } = useAuth();
+    const [form, setForm] = useState<AddressForm>({
+        country: "",
+        fullName: "",
+        birthday: "",
+        phone: "",
+        department: "",
+        city: "",
+        address: "",
+        extra: "",
+    });
+    const [originalForm, setOriginalForm] = useState<AddressForm>(form);
+    const [isEditing, setIsEditing] = useState(false);
+    const [saving, setSaving] = useState(false);
 
-const AddressCard: React.FC<Props> = ({
-    form,
-    dirty,
-    saving,
-    isEditing,
-    isDirty,
-    onChange,
-    onToggleEdit,
-    onSave,
-}) => {
+    useEffect(() => {
+        if (user?.user_metadata) {
+            const metadata = user.user_metadata;
+            setForm({
+                country: metadata.country || "",
+                fullName: metadata.full_name || "",
+                birthday: metadata.birthday || "",
+                phone: metadata.phone || "",
+                department: metadata.department || "",
+                city: metadata.city || "",
+                address: metadata.address || "",
+                extra: metadata.extra || "",
+            });
+            setOriginalForm({
+                country: metadata.country || "",
+                fullName: metadata.full_name || "",
+                birthday: metadata.birthday || "",
+                phone: metadata.phone || "",
+                department: metadata.department || "",
+                city: metadata.city || "",
+                address: metadata.address || "",
+                extra: metadata.extra || "",
+            });
+        }
+    }, [user]);
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        const { name, value } = e.target;
+        setForm((prev) => ({ ...prev, [name]: value }));
+    };
+
+    const handleToggleEdit = () => {
+        if (isEditing) {
+            setForm(originalForm); // Reset to original if canceling
+        }
+        setIsEditing(!isEditing);
+    };
+
+    const handleSave = async () => {
+        setSaving(true);
+        try {
+            const { error } = await supabase.auth.updateUser({
+                data: {
+                    country: form.country,
+                    department: form.department,
+                    city: form.city,
+                    address: form.address,
+                    extra: form.extra,
+                    // fullName, birthday, phone are not editable here, so not updated
+                },
+            });
+            if (error) throw error;
+            await refreshUser(); // Refresh user data
+            setOriginalForm(form);
+            setIsEditing(false);
+        } catch (error) {
+            console.error("Error saving address:", error);
+            // Handle error, perhaps show toast
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const isDirty = JSON.stringify(form) !== JSON.stringify(originalForm);
+
     const formattedBirthday = React.useMemo(() => {
         if (!form.birthday) return "";
         const parsed = new Date(form.birthday);
@@ -70,13 +132,13 @@ const AddressCard: React.FC<Props> = ({
                     <Button
                         variant={isEditing ? "secondary" : "outline"}
                         className="border-primary text-primary hover:bg-primary/5"
-                        onClick={onToggleEdit}
+                        onClick={handleToggleEdit}
                     >
                         <Pencil className="mr-2 h-4 w-4" />
                         {isEditing ? "Cancelar" : "Editar"}
                     </Button>
                     {isEditing && (
-                        <Button className="bg-primary hover:bg-primary/90" disabled={!isDirty || saving} onClick={onSave}>
+                        <Button className="bg-primary hover:bg-primary/90" disabled={!isDirty || saving} onClick={handleSave}>
                             {saving ? "Guardando..." : "Guardar"}
                         </Button>
                     )}
@@ -91,7 +153,7 @@ const AddressCard: React.FC<Props> = ({
                         id="country"
                         name="country"
                         value={form.country}
-                        onChange={onChange}
+                        onChange={handleChange}
                         disabled={!isEditing}
                         className="rounded-full"
                     />
@@ -106,7 +168,7 @@ const AddressCard: React.FC<Props> = ({
                             id="department"
                             name="department"
                             value={form.department}
-                            onChange={onChange}
+                            onChange={handleChange}
                             disabled={!isEditing}
                             className="rounded-full"
                         />
@@ -119,7 +181,7 @@ const AddressCard: React.FC<Props> = ({
                             id="city"
                             name="city"
                             value={form.city}
-                            onChange={onChange}
+                            onChange={handleChange}
                             disabled={!isEditing}
                             className="rounded-full"
                         />
@@ -133,7 +195,7 @@ const AddressCard: React.FC<Props> = ({
                         id="address"
                         name="address"
                         value={form.address}
-                        onChange={onChange}
+                        onChange={handleChange}
                         disabled={!isEditing}
                         className="rounded-full"
                     />
@@ -147,12 +209,11 @@ const AddressCard: React.FC<Props> = ({
                         id="extra"
                         name="extra"
                         value={form.extra}
-                        onChange={onChange}
+                        onChange={handleChange}
                         disabled={!isEditing}
                         className="rounded-full"
                     />
                 </div>
-                {/*  */}
 
                 <div className="flex items-center gap-2 py-4">
                     <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-primary">
@@ -171,7 +232,7 @@ const AddressCard: React.FC<Props> = ({
                         id="fullName"
                         name="fullName"
                         value={form.fullName}
-                        onChange={onChange}
+                        onChange={handleChange}
                         disabled
                         className="rounded-full"
                     />
@@ -202,7 +263,7 @@ const AddressCard: React.FC<Props> = ({
                             id="phoneAddress"
                             name="phone"
                             value={form.phone}
-                            onChange={onChange}
+                            onChange={handleChange}
                             disabled
                             className="rounded-full"
                         />
