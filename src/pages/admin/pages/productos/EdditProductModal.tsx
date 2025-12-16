@@ -49,6 +49,7 @@ const EditProductModal: React.FC<Props> = ({ open, onClose, product, onSaved }) 
     { title: "Presentación", description: "" },
     { title: "Llegada estimada", description: "" },
   ]);
+  const [currentShots, setCurrentShots] = useState<string[]>([]);
   const [files, setFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -80,6 +81,8 @@ const EditProductModal: React.FC<Props> = ({ open, onClose, product, onSaved }) 
       { title: "Presentación", description: "" },
       { title: "Llegada estimada", description: "" },
     ]);
+    setCurrentShots(product?.shots ?? []);
+    setFiles([]);
   }, [open, product]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -90,9 +93,7 @@ const EditProductModal: React.FC<Props> = ({ open, onClose, product, onSaved }) 
       setError("El nombre es obligatorio");
       return;
     }
-    const uploaded: string[] = Array.isArray(product?.shots)
-      ? [...product.shots]
-      : [];
+    const uploaded: string[] = [...currentShots];
 
     setUploading(true);
     let coverUrl: string | null = product?.coverImage ?? uploaded[0] ?? null;
@@ -145,7 +146,7 @@ const EditProductModal: React.FC<Props> = ({ open, onClose, product, onSaved }) 
           previous_price: previousPrice,
           stock,
           cover_image: coverUrl,
-          images: uploaded.length ? uploaded : product?.shots ?? [],
+          images: uploaded,
           overview: overview || null,
           shipment_details: shipmentDetails,
         },
@@ -183,6 +184,13 @@ const EditProductModal: React.FC<Props> = ({ open, onClose, product, onSaved }) 
     setPrice(null);
     setStock(null);
     setOverview("");
+    setShipmentDetails([
+      { title: "Descuento", description: "" },
+      { title: "Tiempo de entrega", description: "" },
+      { title: "Presentación", description: "" },
+      { title: "Llegada estimada", description: "" },
+    ]);
+    setCurrentShots([]);
     setFiles([]);
     setHasDiscount(false);
     setDiscountPercent(0);
@@ -195,9 +203,9 @@ const EditProductModal: React.FC<Props> = ({ open, onClose, product, onSaved }) 
       <div className="w-full max-w-5xl overflow-hidden rounded-2xl bg-white shadow-2xl">
         <div className="flex items-center justify-between border-b px-6 py-4">
           <div>
-            <p className="text-sm text-neutral-500">Agregar producto</p>
+            <p className="text-sm text-neutral-500">Editar producto</p>
             <h2 className="text-xl font-semibold text-neutral-900">
-              Nuevo producto
+              Editar producto
             </h2>
           </div>
           <button
@@ -209,7 +217,7 @@ const EditProductModal: React.FC<Props> = ({ open, onClose, product, onSaved }) 
         </div>
 
         <form onSubmit={handleSubmit} className="grid gap-6 p-6 lg:grid-cols-2">
-          {/* Columna izquierda: subida de imágenes */}
+          {/* Columna izquierda: formulario de datos */}
           <div className="space-y-4">
             <div className="rounded-2xl border border-neutral-200 bg-white px-4 py-4 shadow-sm">
               <div className="flex gap-4">
@@ -238,6 +246,44 @@ const EditProductModal: React.FC<Props> = ({ open, onClose, product, onSaved }) 
                   onChange={(e) => setOverview(e.target.value)}
                   placeholder="Breve descripción del producto"
                 />
+
+                <hr className="mt-5" />
+
+                <label className="text-sm font-medium text-neutral-700 mt-3 block">
+                  Detalles de envío
+                </label>
+                {shipmentDetails.map((detail, idx) => (
+                  <div key={idx} className="mt-3 flex gap-4">
+                    <div className="flex-1">
+                      <input
+                        className="w-full rounded-xl border border-neutral-200 px-3 py-2 text-sm outline-none focus:border-primary bg-white"
+                        value={detail.title}
+                        onChange={(e) =>
+                          setShipmentDetails((prev) =>
+                            prev.map((d, i) =>
+                              i === idx ? { ...d, title: e.target.value } : d
+                            )
+                          )
+                        }
+                        placeholder="Título del detalle"
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <input
+                        className="w-full rounded-xl border border-neutral-200 px-3 py-2 text-sm outline-none focus:border-primary bg-white"
+                        value={detail.description}
+                        onChange={(e) =>
+                          setShipmentDetails((prev) =>
+                            prev.map((d, i) =>
+                              i === idx ? { ...d, description: e.target.value } : d
+                            )
+                          )
+                        }
+                        placeholder="Descripción"
+                      />
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
 
@@ -365,11 +411,11 @@ const EditProductModal: React.FC<Props> = ({ open, onClose, product, onSaved }) 
             </div>
           </div>
 
-          {/* Columna derecha: formulario de datos */}
+          {/* Columna derecha: subida de imágenes */}
           <div className="space-y-4">
             <div className="rounded-2xl border border-neutral-200 bg-neutral-50/80 px-4 py-5">
               <p className="text-sm font-semibold text-neutral-800 mb-3">
-                Añadir imágenes
+                Añadir imágenes (reemplazará las actuales)
               </p>
               <label
                 className={`flex h-48 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed ${
@@ -447,6 +493,48 @@ const EditProductModal: React.FC<Props> = ({ open, onClose, product, onSaved }) 
                   Requeridas: 3 imágenes. Restantes: {Math.max(0, 3 - files.length)}.
                 </p>
               </div>
+
+              <p className="text-sm font-semibold text-neutral-800 mb-3 mt-6">
+                Imágenes actuales
+              </p>
+              {currentShots.length > 0 ? (
+                <div className="mt-4 space-y-2">
+                  {currentShots.map((url, idx) => (
+                    <div
+                      key={idx}
+                      className="flex items-center justify-between rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm"
+                    >
+                      <div className="flex items-center gap-3">
+                        <img
+                          src={url}
+                          alt={`Imagen ${idx + 1}`}
+                          className="h-10 w-10 object-cover rounded"
+                        />
+                        <div>
+                          <p className="font-medium text-neutral-800">Imagen {idx + 1}</p>
+                          <p className="text-xs text-neutral-500">Existente</p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setCurrentShots((prev) =>
+                            prev.filter((_, shotIdx) => shotIdx !== idx)
+                          )
+                        }
+                        className="rounded-full p-2 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700"
+                        disabled={uploading}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-neutral-400 mt-4">
+                  No hay imágenes actuales.
+                </p>
+              )}
             </div>
 
             {error && (
