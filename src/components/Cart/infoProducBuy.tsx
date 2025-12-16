@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -31,8 +31,6 @@ const InfoProducBuy: React.FC<InfoProducBuyProps> = ({
 
     try {
       // Insert order into Supabase
-      // Note: You need to create the "orders" table in Supabase with appropriate columns
-      // Columns: id (uuid, primary), user_id (uuid), items (jsonb), total (numeric), customer_info (jsonb), status (text), created_at (timestamptz)
       const orderData = {
         user_id: user.id,
         items: cart.map(item => ({
@@ -59,30 +57,17 @@ const InfoProducBuy: React.FC<InfoProducBuyProps> = ({
         status: "pending",
       };
 
-      // Since "orders" table is not in types, use any for now or update types
+      // Use (supabase as any) until types are generated
       const { error } = await (supabase as any).from("orders").insert(orderData);
       if (error) throw error;
 
-      // Send email using Resend (install resend library first)
-      // Note: You need to install resend: npm install resend
-      // And set RESEND_API_KEY in your environment variables
-      const resendResponse = await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${process.env.RESEND_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          from: "onboarding@resend.dev", // Replace with your verified domain
-          to: "fitmexstore@gmail.com",
-          subject: "Nuevo pedido recibido",
-          html: generateEmailHTML(orderData),
-        }),
+      // Call Supabase Edge Function to send email
+      const { data, error: funcError } = await supabase.functions.invoke('send-order-email', {
+        body: orderData,
       });
+      if (funcError) throw funcError;
 
-      if (!resendResponse.ok) throw new Error("Failed to send email");
-
-      // Close modal and perhaps navigate or show success
+      // Close modal and show success
       onClose();
       alert("Pedido enviado exitosamente. Te contactaremos pronto.");
     } catch (error) {
@@ -93,36 +78,14 @@ const InfoProducBuy: React.FC<InfoProducBuyProps> = ({
     }
   };
 
-  const generateEmailHTML = (orderData: any) => {
-    const itemsHTML = orderData.items.map((item: any) => `
-      <div style="margin-bottom: 10px;">
-        <img src="${item.coverImage}" alt="${item.nombreProducto}" style="width: 100px; height: 100px; object-fit: cover;" />
-        <p><strong>Producto:</strong> ${item.nombreProducto}</p>
-        <p><strong>Cantidad:</strong> ${item.cantidad}</p>
-        <p><strong>Precio:</strong> $${item.precio}</p>
-      </div>
-    `).join("");
-
-    return `
-      <h1>Nuevo Pedido</h1>
-      <h2>Información del Cliente</h2>
-      <p><strong>Nombre:</strong> ${orderData.customer_info.fullName}</p>
-      <p><strong>Email:</strong> ${orderData.customer_info.email}</p>
-      <p><strong>Teléfono:</strong> ${orderData.customer_info.phone}</p>
-      <p><strong>Fecha de Nacimiento:</strong> ${orderData.customer_info.birthday}</p>
-      <p><strong>Dirección:</strong> ${orderData.customer_info.address.address}, ${orderData.customer_info.address.city}, ${orderData.customer_info.address.department}, ${orderData.customer_info.address.country}</p>
-      <p><strong>Extra:</strong> ${orderData.customer_info.address.extra}</p>
-      <h2>Productos</h2>
-      ${itemsHTML}
-      <h2>Total: $${orderData.total}</h2>
-    `;
-  };
-
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>Confirmar Pedido</DialogTitle>
+          <DialogDescription>
+            Revisa tu información y productos antes de confirmar el pedido.
+          </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
           <Card>
