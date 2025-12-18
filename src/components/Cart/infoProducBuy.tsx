@@ -6,6 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { CartItem } from "@/hooks/useCart";
 import { Loader2 } from "lucide-react";
+import { addNotification } from "@/lib/supabase/notifications";
 
 interface InfoProducBuyProps {
   open: boolean;
@@ -13,6 +14,7 @@ interface InfoProducBuyProps {
   cart: CartItem[];
   total: number;
   totalItems: number;
+  onConfirmed?: () => Promise<void> | void;
 }
 
 const InfoProducBuy: React.FC<InfoProducBuyProps> = ({
@@ -21,12 +23,16 @@ const InfoProducBuy: React.FC<InfoProducBuyProps> = ({
   cart,
   total,
   totalItems,
+  onConfirmed,
 }) => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
 
   const handleConfirm = async () => {
-    if (!user) return;
+    if (!user) {
+      alert("Debes iniciar sesión para continuar.");
+      return;
+    }
     setLoading(true);
 
     try {
@@ -61,13 +67,26 @@ const InfoProducBuy: React.FC<InfoProducBuyProps> = ({
       if (error) throw error;
 
       // Call Supabase Edge Function to send email
-      const { data, error: funcError } = await supabase.functions.invoke('send-order-email', {
-        body: orderData,
+      const adminEmail = "fitmexstore@gmail.com";
+      const { error: funcError } = await supabase.functions.invoke("send-order-email", {
+        body: { ...orderData, adminEmail },
       });
       if (funcError) throw funcError;
 
+      // Crear notificación para el usuario
+      const itemList = cart.map((item) => `${item.nombreProducto} x${item.cantidad || 1}`).join(", ");
+      await addNotification({
+        user_id: user.id,
+        type: "order",
+        title: "Venta de Artículos en proceso",
+        body: `Tu pedido con ${totalItems} artículo(s) está en proceso: ${itemList}. Total $${total.toFixed(2)}`,
+      });
+
       // Close modal and show success
       onClose();
+      if (onConfirmed) {
+        await onConfirmed();
+      }
       alert("Pedido enviado exitosamente. Te contactaremos pronto.");
     } catch (error) {
       console.error("Error processing order:", error);

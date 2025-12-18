@@ -8,13 +8,13 @@ import {
   Calendar,
   Star,
   Heart,
+  Store,
+  Globe,
   Lock,
   Package,
   CreditCard,
-  Store,
   Clock,
   MapPin,
-  Globe,
   Shield,
   User,
 } from "lucide-react";
@@ -30,6 +30,7 @@ import ProfileContactCard from "@/components/profile/ProfileContactCard";
 import AddressCard from "@/components/profile/AddressCard";
 import PermisosCars from "@/components/profile/PermisosCars";
 import Security from "@/components/profile/Security";
+import UserOrders from "@/components/profile/UserOrders"
 
 type Section =
   | "info"

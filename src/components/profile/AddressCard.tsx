@@ -1,104 +1,43 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { MapPin, Pencil, Calendar, UserRound } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
 
-interface AddressForm {
-    country: string;
-    fullName: string;
-    birthday: string;
-    phone: string;
-    department: string;
-    city: string;
-    address: string;
-    extra: string;
+export interface AddressForm {
+  country: string;
+  fullName: string;
+  birthday: string;
+  phone: string;
+  department: string;
+  city: string;
+  address: string;
+  extra: string;
 }
 
-const AddressCard: React.FC = () => {
-    const { user, refreshUser } = useAuth();
-    const [form, setForm] = useState<AddressForm>({
-        country: "",
-        fullName: "",
-        birthday: "",
-        phone: "",
-        department: "",
-        city: "",
-        address: "",
-        extra: "",
-    });
-    const [originalForm, setOriginalForm] = useState<AddressForm>(form);
-    const [isEditing, setIsEditing] = useState(false);
-    const [saving, setSaving] = useState(false);
+type Props = {
+  form: AddressForm;
+  dirty: boolean;
+  saving: boolean;
+  isEditing: boolean;
+  isDirty: boolean;
+  onToggleEdit: () => void;
+  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
+  onSave: () => void;
+};
 
-    useEffect(() => {
-        if (user?.user_metadata) {
-            const metadata = user.user_metadata;
-            setForm({
-                country: metadata.country || "",
-                fullName: metadata.full_name || "",
-                birthday: metadata.birthday || "",
-                phone: metadata.phone || "",
-                department: metadata.department || "",
-                city: metadata.city || "",
-                address: metadata.address || "",
-                extra: metadata.extra || "",
-            });
-            setOriginalForm({
-                country: metadata.country || "",
-                fullName: metadata.full_name || "",
-                birthday: metadata.birthday || "",
-                phone: metadata.phone || "",
-                department: metadata.department || "",
-                city: metadata.city || "",
-                address: metadata.address || "",
-                extra: metadata.extra || "",
-            });
-        }
-    }, [user]);
-
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        const { name, value } = e.target;
-        setForm((prev) => ({ ...prev, [name]: value }));
-    };
-
-    const handleToggleEdit = () => {
-        if (isEditing) {
-            setForm(originalForm); // Reset to original if canceling
-        }
-        setIsEditing(!isEditing);
-    };
-
-    const handleSave = async () => {
-        setSaving(true);
-        try {
-            const { error } = await supabase.auth.updateUser({
-                data: {
-                    country: form.country,
-                    department: form.department,
-                    city: form.city,
-                    address: form.address,
-                    extra: form.extra,
-                    // fullName, birthday, phone are not editable here, so not updated
-                },
-            });
-            if (error) throw error;
-            await refreshUser(); // Refresh user data
-            setOriginalForm(form);
-            setIsEditing(false);
-        } catch (error) {
-            console.error("Error saving address:", error);
-            // Handle error, perhaps show toast
-        } finally {
-            setSaving(false);
-        }
-    };
-
-    const isDirty = JSON.stringify(form) !== JSON.stringify(originalForm);
+const AddressCard: React.FC<Props> = ({
+  form,
+  dirty,
+  saving,
+  isEditing,
+  isDirty,
+  onToggleEdit,
+  onChange,
+  onSave,
+}) => {
 
     const formattedBirthday = React.useMemo(() => {
         if (!form.birthday) return "";
@@ -132,13 +71,13 @@ const AddressCard: React.FC = () => {
                     <Button
                         variant={isEditing ? "secondary" : "outline"}
                         className="border-primary text-primary hover:bg-primary/5"
-                        onClick={handleToggleEdit}
+                        onClick={onToggleEdit}
                     >
                         <Pencil className="mr-2 h-4 w-4" />
                         {isEditing ? "Cancelar" : "Editar"}
                     </Button>
                     {isEditing && (
-                        <Button className="bg-primary hover:bg-primary/90" disabled={!isDirty || saving} onClick={handleSave}>
+                        <Button className="bg-primary hover:bg-primary/90" disabled={!isDirty || saving} onClick={onSave}>
                             {saving ? "Guardando..." : "Guardar"}
                         </Button>
                     )}
@@ -153,7 +92,7 @@ const AddressCard: React.FC = () => {
                         id="country"
                         name="country"
                         value={form.country}
-                        onChange={handleChange}
+                        onChange={onChange}
                         disabled={!isEditing}
                         className="rounded-full"
                     />
@@ -165,28 +104,28 @@ const AddressCard: React.FC = () => {
                             Departamento
                         </Label>
                         <Input
-                            id="department"
-                            name="department"
-                            value={form.department}
-                            onChange={handleChange}
-                            disabled={!isEditing}
-                            className="rounded-full"
-                        />
-                    </div>
-                    <div className="space-y-2">
+                        id="department"
+                        name="department"
+                        value={form.department}
+                        onChange={onChange}
+                        disabled={!isEditing}
+                        className="rounded-full"
+                    />
+                </div>
+                <div className="space-y-2">
                         <Label htmlFor="city" className="text-sm font-semibold">
                             Ciudad / Municipio
                         </Label>
                         <Input
-                            id="city"
-                            name="city"
-                            value={form.city}
-                            onChange={handleChange}
-                            disabled={!isEditing}
-                            className="rounded-full"
-                        />
-                    </div>
+                        id="city"
+                        name="city"
+                        value={form.city}
+                        onChange={onChange}
+                        disabled={!isEditing}
+                        className="rounded-full"
+                    />
                 </div>
+            </div>
                 <div className="space-y-2">
                     <Label htmlFor="address" className="text-sm font-semibold">
                         Dirección
@@ -195,7 +134,7 @@ const AddressCard: React.FC = () => {
                         id="address"
                         name="address"
                         value={form.address}
-                        onChange={handleChange}
+                        onChange={onChange}
                         disabled={!isEditing}
                         className="rounded-full"
                     />
@@ -209,7 +148,7 @@ const AddressCard: React.FC = () => {
                         id="extra"
                         name="extra"
                         value={form.extra}
-                        onChange={handleChange}
+                        onChange={onChange}
                         disabled={!isEditing}
                         className="rounded-full"
                     />
@@ -229,15 +168,15 @@ const AddressCard: React.FC = () => {
                         Nombre completo
                     </Label>
                     <Input
-                        id="fullName"
-                        name="fullName"
-                        value={form.fullName}
-                        onChange={handleChange}
-                        disabled
-                        className="rounded-full"
-                    />
-                </div>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                            id="fullName"
+                            name="fullName"
+                            value={form.fullName}
+                            onChange={onChange}
+                            disabled
+                            className="rounded-full"
+                        />
+                    </div>
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
                         <Label htmlFor="birthday" className="text-sm font-semibold text-muted-foreground">
                             Fecha de nacimiento
@@ -263,7 +202,7 @@ const AddressCard: React.FC = () => {
                             id="phoneAddress"
                             name="phone"
                             value={form.phone}
-                            onChange={handleChange}
+                            onChange={onChange}
                             disabled
                             className="rounded-full"
                         />

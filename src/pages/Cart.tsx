@@ -18,7 +18,7 @@ import {
 import { Link } from "react-router-dom";
 
 const Cart = () => {
-  const { cart, removeFromCart, updateQuantity } = useCart();
+  const { cart, removeFromCart, updateQuantity, clearCart } = useCart();
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [menuOpen, setMenuOpen] = useState(false);
   const [manageOpen, setManageOpen] = useState(false);
@@ -440,6 +440,11 @@ const Cart = () => {
                       cart={cart}
                       total={total}
                       totalItems={totalItems}
+                      onConfirmed={async () => {
+                        await clearCart();
+                        setSelectedIds([]);
+                        setConfirmOpen(false);
+                      }}
                     />
 
                     <p className="text-xs text-neutral-500 flex items-start gap-2">
