@@ -86,7 +86,7 @@ const AddressCard: React.FC<Props> = ({
             <CardContent className="space-y-4 p-0">
                 <div className="space-y-2">
                     <Label htmlFor="country" className="text-sm font-semibold">
-                        País / Región
+                        País / Región <span className="text-sm text-primary">*</span>
                     </Label>
                     <Input
                         id="country"
@@ -95,13 +95,14 @@ const AddressCard: React.FC<Props> = ({
                         onChange={onChange}
                         disabled={!isEditing}
                         className="rounded-full"
+                        required
                     />
                 </div>
 
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
                         <Label htmlFor="department" className="text-sm font-semibold">
-                            Departamento
+                            Departamento <span className="text-sm text-primary">*</span>
                         </Label>
                         <Input
                         id="department"
@@ -110,11 +111,12 @@ const AddressCard: React.FC<Props> = ({
                         onChange={onChange}
                         disabled={!isEditing}
                         className="rounded-full"
+                        required
                     />
                 </div>
                 <div className="space-y-2">
                         <Label htmlFor="city" className="text-sm font-semibold">
-                            Ciudad / Municipio
+                            Ciudad / Municipio <span className="text-sm text-primary">*</span>
                         </Label>
                         <Input
                         id="city"
@@ -123,12 +125,13 @@ const AddressCard: React.FC<Props> = ({
                         onChange={onChange}
                         disabled={!isEditing}
                         className="rounded-full"
+                        required
                     />
                 </div>
             </div>
                 <div className="space-y-2">
                     <Label htmlFor="address" className="text-sm font-semibold">
-                        Dirección
+                        Dirección <span className="text-sm text-primary">*</span>
                     </Label>
                     <Input
                         id="address"
@@ -137,6 +140,7 @@ const AddressCard: React.FC<Props> = ({
                         onChange={onChange}
                         disabled={!isEditing}
                         className="rounded-full"
+                        required
                     />
                 </div>
 

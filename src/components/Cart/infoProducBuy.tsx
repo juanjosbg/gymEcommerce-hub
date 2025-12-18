@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { CartItem } from "@/hooks/useCart";
 import { Loader2 } from "lucide-react";
 import { addNotification } from "@/lib/supabase/notifications";
+import Swal from "sweetalert2";
 
 interface InfoProducBuyProps {
   open: boolean;
@@ -33,6 +34,19 @@ const InfoProducBuy: React.FC<InfoProducBuyProps> = ({
       alert("Debes iniciar sesión para continuar.");
       return;
     }
+    const addr = user.user_metadata || {};
+    const required = [addr.address, addr.city, addr.department, addr.country];
+    const missingAddress = required.some((v) => !v || String(v).trim() === "");
+    if (missingAddress) {
+      Swal.fire({
+        icon: "error",
+        title: "Datos faltantes",
+        text: "Asegurate de que todos los datos esten completo.",
+        footer: '<span style="color:#888">Revisa tu perfil → Direcciones para completar los datos.</span>',
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -61,7 +75,7 @@ const InfoProducBuy: React.FC<InfoProducBuyProps> = ({
           },
         },
         status: "pending",
-      };
+      };   
 
       const { error } = await supabase.from("orders").insert(orderData);
       if (error) throw error;

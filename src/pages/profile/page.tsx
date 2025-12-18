@@ -88,14 +88,19 @@ const ProfilePage = () => {
   useEffect(() => {
     setForm(initialData);
     setIsDirty(false);
-    // precarga el nombre completo en el formulario de dirección
+    // precarga el nombre completo en el formulario de dirección y campos de dirección
     setAddressForm((prev) => ({
       ...prev,
       fullName: initialData.fullName,
       birthday: initialData.birthday || "",
       phone: initialData.phone || "",
+      country: (user?.user_metadata as any)?.country || prev.country || "Colombia",
+      department: (user?.user_metadata as any)?.department || prev.department || "",
+      city: (user?.user_metadata as any)?.city || prev.city || "",
+      address: (user?.user_metadata as any)?.address || prev.address || "",
+      extra: (user?.user_metadata as any)?.extra || prev.extra || "",
     }));
-  }, [initialData]);
+  }, [initialData, user?.user_metadata]);
 
   useEffect(() => {
     if (!sliderImages.length) return;
@@ -165,7 +170,17 @@ const ProfilePage = () => {
     if (!user) return;
     setAddressSaving(true);
     try {
-      toast.success("Dirección guardada (integra Supabase cuando tengas la tabla de direcciones).");
+      const { error } = await supabase.auth.updateUser({
+        data: {
+          country: addressForm.country,
+          department: addressForm.department,
+          city: addressForm.city,
+          address: addressForm.address,
+          extra: addressForm.extra,
+        },
+      });
+      if (error) throw error;
+      toast.success("Dirección guardada correctamente.");
       setAddressDirty(false);
       setAddressEditing(false);
     } catch (err: any) {
@@ -295,6 +310,12 @@ const ProfilePage = () => {
                   onSave={handleSaveAddress}
                 />
                 {rightPromo}
+              </>
+            ) : activeSection === "orders" ? (
+              <>
+                <div className="lg:col-span-2">
+                  <UserOrders />
+                </div>
               </>
             ) : activeSection === "permissions" ? (
               <>
