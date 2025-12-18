@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Package, ShoppingBag } from "lucide-react";
+import { STATUS_OPTIONS } from "@/pages/admin/components/StateUserproduct";
 
 type OrderItem = {
   product_id?: string;
@@ -19,6 +20,17 @@ type OrderRow = {
   total?: number;
   status?: string;
   created_at?: string;
+};
+
+const normalizeStatus = (value?: string | null) => {
+  const v = (value || "").toLowerCase().trim();
+  if (["pending", "pendiente"].includes(v)) return "pending";
+  if (["processing", "en proceso", "proceso", "procesando"].includes(v))
+    return "processing";
+  if (["shipped", "enviado", "enviada"].includes(v)) return "shipped";
+  if (["cancelled", "canceled", "cancelado", "cancelada"].includes(v))
+    return "cancelled";
+  return v || "pending";
 };
 
 const formatDate = (iso?: string) => {
@@ -51,11 +63,64 @@ const UserOrders: React.FC = () => {
       if (error) {
         setError(error.message);
       } else {
-        setOrders((data as OrderRow[]) || []);
+        setOrders(
+          ((data as OrderRow[]) || []).map((o) => ({
+            ...o,
+            status: normalizeStatus(o.status),
+          }))
+        );
       }
       setLoading(false);
     };
     load();
+
+    const channel = supabase
+      .channel(`orders-user-${user.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "orders",
+          filter: `user_id=eq.${user.id}`,
+        },
+        (payload) => {
+          const incoming = payload.new as any;
+          if (!incoming?.id) return;
+          setOrders((prev) => {
+            const exists = prev.find((o) => o.id === incoming.id);
+            if (exists) {
+              return prev.map((o) =>
+                o.id === incoming.id
+                  ? {
+                      ...o,
+                      ...incoming,
+                      status: normalizeStatus(incoming.status),
+                      items: Array.isArray(incoming.items)
+                        ? incoming.items
+                        : o.items,
+                    }
+                  : o
+              );
+            }
+            return [
+              {
+                id: incoming.id,
+                items: Array.isArray(incoming.items) ? incoming.items : [],
+                total: incoming.total,
+                status: normalizeStatus(incoming.status),
+                created_at: incoming.created_at,
+              },
+              ...prev,
+            ];
+          });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [user?.id]);
 
   if (!user) return null;
@@ -91,6 +156,8 @@ const UserOrders: React.FC = () => {
       {orders.map((order) => {
         const items = Array.isArray(order.items) ? order.items : [];
         const itemCount = items.reduce((acc, itm) => acc + (itm.cantidad || 1), 0);
+        const statusKey = normalizeStatus(order.status);
+        const statusObj = STATUS_OPTIONS.find((s) => s.value === statusKey);
         return (
           <Card key={order.id} className="p-4 shadow-sm">
             <div className="flex flex-wrap items-center justify-between gap-3 border-b pb-3">
@@ -102,9 +169,17 @@ const UserOrders: React.FC = () => {
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <Badge variant="secondary" className="capitalize">
-                  {order.status || "pendiente"}
-                </Badge>
+                {statusObj ? (
+                  <span
+                    className={`rounded-full px-3 py-1 text-xs font-semibold capitalize ${statusObj.badge}`}
+                  >
+                    {statusObj.label}
+                  </span>
+                ) : (
+                  <Badge variant="secondary" className="capitalize">
+                    {order.status || "pendiente"}
+                  </Badge>
+                )}
                 <span className="text-xs text-muted-foreground">
                   {formatDate(order.created_at)}
                 </span>
