@@ -4,6 +4,7 @@ import { Loader2, Mail, Package, User } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import OrderDetailModal from "@/pages/admin/components/OrderDetailModa";
 import { STATUS_OPTIONS } from "@/pages/admin/components/StateUserproduct";
+import FilterOrden from "../../components/FilterOrdenUser";
 
 type OrderItem = {
   product_id?: string;
@@ -43,6 +44,7 @@ const AdminOrdenesPage: React.FC = () => {
   const [orders, setOrders] = useState<OrderRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [filter, setFilter] = useState("");
 
   useEffect(() => {
     const loadOrders = async () => {
@@ -66,6 +68,18 @@ const AdminOrdenesPage: React.FC = () => {
 
   const totalOrders = useMemo(() => orders.length, [orders]);
   const [selectedOrder, setSelectedOrder] = useState<OrderRow | null>(null);
+  const filteredOrders = useMemo(() => {
+    const q = filter.trim().toLowerCase();
+    if (!q) return orders;
+    return orders.filter((o) => {
+      const idMatch = (o.id || "").toLowerCase().includes(q);
+      const nameMatch = (o.customer_info?.fullName || "")
+        .toLowerCase()
+        .includes(q);
+      const emailMatch = (o.customer_info?.email || "").toLowerCase().includes(q);
+      return idMatch || nameMatch || emailMatch;
+    });
+  }, [filter, orders]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-neutral-50 to-slate-100 text-neutral-900">
@@ -78,10 +92,12 @@ const AdminOrdenesPage: React.FC = () => {
               <h1 className="text-2xl font-bold text-neutral-900 lg:text-3xl">
                 Ordenes
               </h1>
-              <p className="text-sm text-neutral-500">
+              <p className="text-sm text-neutral-500 mt-2">
                 Total de órdenes: {totalOrders}
               </p>
             </div>
+
+            <FilterOrden onFilter={setFilter} />
           </div>
 
           <div className="rounded-2xl border bg-white shadow-sm">
@@ -96,7 +112,7 @@ const AdminOrdenesPage: React.FC = () => {
                     <th className="px-4 py-3 font-semibold">Estado</th>
                     <th className="px-4 py-3 font-semibold">Fecha</th>
                     <th className="px-4 py-3 font-semibold">Total</th>
-                    <th className="px-4 py-3 font-semibold">Acciones</th>
+                    <th className="px-4 py-3 font-semibold">Detalles</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-neutral-100 text-neutral-800">
@@ -138,7 +154,7 @@ const AdminOrdenesPage: React.FC = () => {
 
                   {!loading &&
                     !error &&
-                    orders.map((order, idx) => {
+                    filteredOrders.map((order, idx) => {
                       const info = order.customer_info || {};
                       return (
                         <tr key={order.id} className="hover:bg-neutral-50">
@@ -166,20 +182,7 @@ const AdminOrdenesPage: React.FC = () => {
                             </div>
                           </td>
                           <td className="px-4 py-3 capitalize">
-                            {(() => {
-                              const statusObj = STATUS_OPTIONS.find(
-                                (s) => s.value === order.status
-                              );
-                              return statusObj ? (
-                                <span
-                                  className={`rounded-full px-3 py-1 text-xs font-semibold ${statusObj.badge}`}
-                                >
-                                  {statusObj.label}
-                                </span>
-                              ) : (
-                                order.status || "pendiente"
-                              );
-                            })()}
+                            {order.status || "pendiente"}
                           </td>
                           <td className="px-4 py-3">
                             {formatDate(order.created_at)}
