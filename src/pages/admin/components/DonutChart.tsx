@@ -1,9 +1,5 @@
-// DonutChart.tsx
-import type { CategorySlice } from "../types/dashboard";
-
-type Props = {
-  categories: CategorySlice[];
-};
+﻿// DonutChart.tsx
+import type { DonutChartProps } from "@/pages/admin/types/donutChart";
 
 // Mapea las clases Tailwind de fondo a valores hex para usarlos como fill en el SVG
 const classToHex: Record<string, string> = {
@@ -19,7 +15,7 @@ const classToHex: Record<string, string> = {
   "bg-teal-400": "#2dd4bf",
 };
 
-export function DonutChart({ categories }: Props) {
+export function DonutChart({ categories }: DonutChartProps) {
   const total = categories.reduce((acc, c) => acc + c.value, 0);
   let cumulative = 0;
   return (
@@ -49,3 +45,6 @@ export function DonutChart({ categories }: Props) {
     </svg>
   );
 }
+
+
+

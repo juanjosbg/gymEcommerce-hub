@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -7,7 +7,7 @@ import SidebarFilters from "@/components/SideBarFilter";
 import { products as staticProducts } from "@/data/content";
 import { branch } from "@/data/filterByProduct";
 import { supabase } from "@/integrations/supabase/client";
-import type { ProductType } from "@/data/types";
+import type { Product } from "@/entities/product/types";
 
 const slugify = (str: string) =>
   str
@@ -17,7 +17,7 @@ const slugify = (str: string) =>
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
 
-const computeMinMaxPrice = (list: ProductType[]) => {
+const computeMinMaxPrice = (list: Product[]) => {
   const prices = list
     .map((item) => item.price)
     .filter((n): n is number => typeof n === "number");
@@ -26,7 +26,7 @@ const computeMinMaxPrice = (list: ProductType[]) => {
 };
 
 const applyFilters = (
-  list: ProductType[],
+  list: Product[],
   brand: string,
   range: number[],
   search: string
@@ -68,8 +68,8 @@ const Page = () => {
   const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [baseProducts, setBaseProducts] =
-    useState<ProductType[]>(staticProducts);
-  const [filteredShoes, setFilteredShoes] = useState<ProductType[]>(
+    useState<Product[]>(staticProducts);
+  const [filteredShoes, setFilteredShoes] = useState<Product[]>(
     staticProducts
   );
   const [priceRange, setPriceRange] = useState<number[]>([0, 0]);
@@ -113,7 +113,7 @@ const Page = () => {
           return;
         }
 
-        const mapped: ProductType[] = (data as ProductRow[]).map((p) => {
+        const mapped: Product[] = (data as ProductRow[]).map((p) => {
           const staticFallback =
             staticProducts.find((s) => s.slug === p.slug) ||
             staticProducts.find(
@@ -206,3 +206,4 @@ const Page = () => {
 };
 
 export default Page;
+

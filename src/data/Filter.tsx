@@ -1,14 +1,14 @@
-import type { ProductType } from "./types";
+﻿import type { Product } from "@/entities/product/types";
 
 export const filters: string[][] = [
-  ["Todos", "Pre-entreno", "Proteína", "Creatina", "Glutamina", "Aminoácidos", "Omega 3", "Suplemento"],
+  ["Todos", "Pre-entreno", "ProteÃ­na", "Creatina", "Glutamina", "AminoÃ¡cidos", "Omega 3", "Suplemento"],
   ["Todos", "Con descuento", "Sin descuento"],
-  ["Todos", "Menos de 100", "100 - 500", "500 - 1000", "Más de 1000"],
+  ["Todos", "Menos de 100", "100 - 500", "500 - 1000", "MÃ¡s de 1000"],
 ];
 
 export const productCategories = filters[0].slice(1);
 
-export function filterProducts(products: ProductType[], selected: string[]): ProductType[] {
+export function filterProducts(products: Product[], selected: string[]): Product[] {
   const [typeFilter, discountFilter, priceFilter] = selected;
 
   return products.filter(({ category, price, previousPrice }) => {
@@ -18,10 +18,10 @@ export function filterProducts(products: ProductType[], selected: string[]): Pro
       case "Pre-entreno":
         passType = /pre-?entreno/i.test(category);
         break;
-      case "Proteína":
+      case "ProteÃ­na":
       case "Creatina":
       case "Glutamina":
-      case "Aminoácidos":
+      case "AminoÃ¡cidos":
       case "Omega 3":
         passType = category.toLowerCase().includes(typeFilter.toLowerCase());
         break;
@@ -46,10 +46,11 @@ export function filterProducts(products: ProductType[], selected: string[]): Pro
         return price >= 100 && price <= 500;
       case "500 - 1000":
         return price > 500 && price <= 1000;
-      case "Más de 1000":
+      case "MÃ¡s de 1000":
         return price > 1000;
       default:
         return true;
     }
   });
 }
+

@@ -1,12 +1,6 @@
-import { Pencil, Trash2 } from "lucide-react";
+﻿import { Pencil, Trash2 } from "lucide-react";
 import Swal from "sweetalert2";
-
-type CrudProps = {
-  onEdit: () => void;
-  onDelete: () => Promise<void> | void;
-  disabled?: boolean;
-  productName?: string | null;
-};
+import type { CrudProps } from "@/pages/admin/types/crud";
 
 const CrudActions = ({
   onEdit,
@@ -18,11 +12,11 @@ const CrudActions = ({
     if (disabled) return;
     const nameLabel = productName ? `${productName}` : "este producto";
     const result = await Swal.fire({
-      title: `¿Estas seguro de que quieres eliminar ${nameLabel}?`,
-      html: "Si lo eliminas, se borrará toda su información. ¿Estás seguro?",
+      title: `Â¿Estas seguro de que quieres eliminar ${nameLabel}?`,
+      html: "Si lo eliminas, se borrarÃ¡ toda su informaciÃ³n. Â¿EstÃ¡s seguro?",
       icon: "warning",
       showCancelButton: true,
-      confirmButtonText: "Sí, eliminar",
+      confirmButtonText: "SÃ­, eliminar",
       cancelButtonText: "Cancelar",
       focusCancel: true,
       showClass: {
@@ -78,3 +72,5 @@ const CrudActions = ({
 };
 
 export default CrudActions;
+
+

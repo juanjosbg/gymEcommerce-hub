@@ -1,16 +1,8 @@
-"use client";
+﻿"use client";
 
 import React, { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-
-type Series = { label: string; color: string; points: number[] };
-type Bucket = {
-  label: string; // ej: 12 Ene
-  nuevos: number;
-  viejos: number;
-  recurrentes: number;
-};
-type ProfileRow = { id: string; created_at: string };
+import type { Bucket, ProfileRow, Series } from "@/pages/admin/types/graficUser";
 
 const GraficUser: React.FC = () => {
   const [data, setData] = useState<Bucket[]>([]);
@@ -21,14 +13,14 @@ const GraficUser: React.FC = () => {
       month: "short",
     }).format(date);
 
-  // Construye los buckets de los últimos 30 días:
-  // - nuevos: registros en el día
-  // - viejos: usuarios existentes antes de ese día
-  // - recurrentes: usuarios con más de 14 días de antigüedad (proxy de cuentas “frecuentes”)
+  // Construye los buckets de los Ãºltimos 30 dÃ­as:
+  // - nuevos: registros en el dÃ­a
+  // - viejos: usuarios existentes antes de ese dÃ­a
+  // - recurrentes: usuarios con mÃ¡s de 14 dÃ­as de antigÃ¼edad (proxy de cuentas â€œfrecuentesâ€)
   const buildBuckets = (rows: ProfileRow[]): Bucket[] => {
     const today = new Date();
     const start = new Date(today);
-    start.setDate(today.getDate() - 29); // 30 días atrás
+    start.setDate(today.getDate() - 29); // 30 dÃ­as atrÃ¡s
 
     const all = rows
       .map((r) => ({ ...r, createdAt: new Date(r.created_at) }))
@@ -66,7 +58,7 @@ const GraficUser: React.FC = () => {
       });
     }
 
-    // Si no hay datos, devolvemos arreglo vacío y el fallback tomará el control
+    // Si no hay datos, devolvemos arreglo vacÃ­o y el fallback tomarÃ¡ el control
     return buckets.filter((b) => b.nuevos || b.viejos || b.recurrentes);
   };
 
@@ -206,13 +198,15 @@ const GraficUser: React.FC = () => {
         </div>
       </div>
       <p className="mt-4 text-xs text-neutral-500">
-        Datos agrupados por día (últimos 30). <br />
-        Nuevos = registros del día. <br />
-        Viejos = usuarios existentes antes del día. <br />
-        Recurrentes = cuentas con más de 14 días de antigüedad (se muestra solo si hay datos).
+        Datos agrupados por dÃ­a (Ãºltimos 30). <br />
+        Nuevos = registros del dÃ­a. <br />
+        Viejos = usuarios existentes antes del dÃ­a. <br />
+        Recurrentes = cuentas con mÃ¡s de 14 dÃ­as de antigÃ¼edad (se muestra solo si hay datos).
       </p>
     </div>
   );
 };
 
 export default GraficUser;
+
+

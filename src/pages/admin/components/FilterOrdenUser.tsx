@@ -1,11 +1,7 @@
-import React, { useState } from "react";
+﻿import React, { useState } from "react";
+import type { FilterOrdenUserProps } from "@/pages/admin/types/filterOrdenUser";
 
-type Props = {
-  onFilter: (value: string) => void;
-  className?: string;
-};
-
-const FilterOrdenUser: React.FC<Props> = ({ onFilter, className }) => {
+const FilterOrdenUser: React.FC<FilterOrdenUserProps> = ({ onFilter, className }) => {
   const [value, setValue] = useState("");
 
   const handleSearch = () => {
@@ -44,3 +40,5 @@ const FilterOrdenUser: React.FC<Props> = ({ onFilter, className }) => {
 };
 
 export default FilterOrdenUser;
+
+

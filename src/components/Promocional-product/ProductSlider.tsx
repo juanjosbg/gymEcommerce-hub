@@ -1,11 +1,11 @@
-"use client";
+﻿"use client";
 import React, { useEffect, useMemo, useState } from "react";
 import { products as localProducts } from "@/data/content";
 import Slider from "@/shared/Slider/Slider";
 import ProductCard from "./ProductCard";
 import { supabase } from "@/integrations/supabase/client";
 import { ProductImages } from "@/data/ImgContent";
-import type { ProductType } from "@/data/types";
+import type { Product } from "@/entities/product/types";
 
 const slugify = (str: string) =>
   str
@@ -16,7 +16,7 @@ const slugify = (str: string) =>
     .replace(/^-+|-+$/g, "");
 
 const ProductSlider = () => {
-  const [items, setItems] = useState<ProductType[]>([]);
+  const [items, setItems] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
   const getFallbackCover = (slug: string, name: string) => {
@@ -97,10 +97,10 @@ const ProductSlider = () => {
             shots: Array.isArray(p.images) ? p.images : [],
             overview: p.overview ?? undefined,
             justIn: !!p.just_in,
-          } as ProductType;
+          } as Product;
         };
 
-        let promosFromDb: ProductType[] = [];
+        let promosFromDb: Product[] = [];
         if (promoIds.length) {
           const byId = new Map<string, ProductRow>();
           rows.forEach((p) => byId.set(String(p.id), p));
@@ -156,3 +156,4 @@ const ProductSlider = () => {
 };
 
 export default ProductSlider;
+

@@ -1,12 +1,8 @@
-// DonutLegend.tsx
+﻿// DonutLegend.tsx
 import { Fragment } from "react";
-import type { CategorySlice } from "../types/dashboard";
+import type { DonutLegendProps } from "@/pages/admin/types/donutLegend";
 
-type Props = {
-  categories: CategorySlice[];
-};
-
-export function DonutLegend({ categories }: Props) {
+export function DonutLegend({ categories }: DonutLegendProps) {
   return (
     <div className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
       {categories.map((cat) => (
@@ -20,3 +16,6 @@ export function DonutLegend({ categories }: Props) {
     </div>
   );
 }
+
+
+

@@ -1,13 +1,7 @@
-import React, { useEffect, useMemo, useState } from "react";
+﻿import React, { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
-
-type Props = {
-  orderId: string;
-  status?: string | null;
-  onUpdated?: (newStatus: string) => void;
-  disabled?: boolean;
-};
+import type { StateUserproductProps } from "@/pages/admin/types/stateUserproduct";
 
 export const STATUS_OPTIONS = [
   { value: "pending", label: "Pendiente", badge: "bg-neutral-200 text-neutral-800" },
@@ -16,7 +10,7 @@ export const STATUS_OPTIONS = [
   { value: "cancelled", label: "Cancelado", badge: "bg-red-100 text-red-700" },
 ];
 
-const StateUserproduct: React.FC<Props> = ({
+const StateUserproduct: React.FC<StateUserproductProps> = ({
   orderId,
   status,
   onUpdated,
@@ -89,3 +83,5 @@ const StateUserproduct: React.FC<Props> = ({
 };
 
 export default StateUserproduct;
+
+

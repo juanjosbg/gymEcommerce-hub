@@ -1,12 +1,12 @@
-import type { FC } from "react";
+﻿import type { FC } from "react";
 import React from "react";
 import { Link } from "react-router-dom";
 
-import type { ProductType } from "@/data/types";
+import type { Product } from "@/entities/product/types";
 import LikeButton from "../LikeButton";
 
 interface ProductCardProps {
-  product: ProductType;
+  product: Product;
   className?: string;
   showPrevPrice?: boolean;
 }
@@ -21,7 +21,7 @@ const ProductCard: FC<ProductCardProps> = ({
       <div className="h-[250px] w-full overflow-hidden rounded-2xl lg:h-[240px] 2xl:h-[300px]">
         {product.justIn && (
           <div className="absolute left-6 top-0 rounded-b-lg bg-primary px-3 py-2 text-sm uppercase text-white shadow-md">
-            ¡Acabo de llegar!
+            Â¡Acabo de llegar!
           </div>
         )}
         <LikeButton
@@ -56,3 +56,4 @@ const ProductCard: FC<ProductCardProps> = ({
 };
 
 export default ProductCard;
+

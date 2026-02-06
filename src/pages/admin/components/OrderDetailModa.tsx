@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import {
   Dialog,
   DialogContent,
@@ -8,49 +8,12 @@ import {
 } from "@/components/ui/dialog";
 import StateUserproduct from "./StateUserproduct";
 import { Mail, Phone, MapPin, User } from "lucide-react";
-
-type OrderItem = {
-  product_id?: string;
-  nombreProducto?: string;
-  coverImage?: string;
-  cantidad?: number;
-  precio?: number;
-};
-
-type CustomerInfo = {
-  fullName?: string | null;
-  email?: string | null;
-  phone?: string | null;
-  birthday?: string | null;
-  address?: {
-    country?: string | null;
-    department?: string | null;
-    city?: string | null;
-    address?: string | null;
-    extra?: string | null;
-  } | null;
-};
-
-type OrderRow = {
-  id: string;
-  total?: number | null;
-  status?: string | null;
-  created_at?: string | null;
-  items?: OrderItem[] | null;
-  customer_info?: CustomerInfo | null;
-};
-
-type Props = {
-  order: OrderRow | null;
-  open: boolean;
-  onClose: () => void;
-  onStatusChange?: (newStatus: string) => void;
-};
+import type { OrderDetailModalProps } from "@/pages/admin/types/orderDetailModal";
 
 const formatMoney = (value?: number | null) =>
-  typeof value === "number" ? `$${value.toFixed(2)}` : "—";
+  typeof value === "number" ? `$${value.toFixed(2)}` : "â€”";
 
-const OrderDetailModal: React.FC<Props> = ({
+const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
   order,
   open,
   onClose,
@@ -88,7 +51,7 @@ const OrderDetailModal: React.FC<Props> = ({
             ) : null}
           </DialogDescription>
           <DialogDescription className="mb-10">
-            Revisa los productos y la información del cliente.
+            Revisa los productos y la informaciÃ³n del cliente.
           </DialogDescription>
         </DialogHeader>
 
@@ -144,7 +107,7 @@ const OrderDetailModal: React.FC<Props> = ({
           {/* Customer info */}
           <div className="rounded-xl border bg-neutral-50 p-4">
             <div className="mb-3 text-sm font-semibold text-neutral-700">
-              Información personal
+              InformaciÃ³n personal
             </div>
             <div className="grid gap-3 text-sm text-neutral-700 sm:grid-cols-2">
               <div className="flex items-center gap-2">
@@ -157,11 +120,11 @@ const OrderDetailModal: React.FC<Props> = ({
               </div>
               <div className="flex items-center gap-2">
                 <Phone className="h-4 w-4 text-neutral-500" />
-                <span>{info.phone || "Sin teléfono"}</span>
+                <span>{info.phone || "Sin telÃ©fono"}</span>
               </div>
               {info.birthday ? (
                 <div className="flex items-center gap-2">
-                  <span className="text-neutral-500">Cumpleaños:</span>
+                  <span className="text-neutral-500">CumpleaÃ±os:</span>
                   <span>{info.birthday}</span>
                 </div>
               ) : null}
@@ -178,7 +141,7 @@ const OrderDetailModal: React.FC<Props> = ({
                     address.country,
                   ]
                     .filter(Boolean)
-                    .join(", ") || "Sin dirección"}
+                    .join(", ") || "Sin direcciÃ³n"}
                 </span>
               </div>
               {address.extra ? (
@@ -195,3 +158,5 @@ const OrderDetailModal: React.FC<Props> = ({
 };
 
 export default OrderDetailModal;
+
+
