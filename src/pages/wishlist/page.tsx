@@ -9,12 +9,34 @@ import { useWishlist } from "@/hooks/useWishlist";
 const WishlistPage = () => {
   const { wishlist } = useWishlist();
 
+  type WishlistItem = {
+    id?: string | number | null;
+    product_data?: {
+      slug?: string | null;
+      name?: string | null;
+      overview?: string | null;
+      price?: number | null;
+      stock?: number | null;
+      category?: string | null;
+      cover_image?: string | null;
+      image_url?: string | null;
+    };
+    slug?: string | null;
+    name?: string | null;
+    overview?: string | null;
+    price?: number | null;
+    stock?: number | null;
+    category?: string | null;
+    cover_image?: string | null;
+    image_url?: string | null;
+  };
+
   const normalizedWishlist = useMemo(
   () =>
-    wishlist.map((item) => {
-      const data = (item as any).product_data || item;
+    (wishlist as WishlistItem[]).map((item) => {
+      const data = item.product_data || item;
       return {
-        id: item.id || data.slug || data.name,
+        id: String(item.id || data.slug || data.name),
         name: data.name ?? "Producto",
         description: data.overview ?? "",
         price: data.price ?? 0,

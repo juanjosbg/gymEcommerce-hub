@@ -4,13 +4,19 @@ import { supabase } from "@/integrations/supabase/client";
 type CartItemInput = { productId: string; quantity: number; priceAtAdd?: number };
 
 async function getOrCreateCart(userId: string) {
-  let { data: cart, error } = await supabase
+  const { data: cartData, error } = await supabase
     .from("carts")
     .select("id")
     .eq("user_id", userId)
     .single();
 
-  if (error && (error as any).code === "PGRST116") {
+  let cart = cartData;
+  const errorCode =
+    typeof error === "object" && error !== null && "code" in error
+      ? String((error as { code?: string }).code)
+      : null;
+
+  if (error && errorCode === "PGRST116") {
     const { data: newCart, error: createError } = await supabase
       .from("carts")
       .insert({ user_id: userId })

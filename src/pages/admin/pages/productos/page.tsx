@@ -5,18 +5,35 @@ import { supabase } from "@/integrations/supabase/client";
 import { ProductImages } from "@/data/ImgContent";
 import AddProductModal from "./AddProductModal";
 import CrudActions from "../../components/crud";
-//import EditProductModal from "./EdditProductModal";
+import EditProductModal from "./EdditProductModal";
 
 type Product = {
   id: string;
   slug?: string | null;
   name: string | null;
   price: number | null;
+  previousPrice?: number | null;
   stock: number | null;
   coverImage?: string | null;
   images?: string[] | null;
   category?: string | null;
   overview?: string | null;
+  shipment_details?: any[] | null;
+  created_at?: string | null;
+};
+
+type ProductRow = {
+  id?: string | null;
+  slug?: string | null;
+  name?: string | null;
+  price?: number | null;
+  previous_price?: number | null;
+  stock?: number | null;
+  category?: string | null;
+  cover_image?: string | null;
+  images?: string[] | null;
+  overview?: string | null;
+  shipment_details?: any[] | null;
   created_at?: string | null;
 };
 
@@ -29,7 +46,7 @@ const slugify = (str: string) =>
     .replace(/^-+|-+$/g, "");
 
 const findFallbackImage = (slug?: string | null, name?: string | null) => {
-  const keys = Object.keys(ProductImages as any);
+  const keys = Object.keys(ProductImages);
   const mapSlugToKey: Record<string, string> = {
     Vemon: "venom",
     "psychotic-orange": "psychotic",
@@ -61,23 +78,24 @@ const findFallbackImage = (slug?: string | null, name?: string | null) => {
   for (const candidate of candidates) {
     const mapped = mapSlugToKey[candidate];
     if (mapped && keys.includes(mapped)) {
-      return (ProductImages as any)[mapped]?.[0] || null;
+      return (ProductImages as Record<string, string[]>)[mapped]?.[0] || null;
     }
   }
 
   for (const candidate of candidates) {
     const exact = keys.find((k) => k === candidate);
-    if (exact) return (ProductImages as any)[exact]?.[0] || null;
+    if (exact) return (ProductImages as Record<string, string[]>)[exact]?.[0] || null;
 
     const partial = keys.find(
       (k) => candidate.includes(k) || k.includes(candidate)
     );
-    if (partial) return (ProductImages as any)[partial]?.[0] || null;
+    if (partial) return (ProductImages as Record<string, string[]>)[partial]?.[0] || null;
   }
 
   const lowerName = (name || "").toLowerCase();
   const matchByName = keys.find((k) => lowerName.includes(k.toLowerCase()));
-  if (matchByName) return (ProductImages as any)[matchByName]?.[0] || null;
+  if (matchByName)
+    return (ProductImages as Record<string, string[]>)[matchByName]?.[0] || null;
 
   return null;
 };
@@ -107,7 +125,7 @@ const AdminProductosPage: React.FC = () => {
       if (error) {
         setError(error.message);
       } else {
-        const normalized = (data ?? []).map((p: any) => {
+        const normalized = (data ?? []).map((p: ProductRow) => {
           const images = Array.isArray(p.images) ? p.images : [];
           const fallback = findFallbackImage(p.slug, p.name);
           const coverFromImages = images.length ? images[0] : null;
@@ -116,9 +134,13 @@ const AdminProductosPage: React.FC = () => {
             slug: p.slug ?? null,
             name: p.name ?? null,
             price: p.price ?? null,
+            previousPrice: p.previous_price ?? null,
             stock: p.stock ?? null,
             category: p.category ?? null,
             coverImage: p.cover_image || coverFromImages || fallback,
+            images,
+            overview: p.overview ?? null,
+            shipment_details: p.shipment_details ?? null,
             created_at: p.created_at ?? null,
           };
         });
@@ -297,9 +319,8 @@ const AdminProductosPage: React.FC = () => {
                             productName={p.name ?? undefined}
                             disabled={deletingId === p.id}
                             onEdit={() => {
-                              alert(
-                                "Editar producto aún no está implementado."
-                              );
+                              setEditProduct(p);
+                              setShowEditModal(true);
                             }}
                             onDelete={async () => {
                               if (!p.id) return;
@@ -317,11 +338,12 @@ const AdminProductosPage: React.FC = () => {
                                 setProducts((prev) =>
                                   prev.filter((item) => item.id !== p.id)
                                 );
-                              } catch (err: any) {
-                                alert(
-                                  err?.message ||
-                                    "No se pudo eliminar el producto"
-                                );
+                              } catch (err: unknown) {
+                                const message =
+                                  err instanceof Error
+                                    ? err.message
+                                    : "No se pudo eliminar el producto";
+                                alert(message);
                               } finally {
                                 setDeletingId(null);
                               }
@@ -340,7 +362,31 @@ const AdminProductosPage: React.FC = () => {
         open={showModal}
         onClose={() => setShowModal(false)}
         onCreated={(p) => {
-          setProducts((prev) => [p as any, ...prev]);
+          setProducts((prev) => [p as Product, ...prev]);
+        }}
+      />
+      <EditProductModal
+        open={showEditModal}
+        product={editProduct}
+        onClose={() => {
+          setShowEditModal(false);
+          setEditProduct(null);
+        }}
+        onSaved={(updated) => {
+          setProducts((prev) =>
+            prev.map((item) =>
+              item.id === updated.id
+                ? {
+                    ...item,
+                    ...updated,
+                    previousPrice:
+                      updated.previousPrice !== undefined
+                        ? updated.previousPrice
+                        : item.previousPrice,
+                  }
+                : item
+            )
+          );
         }}
       />
     </div>

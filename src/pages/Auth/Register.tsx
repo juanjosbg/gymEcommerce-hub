@@ -124,12 +124,14 @@ const Register = () => {
       }
 
       navigate("/");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error al registrar:", error);
+      const message =
+        error instanceof Error ? error.message : "Error al crear la cuenta";
       await Swal.fire({
         icon: "error",
         title: "Oops...",
-        text: error?.message || "Error al crear la cuenta",
+        text: message,
         footer: '<a href="#">Why do I have this issue?</a>',
       });
     } finally {

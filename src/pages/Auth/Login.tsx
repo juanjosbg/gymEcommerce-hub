@@ -56,7 +56,7 @@ const Login = () => {
     }
 
     if (userId) {
-      const { data: roleRow } = await (supabase as any)
+      const { data: roleRow } = await supabase
         .from("user_roles")
         .select("role")
         .eq("user_id", userId)

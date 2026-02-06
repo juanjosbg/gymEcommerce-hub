@@ -80,6 +80,19 @@ const Page = () => {
     [searchParams]
   );
 
+  type ProductRow = {
+    id?: string | number | null;
+    slug?: string | null;
+    name?: string | null;
+    category?: string | null;
+    price?: number | null;
+    previous_price?: number | null;
+    cover_image?: string | null;
+    images?: string[] | null;
+    overview?: string | null;
+    shipment_details?: { title: string; description: string }[] | null;
+  };
+
   useEffect(() => {
     const load = async () => {
       setLoading(true);
@@ -100,7 +113,7 @@ const Page = () => {
           return;
         }
 
-        const mapped: ProductType[] = (data as any[]).map((p) => {
+        const mapped: ProductType[] = (data as ProductRow[]).map((p) => {
           const staticFallback =
             staticProducts.find((s) => s.slug === p.slug) ||
             staticProducts.find(

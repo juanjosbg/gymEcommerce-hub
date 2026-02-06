@@ -122,6 +122,13 @@ export type Database = {
           name: string
           price: number
           stock: number | null
+          slug: string | null
+          previous_price: number | null
+          cover_image: string | null
+          images: string[] | null
+          overview: string | null
+          shipment_details: Json | null
+          just_in: boolean | null
         }
         Insert: {
           category?: string | null
@@ -132,6 +139,13 @@ export type Database = {
           name: string
           price: number
           stock?: number | null
+          slug?: string | null
+          previous_price?: number | null
+          cover_image?: string | null
+          images?: string[] | null
+          overview?: string | null
+          shipment_details?: Json | null
+          just_in?: boolean | null
         }
         Update: {
           category?: string | null
@@ -142,6 +156,70 @@ export type Database = {
           name?: string
           price?: number
           stock?: number | null
+          slug?: string | null
+          previous_price?: number | null
+          cover_image?: string | null
+          images?: string[] | null
+          overview?: string | null
+          shipment_details?: Json | null
+          just_in?: boolean | null
+        }
+        Relationships: []
+      }
+      marketing_content: {
+        Row: {
+          id: string
+          title: string | null
+          heading: string | null
+          description: string | null
+          cta_text: string | null
+          cta_link: string | null
+          images: string[] | null
+          promo_tag_title: string | null
+          promo_tag_cta_text: string | null
+          promo_tag_cta_link: string | null
+          promo_tag_images: string[] | null
+          products_heading: string | null
+          products_description: string | null
+          promo_product_ids: string[] | null
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id: string
+          title?: string | null
+          heading?: string | null
+          description?: string | null
+          cta_text?: string | null
+          cta_link?: string | null
+          images?: string[] | null
+          promo_tag_title?: string | null
+          promo_tag_cta_text?: string | null
+          promo_tag_cta_link?: string | null
+          promo_tag_images?: string[] | null
+          products_heading?: string | null
+          products_description?: string | null
+          promo_product_ids?: string[] | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          title?: string | null
+          heading?: string | null
+          description?: string | null
+          cta_text?: string | null
+          cta_link?: string | null
+          images?: string[] | null
+          promo_tag_title?: string | null
+          promo_tag_cta_text?: string | null
+          promo_tag_cta_link?: string | null
+          promo_tag_images?: string[] | null
+          products_heading?: string | null
+          products_description?: string | null
+          promo_product_ids?: string[] | null
+          created_at?: string | null
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -247,6 +325,27 @@ export type Database = {
             referencedColumns: ["id"]
           }
         ]
+      }
+      user_roles: {
+        Row: {
+          id: string
+          user_id: string
+          role: string
+          created_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          role: string
+          created_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          role?: string
+          created_at?: string | null
+        }
+        Relationships: []
       }
     }
     Views: {

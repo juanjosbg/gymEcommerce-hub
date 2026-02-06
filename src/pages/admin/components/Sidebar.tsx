@@ -1,6 +1,6 @@
 // src/pages/admin/components/Sidebar.tsx
 import { NavLink } from "react-router-dom";
-import { BarChart3, ShoppingBag, Users, PieChart } from "lucide-react";
+import { BarChart3, ShoppingBag, Users, PieChart, Sparkles } from "lucide-react";
 
 const base = "flex items-center gap-3 rounded-xl px-3 py-2";
 const active = "bg-primary/10 text-primary";
@@ -39,6 +39,14 @@ export function Sidebar() {
         >
           <ShoppingBag className="h-4 w-4" />
           Stock de productos
+        </NavLink>
+
+        <NavLink
+          to="/admin/marketing"
+          className={({ isActive }) => `${base} ${isActive ? active : idle}`}
+        >
+          <Sparkles className="h-4 w-4" />
+          Contenido promo
         </NavLink>
 
         <NavLink

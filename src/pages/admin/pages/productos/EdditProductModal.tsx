@@ -8,7 +8,22 @@ const BUCKET = "product-images";
 type Props = {
   open: boolean;
   onClose: () => void;
-  product?: any;
+  product?: {
+    id?: string;
+    slug?: string;
+    name?: string | null;
+    category?: string | null;
+    price?: number | null;
+    previousPrice?: number | null;
+    previous_price?: number | null;
+    stock?: number | null;
+    coverImage?: string | null;
+    cover_image?: string | null;
+    shots?: string[];
+    images?: string[];
+    overview?: string | null;
+    shipment_details?: { title: string; description: string }[];
+  };
   onSaved: (product: {
     id: string;
     slug: string;
@@ -21,7 +36,7 @@ type Props = {
     shots?: string[];
     images?: string[];
     overview?: string;
-    shipment_details?: any[];
+    shipment_details?: { title: string; description: string }[];
   }) => void;
 };
 
@@ -75,8 +90,12 @@ const EditProductModal: React.FC<Props> = ({ open, onClose, product, onSaved }) 
     const initial = [2, 3, 4, 5];
     const stepped: number[] = [];
     for (let i = 10; i <= 50; i += 5) stepped.push(i);
-    return [...initial, ...stepped];
-  }, []);
+    const base = [...initial, ...stepped];
+    if (discountPercent && !base.includes(discountPercent)) {
+      return [...base, discountPercent].sort((a, b) => a - b);
+    }
+    return base;
+  }, [discountPercent]);
   const discountedPrice = useMemo(() => {
     if (price === null) return null;
     if (!hasDiscount || !discountPercent) return price;
@@ -106,6 +125,16 @@ const EditProductModal: React.FC<Props> = ({ open, onClose, product, onSaved }) 
     setStock(product.stock ?? null);
     setOverview(product.overview ?? "");
     setAllowImageEdit(false);
+    const prev = typeof product.previousPrice === "number" ? product.previousPrice : null;
+    const current = typeof product.price === "number" ? product.price : null;
+    if (prev && current && prev > current) {
+      const pct = Math.round(((prev - current) / prev) * 100);
+      setHasDiscount(true);
+      setDiscountPercent(pct > 0 ? pct : 0);
+    } else {
+      setHasDiscount(false);
+      setDiscountPercent(0);
+    }
     setShipmentDetails(product.shipment_details ?? [
       { title: "Descuento", description: "" },
       { title: "Tiempo de entrega", description: "" },
@@ -227,10 +256,26 @@ const EditProductModal: React.FC<Props> = ({ open, onClose, product, onSaved }) 
     }
 
     // Mapear a camelCase para el front
-    const row: any = data;
+    const row = data as {
+      id: string;
+      slug?: string | null;
+      name: string;
+      category: string | null;
+      price: number | null;
+      previous_price?: number | null;
+      stock: number | null;
+      cover_image?: string | null;
+      image_url?: string | null;
+      images?: string[];
+      overview?: string | null;
+      shipment_details?: unknown;
+    };
+    const persistedShipmentDetails = Array.isArray(row.shipment_details)
+      ? (row.shipment_details as { title: string; description: string }[])
+      : [];
     onSaved({
       id: row.id,
-      slug: row.slug,
+      slug: row.slug || slug,
       name: row.name,
       category: row.category,
       price: row.price,
@@ -240,7 +285,7 @@ const EditProductModal: React.FC<Props> = ({ open, onClose, product, onSaved }) 
       shots: row.images ?? [],
       images: row.images ?? uploaded,
       overview: row.overview ?? undefined,
-      shipment_details: row.shipment_details ?? [],
+      shipment_details: persistedShipmentDetails,
     });
 
     onClose();

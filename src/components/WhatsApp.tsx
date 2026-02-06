@@ -1,7 +1,7 @@
 import React from "react";
 
 function WhatsApp() {
-  const phoneNumber = "573206635657";
+  const phoneNumber = "521556156173";
   const message = encodeURIComponent(
     "👋 ¡Hola Fix Gym! Vengo desde la tienda online y quiero más información sobre los productos 💪"
   );

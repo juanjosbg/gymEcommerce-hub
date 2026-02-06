@@ -37,12 +37,31 @@ interface Product {
   stock: number;
 }
 
+type ProductRow = {
+  id: string | number | null;
+  name: string | null;
+  price: number | null;
+  previous_price?: number | null;
+  category?: string | null;
+  stock?: number | null;
+  slug?: string | null;
+  cover_image?: string | null;
+  images?: string[] | null;
+  overview?: string | null;
+};
+
 const Home = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [limit, setLimit] = useState(8);
+  const [productsHeading, setProductsHeading] = useState(
+    productsSection.heading
+  );
+  const [productsDescription, setProductsDescription] = useState(
+    productsSection.description
+  );
   
   const heroSlides = [
     {
@@ -94,7 +113,7 @@ const Home = () => {
 
         if (error) throw error;
 
-        const rows = (data ?? []) as any[];
+        const rows = (data ?? []) as ProductRow[];
         const mappedFromDb = rows.map((p) => {
           const slug = p.slug || slugify(p.name || String(p.id));
           const cover =
@@ -151,6 +170,20 @@ const Home = () => {
     };
 
     loadProducts();
+  }, []);
+
+  useEffect(() => {
+    const loadMarketing = async () => {
+      const { data, error } = await supabase
+        .from("marketing_content")
+        .select("products_heading, products_description")
+        .eq("id", "home_promo")
+        .maybeSingle();
+      if (error || !data) return;
+      if (data.products_heading) setProductsHeading(data.products_heading);
+      if (data.products_description) setProductsDescription(data.products_description);
+    };
+    loadMarketing();
   }, []);
 
   // ------ SLIDER AUTO ------
@@ -263,8 +296,8 @@ const Home = () => {
       <section className="container py-16">
         <div className="mb-10 space-y-5 flex">
           <div className="flex flex-col items-center text-center">
-            <h2 className="md:text-5xl font-semibold uppercase py-5 px-10 lineHeight text-3xl">{productsSection.heading}</h2>
-            <p className="text-neutral-500">{productsSection.description}</p>
+            <h2 className="md:text-5xl font-semibold uppercase py-5 px-10 lineHeight text-3xl">{productsHeading}</h2>
+            <p className="text-neutral-500">{productsDescription}</p>
           </div>
         </div>
         <Filter onFilter={handleFilter} />

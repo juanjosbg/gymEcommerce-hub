@@ -28,13 +28,30 @@ type DbProduct = {
   cover_image?: string | null;
   image_url?: string | null;
   images?: string[] | null;
-  shipment_details?: any[] | null;
+  shipment_details?: { title: string; description: string }[] | null;
+};
+
+type DisplayProduct = {
+  slug: string;
+  name: string;
+  category: string;
+  price: number;
+  previousPrice: number;
+  overview: string;
+  rating: number;
+  pieces_sold: number;
+  reviews: number;
+  coverImage: string;
+  shots: string[];
+  shipment_details: { title: string; description: string }[];
 };
 
 const SingleProductPage = () => {
   const { productId = "" } = useParams();
   const normalizedId = slugify(productId);
-  const [selectedProduct, setSelectedProduct] = useState<any | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<DisplayProduct | null>(
+    null
+  );
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -53,7 +70,7 @@ const SingleProductPage = () => {
         const normalizedParam = slugify(productId);
         let productRow: DbProduct | null = null;
 
-        const { data, error } = await (supabase as any)
+        const { data, error } = await supabase
           .from("products")
           .select("*")
           .or(`slug.eq.${normalizedId},slug.eq.${productId},id.eq.${productId}`)
