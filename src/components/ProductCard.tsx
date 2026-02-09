@@ -6,17 +6,10 @@ import { Badge } from "./ui/badge";
 import { ProductImages } from "@/data/ImgContent";
 import { Link } from "react-router-dom";
 import LikeButton from "./LikeButton";
+import type { CatalogProduct } from "@/entities/product/types";
 
 interface ProductCardProps {
-  product: {
-    id: string;
-    name: string;
-    description: string;
-    price: number;
-    image_url?: string | null;
-    stock: number;
-    category: string;
-  };
+  product: CatalogProduct;
 }
 
 const imageKeyMap: Record<string, keyof typeof ProductImages> = {

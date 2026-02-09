@@ -4,10 +4,11 @@ import type { FC } from "react";
 import React, { useState } from "react";
 
 import LikeButton from "../LikeButton";
+import type { WishlistItem } from "@/entities/wishlist/types";
 
 interface ImageShowCaseProps {
   shots: string[];
-  product: any;
+  product: WishlistItem;
 }
 
 const ImageShowCase: FC<ImageShowCaseProps> = ({ shots, product }) => {

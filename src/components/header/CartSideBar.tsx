@@ -15,6 +15,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import Swal from "sweetalert2";
+import type { CartItem } from "@/hooks/useCart";
+import type { WishlistItem } from "@/entities/wishlist/types";
 
 const CartSideBar: React.FC = () => {
   const [isVisable, setIsVisable] = useState(false);
@@ -48,7 +50,7 @@ const CartSideBar: React.FC = () => {
       quantity: item.cantidad || 1,
     }));
 
-    const { error } = await (supabase as any).rpc("reserve_stock", { items: payload });
+    const { error } = await supabase.rpc("reserve_stock", { items: payload });
     if (error) {
       if (error.message?.includes("stock_insufficient")) {
         toast.error("Stock insuficiente en alguno de los productos");
@@ -62,7 +64,7 @@ const CartSideBar: React.FC = () => {
     navigate("/checkout");
   };
 
-  const renderProduct = (item: any) => {
+  const renderProduct = (item: CartItem) => {
     const {
       nombreProducto,
       coverImage,
@@ -72,6 +74,13 @@ const CartSideBar: React.FC = () => {
       shoeCategory,
       cantidad,
     } = item;
+    const wishlistProduct: WishlistItem = {
+      id,
+      name: nombreProducto,
+      image_url: coverImage,
+      price: precio,
+      category: shoeCategory ?? "",
+    };
     return (
       <div key={id} className="flex py-5 last:pb-0">
         <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-xl">
@@ -109,7 +118,7 @@ const CartSideBar: React.FC = () => {
           <div className="flex w-full items-end justify-between text-sm">
             <div className="flex items-center gap-3">
               <LikeButton
-                product={{ ...item, id: item.id || item._id || item.slug }}
+                product={wishlistProduct}
               />
               <AiOutlineDelete
                 className="text-2xl cursor-pointer"

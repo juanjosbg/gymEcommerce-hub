@@ -19,6 +19,7 @@ export type Database = {
           cart_id: string
           created_at: string | null
           id: string
+          price_at_add: number | null
           product_id: string
           quantity: number | null
         }
@@ -26,6 +27,7 @@ export type Database = {
           cart_id: string
           created_at?: string | null
           id?: string
+          price_at_add?: number | null
           product_id: string
           quantity?: number | null
         }
@@ -33,6 +35,7 @@ export type Database = {
           cart_id?: string
           created_at?: string | null
           id?: string
+          price_at_add?: number | null
           product_id?: string
           quantity?: number | null
         }
@@ -223,6 +226,38 @@ export type Database = {
         }
         Relationships: []
       }
+      promo_products: {
+        Row: {
+          id: string
+          created_at: string | null
+          promo_key: string
+          product_id: string
+          sort_order: number | null
+        }
+        Insert: {
+          id?: string
+          created_at?: string | null
+          promo_key: string
+          product_id: string
+          sort_order?: number | null
+        }
+        Update: {
+          id?: string
+          created_at?: string | null
+          promo_key?: string
+          product_id?: string
+          sort_order?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "promo_products_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -352,7 +387,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      reserve_stock: {
+        Args: {
+          items: {
+            product_id: string
+            quantity: number
+          }[]
+        }
+        Returns: Json
+      }
     }
     Enums: {
       [_ in never]: never

@@ -22,7 +22,11 @@ export function useCart() {
   const { user } = useAuth();
   const [cart, setCart] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState(false);
-  const getUserId = (u: any) => u?.id || u?.uid || "anon";
+  const getUserId = (u: unknown) => {
+    if (!u || typeof u !== "object") return "anon";
+    const candidate = (u as { id?: string; uid?: string }).id ?? (u as { uid?: string }).uid;
+    return candidate || "anon";
+  };
 
   useEffect(() => {
     if (!user) {

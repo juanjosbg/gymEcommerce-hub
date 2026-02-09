@@ -45,8 +45,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     try {
       const items = await fetchCartItems();
-      setCartItems((items as any) || []);
-    } catch (error: any) {
+      setCartItems((items as CartItem[]) || []);
+    } catch (error: unknown) {
       console.error("Error fetching cart:", error);
     }
   };
@@ -67,7 +67,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await saveCartItems([{ productId, quantity: nextQty }]);
       await refreshCart();
       toast.success("Producto agregado al carrito");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error adding to cart:", error);
       toast.error("Error al agregar producto al carrito");
     }
@@ -82,7 +82,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await saveCartItems(items);
       await refreshCart();
       toast.success("Productos agregados al carrito");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error adding multiple items:", error);
       toast.error("Error al agregar productos");
     }
@@ -93,7 +93,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await supabase.from("cart_items").delete().eq("id", itemId);
       await refreshCart();
       toast.success("Producto eliminado del carrito");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error removing from cart:", error);
       toast.error("Error al eliminar producto");
     }
@@ -108,7 +108,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       await supabase.from("cart_items").update({ quantity }).eq("id", itemId);
       await refreshCart();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error updating quantity:", error);
       toast.error("Error al actualizar cantidad");
     }
@@ -118,7 +118,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       await clearCartApi();
       setCartItems([]);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error clearing cart:", error);
       toast.error("Error al vaciar carrito");
     }

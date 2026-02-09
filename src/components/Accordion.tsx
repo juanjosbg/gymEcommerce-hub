@@ -1,6 +1,12 @@
 import React from "react";
 
-const Accordion = ({ question, answer, wfull }: any) => {
+type AccordionProps = {
+  question: string;
+  answer: string;
+  wfull?: boolean;
+};
+
+const Accordion = ({ question, answer, wfull }: AccordionProps) => {
   return (
     <div className="">
       <details

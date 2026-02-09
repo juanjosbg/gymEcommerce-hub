@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { User, Session } from '@supabase/supabase-js';
+import type { AuthError, User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 
@@ -10,11 +10,11 @@ interface AuthContextType {
     email: string,
     password: string,
     fullName: string
-  ) => Promise<{ error: any; data: Awaited<ReturnType<typeof supabase.auth.signUp>>["data"] }>;
-  signIn: (email: string, password: string) => Promise<{ error: any }>;
-  signInWithGoogle: () => Promise<{ error: any }>;
+  ) => Promise<{ error: AuthError | null; data: Awaited<ReturnType<typeof supabase.auth.signUp>>["data"] }>;
+  signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>;
+  signInWithGoogle: () => Promise<{ error: AuthError | null }>;
   signOut: () => Promise<void>;
-  resetPassword: (email: string) => Promise<{ error: any }>;
+  resetPassword: (email: string) => Promise<{ error: AuthError | null }>;
   refreshUser: () => Promise<void>;
 }
 

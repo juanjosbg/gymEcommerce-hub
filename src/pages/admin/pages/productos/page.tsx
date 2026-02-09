@@ -6,6 +6,7 @@ import { ProductImages } from "@/data/ImgContent";
 import AddProductModal from "./AddProductModal";
 import CrudActions from "../../components/crud";
 import EditProductModal from "./EdditProductModal";
+import type { ProductRowLoose } from "@/entities/product/types";
 
 type Product = {
   id: string;
@@ -22,20 +23,6 @@ type Product = {
   created_at?: string | null;
 };
 
-type ProductRow = {
-  id?: string | null;
-  slug?: string | null;
-  name?: string | null;
-  price?: number | null;
-  previous_price?: number | null;
-  stock?: number | null;
-  category?: string | null;
-  cover_image?: string | null;
-  images?: string[] | null;
-  overview?: string | null;
-  shipment_details?: any[] | null;
-  created_at?: string | null;
-};
 
 const slugify = (str: string) =>
   str
@@ -125,7 +112,7 @@ const AdminProductosPage: React.FC = () => {
       if (error) {
         setError(error.message);
       } else {
-        const normalized = (data ?? []).map((p: ProductRow) => {
+        const normalized = (data ?? []).map((p: ProductRowLoose) => {
           const images = Array.isArray(p.images) ? p.images : [];
           const fallback = findFallbackImage(p.slug, p.name);
           const coverFromImages = images.length ? images[0] : null;

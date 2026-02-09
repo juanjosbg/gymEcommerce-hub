@@ -23,6 +23,15 @@ import {
 import { products as staticProducts } from "@/data/content";
 import Notifications from "@/components/header/Notifications/pages";
 import CartSideBar from "./header/CartSideBar";
+import type { ProductRowLoose } from "@/entities/product/types";
+
+type SearchProduct = {
+  id: string;
+  slug: string;
+  name: string;
+  category: string;
+  coverImage: string;
+};
 
 const slugify = (str: string) =>
   str
@@ -46,7 +55,15 @@ export const Header = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [open, setOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [searchProducts, setSearchProducts] = useState(staticProducts);
+  const [searchProducts, setSearchProducts] = useState<SearchProduct[]>(
+    staticProducts.map((p) => ({
+      id: p.slug || "producto",
+      slug: p.slug,
+      name: p.name,
+      category: p.category,
+      coverImage: p.coverImage,
+    }))
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -64,7 +81,7 @@ export const Header = () => {
       }
 
       try {
-        const { data } = await (supabase as any)
+        const { data } = await supabase
           .from("user_roles")
           .select("role")
           .eq("user_id", user.id)
@@ -96,26 +113,42 @@ export const Header = () => {
           .order("created_at", { ascending: false });
 
         if (error || !data?.length) {
-          setSearchProducts(staticProducts);
+          setSearchProducts(
+            staticProducts.map((p) => ({
+              id: p.slug || "producto",
+              slug: p.slug,
+              name: p.name,
+              category: p.category,
+              coverImage: p.coverImage,
+            }))
+          );
           return;
         }
 
-        const rows = (data ?? []) as any[];
-        const mapped = rows.map((p) => {
+        const rows = (data ?? []) as ProductRowLoose[];
+        const mapped: SearchProduct[] = rows.map((p) => {
           const cover =
             p.cover_image ||
             (Array.isArray(p.images) && p.images.length ? p.images[0] : null);
           return {
-            id: p.id,
+            id: String(p.id || p.slug || "producto"),
             slug: p.slug || slugify(p.name || "") || p.id || "producto",
             name: p.name ?? "Producto",
             category: p.category ?? "Otros",
             coverImage: cover || "",
           };
         });
-        setSearchProducts(mapped as any);
+        setSearchProducts(mapped);
       } catch {
-        setSearchProducts(staticProducts);
+        setSearchProducts(
+          staticProducts.map((p) => ({
+            id: p.slug || "producto",
+            slug: p.slug,
+            name: p.name,
+            category: p.category,
+            coverImage: p.coverImage,
+          }))
+        );
       }
     };
 
@@ -215,9 +248,9 @@ export const Header = () => {
                   {filtered.map((item) => (
                     <button
                       type="button"
-                      key={item.slug || (item as any).id}
+                      key={item.slug || item.id}
                       onMouseDown={(e) => e.preventDefault()}
-                      onClick={() => handleSelect(item.slug, (item as any).id)}
+                      onClick={() => handleSelect(item.slug, item.id)}
                       className="flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-gray-50"
                     >
                       <img

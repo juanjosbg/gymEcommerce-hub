@@ -33,7 +33,7 @@ export function useCategorySales() {
       }
 
       const counts: Record<string, number> = {};
-      data.forEach((row: any) => {
+      data.forEach((row: { category?: string | null }) => {
         const key = row.category || "Otros";
         counts[key] = (counts[key] || 0) + 1;
       });

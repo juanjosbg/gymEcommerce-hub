@@ -5,7 +5,7 @@ import Slider from "@/shared/Slider/Slider";
 import ProductCard from "./ProductCard";
 import { supabase } from "@/integrations/supabase/client";
 import { ProductImages } from "@/data/ImgContent";
-import type { Product } from "@/entities/product/types";
+import type { Product, ProductRowLoose } from "@/entities/product/types";
 
 const slugify = (str: string) =>
   str
@@ -14,6 +14,9 @@ const slugify = (str: string) =>
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
+
+const isPlaceholderImage = (url: string | null | undefined) =>
+  !!url && url.startsWith("https://TU_URL/");
 
 const ProductSlider = () => {
   const [items, setItems] = useState<Product[]>([]);
@@ -44,31 +47,20 @@ const ProductSlider = () => {
     return "";
   };
 
-  type ProductRow = {
-    id: string | number | null;
-    name: string | null;
-    price: number | null;
-    previous_price?: number | null;
-    category?: string | null;
-    slug?: string | null;
-    cover_image?: string | null;
-    images?: string[] | null;
-    overview?: string | null;
-    just_in?: boolean | null;
-  };
-
   useEffect(() => {
     const loadPromos = async () => {
       setLoading(true);
       try {
-        const { data: marketing } = await supabase
-          .from("marketing_content")
-          .select("promo_product_ids")
-          .eq("id", "home_promo")
-          .maybeSingle();
+        const { data: promoRows } = await supabase
+          .from("promo_products")
+          .select("product_id, sort_order")
+          .eq("promo_key", "home_slider")
+          .order("sort_order", { ascending: true });
 
-        const promoIds: string[] = Array.isArray(marketing?.promo_product_ids)
-          ? marketing!.promo_product_ids
+        const promoIds: string[] = Array.isArray(promoRows)
+          ? promoRows
+              .map((row) => String(row.product_id))
+              .filter(Boolean)
           : [];
 
         const { data, error } = await supabase
@@ -78,13 +70,17 @@ const ProductSlider = () => {
 
         if (error) throw error;
 
-        const rows = (data ?? []) as ProductRow[];
-        const mapRow = (p: ProductRow) => {
+        const rows = (data ?? []) as ProductRowLoose[];
+        const mapRow = (p: ProductRowLoose) => {
           const slug = p.slug || slugify(p.name || String(p.id));
-          const cover =
+          const baseImage =
             p.cover_image ||
-            (Array.isArray(p.images) && p.images.length ? p.images[0] : null) ||
-            getFallbackCover(slug, p.name || "");
+            p.image_url ||
+            (Array.isArray(p.images) && p.images.length ? p.images[0] : null);
+          const cover =
+            baseImage && !isPlaceholderImage(baseImage)
+              ? baseImage
+              : getFallbackCover(slug, p.name || "");
 
           return {
             slug,
@@ -102,7 +98,7 @@ const ProductSlider = () => {
 
         let promosFromDb: Product[] = [];
         if (promoIds.length) {
-          const byId = new Map<string, ProductRow>();
+          const byId = new Map<string, ProductRowLoose>();
           rows.forEach((p) => byId.set(String(p.id), p));
           promosFromDb = promoIds
             .map((id) => byId.get(String(id)))
@@ -118,10 +114,10 @@ const ProductSlider = () => {
 
         const fallback = localProducts.filter((p) => p.previousPrice);
         const finalList = promosFromDb.length ? promosFromDb : fallback;
-        setItems(finalList.slice(0, 10));
+        setItems(finalList);
       } catch (err) {
         const fallback = localProducts.filter((p) => p.previousPrice);
-        setItems(fallback.slice(0, 10));
+        setItems(fallback);
       } finally {
         setLoading(false);
       }
@@ -156,4 +152,3 @@ const ProductSlider = () => {
 };
 
 export default ProductSlider;
-

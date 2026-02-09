@@ -1,11 +1,5 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
-
-type WishlistItem = {
-  id?: string;
-  slug?: string;
-  name?: string;
-  [key: string]: any;
-};
+import type { WishlistItem } from "@/entities/wishlist/types";
 
 type WishlistContextType = {
   wishlist: WishlistItem[];
@@ -19,7 +13,8 @@ const WishlistContext = createContext<WishlistContextType | undefined>(undefined
 
 const getProductId = (product: WishlistItem): string | undefined => {
   if (!product) return undefined;
-  return product.id || product.slug || product.name;
+  const id = product.id ?? product.slug ?? product.name;
+  return id ? String(id) : undefined;
 };
 
 const STORAGE_KEY = "wishlist";

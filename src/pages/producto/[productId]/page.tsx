@@ -7,6 +7,7 @@ import SectionProductHeader from "./SectionProductHeader";
 import SectionProductInfo from "./SectionProductInfo";
 import { supabase } from "@/integrations/supabase/client";
 import Loading from "@/components/Load/loading";
+import type { ProductRowLoose, ShipmentDetail } from "@/entities/product/types";
 
 const slugify = (str: string) =>
   str
@@ -15,21 +16,6 @@ const slugify = (str: string) =>
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
-
-type DbProduct = {
-  id?: string;
-  slug?: string;
-  name?: string;
-  category?: string;
-  price?: number;
-  previous_price?: number;
-  overview?: string;
-  description?: string;
-  cover_image?: string | null;
-  image_url?: string | null;
-  images?: string[] | null;
-  shipment_details?: { title: string; description: string }[] | null;
-};
 
 type DisplayProduct = {
   slug: string;
@@ -43,7 +29,7 @@ type DisplayProduct = {
   reviews: number;
   coverImage: string;
   shots: string[];
-  shipment_details: { title: string; description: string }[];
+  shipment_details: ShipmentDetail[];
 };
 
 const SingleProductPage = () => {
@@ -68,7 +54,7 @@ const SingleProductPage = () => {
 
       try {
         const normalizedParam = slugify(productId);
-        let productRow: DbProduct | null = null;
+        let productRow: ProductRowLoose | null = null;
 
         const { data, error } = await supabase
           .from("products")
@@ -78,9 +64,9 @@ const SingleProductPage = () => {
           .single();
 
         if (!error && data) {
-          productRow = data as DbProduct;
+          productRow = data as ProductRowLoose;
         } else {
-          const row = data as DbProduct;
+          const row = data as ProductRowLoose;
           // Intenta encontrar un fallback estático por slug o por nombre
           const staticFallback =
             products.find((p) => p.slug === row.slug) ||
@@ -117,7 +103,9 @@ const SingleProductPage = () => {
             coverImage: cover || staticFallback?.coverImage || "",
             shots: shots.length ? shots : staticFallback?.shots ?? [],
             shipment_details:
-              row.shipment_details ?? staticFallback?.shipment_details ?? [],
+              (row.shipment_details as ShipmentDetail[] | null) ??
+              staticFallback?.shipment_details ??
+              [],
           });
         }
 
@@ -163,7 +151,9 @@ const SingleProductPage = () => {
           coverImage: cover || staticFallback?.coverImage || "",
           shots: shots.length ? shots : staticFallback?.shots ?? [],
           shipment_details:
-            row.shipment_details ?? staticFallback?.shipment_details ?? [],
+            (row.shipment_details as ShipmentDetail[] | null) ??
+            staticFallback?.shipment_details ??
+            [],
         });
       } catch {
         setSelectedProduct(null);

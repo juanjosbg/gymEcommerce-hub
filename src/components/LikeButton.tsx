@@ -5,17 +5,19 @@ import React from "react";
 import Swal from "sweetalert2";
 import { useAuth } from "@/hooks/useAuth";
 import { useWishlist } from "@/hooks/useWishlist";
+import type { WishlistItem } from "@/entities/wishlist/types";
 
 export interface LikeButtonProps {
   className?: string;
-  product: any;
+  product: WishlistItem;
   onRequireLogin?: () => void;
 }
 
 const LikeButton: React.FC<LikeButtonProps> = ({ className = "", product, onRequireLogin }) => {
   const { user } = useAuth();
   const { isInWishlist, add, remove } = useWishlist();
-  const productId = product?.id || product?.slug || product?.name;
+  const rawId = product?.id || product?.slug || product?.name;
+  const productId = rawId ? String(rawId) : undefined;
   const liked = user && productId ? isInWishlist(productId) : false;
 
   const handleClick = async () => {

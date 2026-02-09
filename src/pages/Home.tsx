@@ -14,6 +14,7 @@ import { filterProducts as applyFilters } from "@/data/filterByProduct";
 import { products as localCatalog } from "@/data/products";
 import { supabase } from "@/integrations/supabase/client";
 import { ProductImages } from "@/data/ImgContent";
+import type { ProductRowLoose } from "@/entities/product/types";
 
 const slugify = (str: string) =>
   str
@@ -36,19 +37,6 @@ interface Product {
   category: string;
   stock: number;
 }
-
-type ProductRow = {
-  id: string | number | null;
-  name: string | null;
-  price: number | null;
-  previous_price?: number | null;
-  category?: string | null;
-  stock?: number | null;
-  slug?: string | null;
-  cover_image?: string | null;
-  images?: string[] | null;
-  overview?: string | null;
-};
 
 const Home = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -113,7 +101,7 @@ const Home = () => {
 
         if (error) throw error;
 
-        const rows = (data ?? []) as ProductRow[];
+        const rows = (data ?? []) as ProductRowLoose[];
         const mappedFromDb = rows.map((p) => {
           const slug = p.slug || slugify(p.name || String(p.id));
           const cover =

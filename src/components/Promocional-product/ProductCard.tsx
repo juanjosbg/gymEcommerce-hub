@@ -27,7 +27,7 @@ const ProductCard: FC<ProductCardProps> = ({
       <div className="h-[250px] w-full overflow-hidden rounded-2xl">
         {product.justIn && (
           <div className="absolute left-6 top-0 rounded-b-lg bg-primary px-3 py-2 text-sm uppercase text-white shadow-md font-semibold">
-            Â¡Acabo de llegar!
+            Acabo de llegar!
           </div>
         )}
 

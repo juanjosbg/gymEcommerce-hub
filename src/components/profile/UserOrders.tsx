@@ -22,6 +22,14 @@ type OrderRow = {
   created_at?: string;
 };
 
+type OrderPayload = {
+  id?: string;
+  items?: OrderItem[] | null;
+  total?: number | null;
+  status?: string | null;
+  created_at?: string | null;
+};
+
 const normalizeStatus = (value?: string | null) => {
   const v = (value || "").toLowerCase().trim();
   if (["pending", "pendiente"].includes(v)) return "pending";
@@ -85,7 +93,7 @@ const UserOrders: React.FC = () => {
           filter: `user_id=eq.${user.id}`,
         },
         (payload) => {
-          const incoming = payload.new as any;
+          const incoming = payload.new as OrderPayload;
           if (!incoming?.id) return;
           setOrders((prev) => {
             const exists = prev.find((o) => o.id === incoming.id);

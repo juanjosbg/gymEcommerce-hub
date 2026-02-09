@@ -5,25 +5,27 @@ import { productCategories } from "@/data/Filter";
 
 const BUCKET = "product-images";
 
+export type EditProductInput = {
+  id?: string;
+  slug?: string;
+  name?: string | null;
+  category?: string | null;
+  price?: number | null;
+  previousPrice?: number | null;
+  previous_price?: number | null;
+  stock?: number | null;
+  coverImage?: string | null;
+  cover_image?: string | null;
+  shots?: string[];
+  images?: string[];
+  overview?: string | null;
+  shipment_details?: { title: string; description: string }[];
+};
+
 type Props = {
   open: boolean;
   onClose: () => void;
-  product?: {
-    id?: string;
-    slug?: string;
-    name?: string | null;
-    category?: string | null;
-    price?: number | null;
-    previousPrice?: number | null;
-    previous_price?: number | null;
-    stock?: number | null;
-    coverImage?: string | null;
-    cover_image?: string | null;
-    shots?: string[];
-    images?: string[];
-    overview?: string | null;
-    shipment_details?: { title: string; description: string }[];
-  };
+  product?: EditProductInput;
   onSaved: (product: {
     id: string;
     slug: string;

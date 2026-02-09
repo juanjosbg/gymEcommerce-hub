@@ -7,7 +7,7 @@ import SidebarFilters from "@/components/SideBarFilter";
 import { products as staticProducts } from "@/data/content";
 import { branch } from "@/data/filterByProduct";
 import { supabase } from "@/integrations/supabase/client";
-import type { Product } from "@/entities/product/types";
+import type { Product, ProductRowLoose } from "@/entities/product/types";
 
 const slugify = (str: string) =>
   str
@@ -80,18 +80,6 @@ const Page = () => {
     [searchParams]
   );
 
-  type ProductRow = {
-    id?: string | number | null;
-    slug?: string | null;
-    name?: string | null;
-    category?: string | null;
-    price?: number | null;
-    previous_price?: number | null;
-    cover_image?: string | null;
-    images?: string[] | null;
-    overview?: string | null;
-    shipment_details?: { title: string; description: string }[] | null;
-  };
 
   useEffect(() => {
     const load = async () => {
@@ -113,7 +101,7 @@ const Page = () => {
           return;
         }
 
-        const mapped: Product[] = (data as ProductRow[]).map((p) => {
+        const mapped: Product[] = (data as ProductRowLoose[]).map((p) => {
           const staticFallback =
             staticProducts.find((s) => s.slug === p.slug) ||
             staticProducts.find(
@@ -206,4 +194,3 @@ const Page = () => {
 };
 
 export default Page;
-

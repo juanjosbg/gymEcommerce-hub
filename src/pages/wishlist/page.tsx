@@ -5,31 +5,10 @@ import { HeartOff } from "lucide-react";
 
 import { ProductCard } from "@/components/ProductCard";
 import { useWishlist } from "@/hooks/useWishlist";
+import type { WishlistItem } from "@/entities/wishlist/types";
 
 const WishlistPage = () => {
   const { wishlist } = useWishlist();
-
-  type WishlistItem = {
-    id?: string | number | null;
-    product_data?: {
-      slug?: string | null;
-      name?: string | null;
-      overview?: string | null;
-      price?: number | null;
-      stock?: number | null;
-      category?: string | null;
-      cover_image?: string | null;
-      image_url?: string | null;
-    };
-    slug?: string | null;
-    name?: string | null;
-    overview?: string | null;
-    price?: number | null;
-    stock?: number | null;
-    category?: string | null;
-    cover_image?: string | null;
-    image_url?: string | null;
-  };
 
   const normalizedWishlist = useMemo(
   () =>
